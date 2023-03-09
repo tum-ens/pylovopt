@@ -9,15 +9,22 @@ import matplotlib.pyplot as plt
 def getTestNetwork():
     net = nw.mv_oberrhein()
     geo_data_to_latlong(net, projection='epsg:31467')
-    df = net['bus_geodata'].drop('coords', axis=1).to_json()
-    test_df = net['bus_geodata']
-    geo_json = to_geojson(df=test_df, lat='y', lon='x',
-                 properties=[])
-    #print(geo_json)
-    return geo_json
-    #print(df.head())
+    df = pp.to_json(net)
+    return df
 
-    #return df
+
+# def getTestNetwork():
+#     net = nw.mv_oberrhein()
+#     geo_data_to_latlong(net, projection='epsg:31467')
+#     df = net['bus_geodata'].drop('coords', axis=1).to_json()
+#     test_df = net['bus_geodata']
+#     geo_json = to_geojson(df=test_df, lat='y', lon='x',
+#                  properties=[])
+#     #print(geo_json)
+#     return geo_json
+#     #print(df.head())
+
+#     #return df
 
 # gdf = geopandas.GeoDataFrame(
 #     df, geometry=geopandas.points_from_xy(df.y, df.x))
