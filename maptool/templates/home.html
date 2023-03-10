@@ -8,55 +8,19 @@
 
 {% block content %}
     <h1></h1>
-    <div class="flex-container">
-      <div class="row">
-        <div class="col-5">
-          <div id="map"></div>
-        </div>
-        <div class="col">
-          <div id="selectedNodeEditor">
-            <h2>Selected Node</h2>
-            <p id="latlon"></p>
-            <div class="slidecontainer">
-              Value 1
-              <input type="text" id="name" name="name" required minlength="4" maxlength="8" size="10">
-            </div>
-            <div class="slidecontainer">
-              Value 2
-              <input type="text" id="name" name="name" required minlength="4" maxlength="8" size="10">
-            </div>
-            <div class="slidecontainer">
-              Value 3
-              <input type="text" id="name" name="name" required minlength="4" maxlength="8" size="10">
-            </div>
-            <div class="slidecontainer">
-              Value 4
-              <input type="text" id="name" name="name" required minlength="4" maxlength="8" size="10">
-            </div>
-            <div class="slidecontainer">
-              Value 5
-              <input type="text" id="name" name="name" required minlength="4" maxlength="8" size="10">
-            </div>
-            <div class="slidecontainer">
-              Value 6
-              <select name="test" id="test">
-                <option value="test1">Test 1</option>
-                <option value="test2">Test 2</option>
-                <option value="test3">Test 3</option>
-                <option value="test4">Test 4</option>
-              </select>
-            </div>
-          </div>
-        </div>
+    <div class="FeatureEditor">
+      <div class="featureButtons"></div>
+      <div class="featureListSelection">
+
       </div>
-      <div class="row">
-        <div class="col">
-          <button class="button" type="button" id="selectAreaButton" onclick="WriteShapefiles()">Select Area</button>
-        </div>
-        <div class="col">
-          <button class="button" type="button" id="selectAreaButton">Finalize Network</button>
-        </div>
+      <div class="selectedFeatureEditor">
+
       </div>
+    </div>
+
+    <div id="map"></div>
+    <div>
+        <button class="button" type="button" id="selectAreaButton" onclick="WriteShapefiles()">Select Area</button>
     </div>
     
     <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>

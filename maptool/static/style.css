@@ -1,19 +1,9 @@
-#map{
-    height: 510px;
-    width: 100%;
-}
-#selectedNodeEditor{
-  background: #b1b1b1;
-  color: #333333;
-  height: 510px;
-  width:510px;
-}
-
-.slidecontainer {
-  width: 100%; /* Width of the outside container */
+html {
+  height: 100%;
 }
 
 body {
+    height: 100%;
     background: #fafafa;
     color: #333333;
     margin-top: 5rem;
@@ -37,6 +27,68 @@ color: #ffffff;
 
 .site-header .navbar-nav .nav-link.active {
 font-weight: 500;
+}
+
+.flex-container {
+  height: 80%;
+  width: 100%;
+  position: relative;
+}
+
+#map{
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+.FeatureEditor {
+  position: absolute;
+  top: 2.5%;
+  right: 1%;
+  background: #ffffff00;
+  color: #333333;
+  height: 90%;
+  width: 35%;
+  z-index: 9999;
+  display: auto;
+  pointer-events: none;
+  box-shadow: 10px 10px 10px rgba(99, 107, 97, 0.377);
+}
+
+.featureButtons{
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: #a0a0a0;
+  color: #e90000;
+  height: 100%;
+  width: 5%;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.featureListSelection{
+  position: absolute;
+  top: 0px;
+  right: 5%;
+  background: #cbd5db;
+  color: #e90000;
+  height: 100%;
+  width: 30%;
+  pointer-events: all;
+}
+
+.selectedFeatureEditor{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background: #fafafa;
+  color: #e90000;
+  height: 100%;
+  width: 65%;
+  opacity: 1;
+  display: auto;
+  pointer-events: all;
 }
 
 .button {
