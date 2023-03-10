@@ -4,7 +4,7 @@
 // TODO: Add all necessary properties to GeoJSON structure
 // TODO: Discuss with Soner which properties need to be editable
 // TODO: Display data of selected bus/line etc in sidebar 
-// TODO: Avoid repetition in code by putting geojson generation in single method
+// TODO: Adjust geojson creation method for lines 
 
 //extends popup so we can save feature data for debugging purposes
 // L.Popup.include({
@@ -84,8 +84,6 @@ function createPopup(feature, layer) {
         "Index: " + feature.properties.index + "<br>" 
         + "Name: " + feature.properties.name + "<br>" 
     );
-
-
     layer.bindPopup(popup);
 }
 
@@ -98,6 +96,61 @@ function clickOnMarker(e, styleDict, feature) {
     }
     e.target.setStyle(styleDict[style][0]);
     clicked = [e.target, feature];
+}
+
+function createFeatures(isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures) {
+    let input_geoJSON = {"type" : "FeatureCollection", "features": []};                       
+        
+    let input_geodata = ppdata['_object'][featureName + '_geodata'];
+    let input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
+    let input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
+
+    let input = ppdata['_object'][featureName];
+    let input_data = JSON.parse(input['_object'])['data'];
+    let input_indices = JSON.parse(input['_object'])['index'];
+    let input_columns = JSON.parse(input['_object'])['columns'];
+
+    let currentFeatureProperties = {};
+
+    for (point in input_geoCoords) {
+        currentFeatureProperties = {};
+
+        let inputCoordinates = [];
+        if(isLines) {
+            for (i in input_geoCoords[point]) {
+                inputCoordinates.push(input_geoCoords[point][i]);
+            }
+        }
+        else {
+            inputCoordinates = [input_geoCoords[point][0], input_geoCoords[point][1]];
+        }
+
+        //corresponding index value associated with the bus
+        let pointIndex = input_geoIndices[point];
+        let pointNameIndex = input_indices.indexOf(pointIndex, 0);
+
+        if(featureProperties != null) {
+            currentFeatureProperties.index = pointIndex;
+            for (property in featureProperties) {
+                currentFeatureProperties[featureProperties[property]] = (input_columns.indexOf(featureProperties[property], 0) == -1) ? null : input_data[pointNameIndex][input_columns.indexOf(featureProperties[property], 0)];
+            }
+        }
+
+        if(propertyGroupNames != null && propertyGroupFeatures != null) {
+            for (let property = 0; property < propertyGroupNames.length; property++) {
+                let propertyGroup = ppdata['_object'][propertyGroupNames[property]];
+                let extractedProperties = extractPropertiesFromNet(propertyGroup, pointIndex, propertyGroupFeatures[property])
+                currentFeatureProperties[propertyGroupNames[property]] = extractedProperties;
+            }
+        }
+
+        let feature = { "type": "Feature", 
+                        "geometry": {"type": (isLines) ? "LineString" : "Point", "coordinates": (isLines) ? inputCoordinates[0] : inputCoordinates}, 
+                        "properties": currentFeatureProperties
+                    };
+        input_geoJSON.features.push(feature);
+    }
+    return input_geoJSON;
 }
 
 function extractPropertiesFromNet(input, pointIndex, properties) {
@@ -136,65 +189,10 @@ function displayNet() {
                 layer.remove();
         });
         console.log('Begin displaying net:');
-        let line_geoJSON = {"type" : "FeatureCollection", "features": []};
+
+        let line_properties = ["name","from_bus", "to_bus","length_km","r_ohm_per_km", "x_ohm_per_km", "c_nf_per_km", "r0_ohm_per_km", "x0_ohm_per_km", "c0_nf_per_km", "max_i_ka", "std_type","df","g_us_per_km", "g0_us_per_km","parallel","max_loading_percent","alpha","temperature_degree_celsius", "tdpf","wind_speed_m_per_s", "wind_angle_degree", "conductor_outer_diameter_m", "air_temperature_degree_celsius","reference_temperature_degree_celsius", "solar_radiation_w_per_sq_m", "solar_absorptivity", "emissivity", "r_theta_kelvin_per_mw", "mc_joule_per_m_k"];
+        let line_geoJSON = createFeatures(true, ppdata, 'line', line_properties, null, null);
         
-        let line_geodata = ppdata['_object']['line_geodata'];
-        let line_geoCoords = JSON.parse(line_geodata['_object'])['data'];
-        let line_geoIndices = JSON.parse(line_geodata['_object'])['index'];
-
-        let line = ppdata['_object']['line'];
-        let line_data = JSON.parse(line['_object'])['data'];
-        let line_indices = JSON.parse(line['_object'])['index'];
-
-        for (point in line_geoCoords) {
-            //lat/long coordinate of our line string
-            let lineCoordinates = [];
-            for (i in line_geoCoords[point]) {
-                lineCoordinates.push(line_geoCoords[point][i]);
-            }
-
-            //corresponding index value associated with the line
-            let lineIndex = line_geoIndices[point];
-
-            let lineNameIndex = line_indices.indexOf(lineIndex, 0);
-            let feature = { "type": "Feature", 
-                            "geometry": {"type": "LineString", "coordinates": lineCoordinates[0]}, 
-                            "properties": { "index": lineIndex,
-                                            "name": line_data[lineNameIndex][0],
-                                            "from_bus": null, 
-                                            "to_bus": null,
-                                            "length_km": null,
-                                            "r_ohm_per_km": null, 
-                                            "x_ohm_per_km": null, 
-                                            "c_nf_per_km": null, 
-                                            "r0_ohm_per_km": null, 
-                                            "x0_ohm_per_km": null, 
-                                            "c0_nf_per_km": null, 
-                                            "max_i_ka": null, 
-                                            "std_type": null,
-                                            "df": null,
-                                            "g_us_per_km": null, 
-                                            "g0_us_per_km": null, 
-                                            "parallel": null,
-                                            "max_loading_percent" : null,
-                                            "alpha" : null,
-                                            "temperature_degree_celsius" : null, 
-                                            "tdpf" : null,
-                                            "wind_speed_m_per_s": null, 
-                                            "wind_angle_degree": null, 
-                                            "conductor_outer_diameter_m": null, 
-                                            "air_temperature_degree_celsius": null, 
-                                            "reference_temperature_degree_celsius": null, 
-                                            "solar_radiation_w_per_sq_m" : null, 
-                                            "solar_absorptivity": null, 
-                                            "emissivity": null, 
-                                            "r_theta_kelvin_per_mw": null, 
-                                            "mc_joule_per_m_k": null
-                                        }
-                        };
-            line_geoJSON.features.push(feature);
-        }
-
         L.geoJSON(line_geoJSON, {
             onEachFeature: function(feature, layer) {
                 layer.features = feature;
@@ -208,74 +206,12 @@ function displayNet() {
 
         console.log("added all lines");
 
-        //Final GeoJSON file we use to display the bus
-        let bus_geoJSON = {"type" : "FeatureCollection", "features": []};                       
-        
-        let bus_geodata = ppdata['_object']['bus_geodata'];
-        let bus_geoCoords = JSON.parse(bus_geodata['_object'])['data'];
-        let bus_geoIndices = JSON.parse(bus_geodata['_object'])['index'];
-
-        let bus = ppdata['_object']['bus'];
-        let bus_data = JSON.parse(bus['_object'])['data'];
-        let bus_indices = JSON.parse(bus['_object'])['index'];
-        let bus_columns = JSON.parse(bus['_object'])['columns'];
-
-        let load = ppdata['_object']['load'];
-        //keys that will be included in load properties of a bus feature, if bus has a load
+        let bus_properties =  ["name","vn_kv","type","in_service", "max_vm_pu","min_vm_pu",]    
         let load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable'];
-        let load_properties = {};
-
-        let sgen = ppdata['_object']['sgen'];
-        //keys that will be included in sgen properties of a bus feature, if bus has a static Generator
         let sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable'];
-        let sgen_properties = {};
+        let switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka'];  
 
-        let pp_switch = ppdata['_object']['switch'];
-        //keys that will be included in switch properties of a bus feature, if bus has a switch
-        let switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka'];
-        let switch_properties = {}
-
-        for (point in bus_geoCoords) {
-            //lat/long coordinate of our bus marker
-            let pointCoordinate = [bus_geoCoords[point][0], bus_geoCoords[point][1]];
-            //corresponding index value associated with the bus
-            let pointIndex = bus_geoIndices[point];
-            /*The element in the bus datastructure lies at the same index as the corresponding index value pointIndex of the geodata 
-            * i.e. geopoint x has index value 159: The index value in the bus index array lies at index 99.
-            * The array containing name, etc. of our bus with index 159 thus lies at index 99 in the bus data array.
-            */
-            //index at which the bus data for correspondidng pointIndex is located in the bus_data array
-            let pointNameIndex = bus_indices.indexOf(pointIndex, 0);
-
-            let bus_name = (bus_columns.indexOf('name', 0) == -1) ? null : bus_data[pointNameIndex][bus_columns.indexOf('name', 0)];
-            let bus_type = (bus_columns.indexOf('type', 0) == -1) ? null : bus_data[pointNameIndex][bus_columns.indexOf('type', 0)];
-            let bus_inService = (bus_columns.indexOf('in_service', 0) == -1) ? null : bus_data[pointNameIndex][bus_columns.indexOf('in_service', 0)];
-            let bus_vn_kv = (bus_columns.indexOf('vn_kv', 0) == -1) ? null : bus_data[pointNameIndex][bus_columns.indexOf('vn_kv', 0)];
-
-            load_properties = extractPropertiesFromNet(load, pointIndex, load_features);
-
-            sgen_properties = extractPropertiesFromNet(sgen, pointIndex, sgen_features);
-
-            switch_properties = extractPropertiesFromNet(pp_switch, pointIndex, switch_features);
-
-            let feature = { "type": "Feature", 
-                            "geometry": {"type": "Point", "coordinates": pointCoordinate}, 
-                            "properties": { "index": pointIndex,
-                                            "name": bus_name,
-                                            "vn_kv": bus_vn_kv,
-                                            "type" : bus_type,
-                                            "in_service": bus_inService, 
-                                            "max_vm_pu" : null,
-                                            "min_vm_pu" : null,
-                                            "load" : load_properties,
-                                            "sgen" : sgen_properties,
-                                            "switch" : switch_properties
-                                        }
-                        };
-            bus_geoJSON.features.push(feature);
-        }
-
-        console.log(bus_geoJSON);
+        let bus_geoJSON = createFeatures(false, ppdata, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]);
 
         L.geoJSON(bus_geoJSON, {
             onEachFeature: createPopup,
