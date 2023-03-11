@@ -1,10 +1,9 @@
 
-// TODO: Write back features of all popups to JSON and send back JSON-file to create functioning pandapower data
 // TODO: Add ext_grid markers and transformators to grid
-// TODO: Add all necessary properties to GeoJSON structure
-// TODO: Discuss with Soner which properties need to be editable
 // TODO: Display data of selected bus/line etc in sidebar 
-// TODO: Adjust geojson creation method for lines 
+// TODO: Write back features of all popups to JSON and send back JSON-file to create functioning pandapower data
+// TODO: Discuss with Soner which properties need to be editable
+// TODO: Deselect marker when clicking elsewhere on the map?
 
 //extends popup so we can save feature data for debugging purposes
 // L.Popup.include({
@@ -48,31 +47,49 @@ function getStyleDict() {
                                     color: "#4e2204",
                                     weight: 1,
                                     opacity: 1,
-                                    fillOpacity: 0.8
+                                    fillOpacity: 1
                                 }
                                 ,
                                 {   radius: 8,
                                     fillColor: "#0065BD",
-                                    color: "#000",
+                                    color: "#012b8c",
                                     weight: 1,
                                     opacity: 1,
-                                    fillOpacity: 0.8
+                                    fillOpacity: 1
                                 }],
                      LineStyles: [{ color: "#ff0000",
                                     weight: 4,
                                     opacity: 1
                                 }
                                 ,
-                                {   color: "#000",
+                                {   color: "#007deb",
                                     weight: 4,
                                     opacity: 1
                                 }],
-                     ExtStyles: [
-
-                     ],
-                     TrafoStyles: [
-
-                     ]            
+                     ExtStyles: [{  radius: 15,
+                                    fillColor: "#f55353",
+                                    color: "#cf2d3b",
+                                    weight: 1,
+                                    opacity: 1,
+                                    fillOpacity: 1
+                                }
+                                ,
+                                {   radius: 14,
+                                    fillColor: "#f5da53",
+                                    color: "#e6b029",
+                                    weight: 1,
+                                    opacity: 1,
+                                    fillOpacity: 1
+                                }],
+                     TrafoStyles: [{color: "#ff0000",
+                                    weight: 10,
+                                    opacity: 1
+                                }
+                                ,
+                                {   color: "#42bd4a",
+                                    weight: 5,
+                                    opacity: 1
+                                }]            
                     };
     return styleDict;
 }
@@ -88,7 +105,7 @@ function createPopup(feature, layer) {
 }
 
 function clickOnMarker(e, styleDict, feature) {
-    let styles = ['BusStyles', 'LineStyles'];
+    let styles = ['BusStyles', 'LineStyles', 'ExtStyles', 'TrafoStyles'];
     let style = styles[feature];
     if(clicked) {
         let oldStyle = styles[clicked[1]];
@@ -99,18 +116,80 @@ function clickOnMarker(e, styleDict, feature) {
 }
 
 function createFeatures(isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures) {
-    let input_geoJSON = {"type" : "FeatureCollection", "features": []};                       
-        
-    let input_geodata = ppdata['_object'][featureName + '_geodata'];
-    let input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
-    let input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
-
+    let input_geoJSON = {"type" : "FeatureCollection", "features": []};     
+    
     let input = ppdata['_object'][featureName];
     let input_data = JSON.parse(input['_object'])['data'];
     let input_indices = JSON.parse(input['_object'])['index'];
     let input_columns = JSON.parse(input['_object'])['columns'];
+    
+    let input_geodata = {};
+    let input_geoCoords = {};
+    let input_geoIndices = {};
 
+    if(featureName == 'bus' || featureName == 'line') {
+        input_geodata = ppdata['_object'][featureName + '_geodata'];
+        input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
+        input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
+    }
+    else {
+        let input_columns = JSON.parse(input['_object'])['columns'];
+        let idx = [0, 0];
+        let temp = [];
+
+        input_geodata = ppdata['_object']['bus_geodata'];
+        input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
+        input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
+
+        if(featureName == 'ext_grid') {
+            idx[0] = input_columns.indexOf('bus', 0);
+            for (entry in input_data) {
+                //console.log(input_data[entry][idx]);
+                 for (geo_entry in input_geoIndices) {
+                     // console.log(input_geoIndices[geo_entry]);
+                     if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
+                         temp.push(input_geoCoords[geo_entry]);
+                         break;
+                     }
+     
+                 }
+             }
+        }
+        else if (featureName == 'trafo') {
+            idx[0] = input_columns.indexOf('hv_bus', 0);
+            idx[1] = input_columns.indexOf('lv_bus', 0);
+            tempLine = [];
+           
+            for (entry in input_data) {
+                tempLine = [];
+                 for (let geo_entry = 0; geo_entry < input_geoIndices.length; geo_entry++) {
+                     if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
+                        let x1 = [input_geoCoords[geo_entry][0], input_geoCoords[geo_entry][1]];
+                        tempLine.push(x1);
+
+                        for (let second_entry = 0; second_entry < input_geoIndices.length; second_entry++) {
+                            if (input_data[entry][idx[1]] == input_geoIndices[second_entry]) {
+                                let x2 = [input_geoCoords[second_entry][0], input_geoCoords[second_entry][1]]
+                                tempLine.push(x2);
+                                break;
+                            }
+                        }
+                        temp.push([tempLine]);
+                        break;
+                     }
+                 }
+             }
+        }
+        input_geoCoords = temp;
+
+        //console.log(featureName);
+        //console.log(input_geoCoords);
+    }
     let currentFeatureProperties = {};
+
+    // if(isLines) {
+    //     console.log(input_geoCoords);
+    // }
 
     for (point in input_geoCoords) {
         currentFeatureProperties = {};
@@ -127,7 +206,7 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
 
         //corresponding index value associated with the bus
         let pointIndex = input_geoIndices[point];
-        let pointNameIndex = input_indices.indexOf(pointIndex, 0);
+        let pointNameIndex = (input_indices.indexOf(pointIndex, 0) != -1) ? input_indices.indexOf(pointIndex, 0) : pointIndex;
 
         if(featureProperties != null) {
             currentFeatureProperties.index = pointIndex;
@@ -206,6 +285,21 @@ function displayNet() {
 
         console.log("added all lines");
 
+        let ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable"];
+        let ext_grid_geoJSON = createFeatures(false, ppdata, 'ext_grid', ext_grid_properties, null, null);
+        L.geoJSON(ext_grid_geoJSON, {
+            onEachFeature: createPopup,
+            pointToLayer: function (feature, latlng) {
+                var marker = L.circleMarker(latlng, getStyleDict()['ExtStyles'][1]);
+                marker.features = feature;
+                marker.on('click', function(e) {
+                    clickOnMarker(e, getStyleDict(), 2);
+                });
+                return marker;
+            }
+        }).addTo(map);
+        console.log('added all external grids');
+
         let bus_properties =  ["name","vn_kv","type","in_service", "max_vm_pu","min_vm_pu",]    
         let load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable'];
         let sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable'];
@@ -226,6 +320,20 @@ function displayNet() {
         }).addTo(map);
         console.log('added all buses');
 
+        let trafo_properties = ["name", "hv_bus", "lv_bus", "std_type", "vk0_percent", "vkr0_percent", "mag0_percent", "mag0_rx", "si0_hv_partial", "tap_pos", "in_service", "max_loading_percent", "parallel", "df", "tap_dependent_impedance", "vk_percent_characteristic", "vkr_percent_characteristic", "xn_ohm"];
+        let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', trafo_properties, null, null);
+        L.geoJSON(trafo_geoJSON, {
+            onEachFeature: function(feature, layer) {
+                layer.features = feature;
+                createPopup(feature, layer);
+                layer.on('click', function(e) {
+                    clickOnMarker(e, getStyleDict(), 3);
+                })
+            },
+            style: getStyleDict()['TrafoStyles'][1]
+        }).addTo(map);
+        console.log('added all trafos');
+        
     });
 }
 
