@@ -49,16 +49,18 @@ font-weight: 500;
   color: #333333;
   height: 90%;
   width: 35%;
+  min-height: 40em;
+  min-width: 40em;
   z-index: 9999;
   display: auto;
   pointer-events: none;
 }
 
-.featureButtons{
+.buttonsTab{
   position: absolute;
   top: 0px;
   right: 0px;
-  background: #a0a0a0;
+  background: #0065bd00;
   color: #e90000;
   height: 5%;
   width: 5%;
@@ -66,25 +68,39 @@ font-weight: 500;
   pointer-events: all;
 }
 
-.featureButtons button {
-  display: block;
-  background-color: inherit;
-  color: black;
-  padding: 22px 16px;
+.buttonsTab button {
+
+  background-color: #0065bd;
+  color: white;
+  padding: 40px 15px;
   width: 100%;
+  right:0.25em;
+  min-width: 2em;
   border: none;
   outline: none;
-  text-align: left;
-  cursor: pointer;
+  text-align: right;
   transition: 0.3s;
+  display: none;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	align-self: center;
+  cursor:pointer;
+  position:relative;
+	font-size: 18px;
+  white-space: nowrap;
 }
 
-.featureButtons button:hover {
-  background-color: #ddd;
+.buttonsTab button:hover {
+  background-color: #3f90d6;
+  
 }
 
-.featureButtons button:active {
-  background-color: #ddd;
+.buttonsTab button.active {
+  background-color: #98C6EA;
+  left: 0;
+  transition: left .2s;
+  color: black;
 }
 
 .tablinks span{
@@ -93,15 +109,42 @@ font-weight: 500;
 }
 
 
-.featureListSelection{
+.featureListTab{
   position: absolute;
   top: 0px;
   right: 5%;
-  background: #ddd;
-  color: #e90000;
+  background: #98C6EA;
+  color: #000000;
   height: 100%;
   width: 30%;
   pointer-events: all;
+  display: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none; 
+}
+
+.featureSelect {
+  width: 100%;
+  height: 100%;
+  background-color: #98C6EA;
+  border: none;
+  outline: none;
+}
+
+.featureSelect::-webkit-scrollbar {
+  display: none;
+}
+
+.featureSelect option:hover {
+  background-color: #c0d7e9;
+}
+
+.featureSelect option:checked {
+  background-color: #fafafa;
+}
+
+.featureSelect option:checked:after {
+  background-color: #fafafa;
 }
 
 .selectedFeatureEditor{
@@ -115,6 +158,7 @@ font-weight: 500;
   opacity: 1;
   display: auto;
   pointer-events: all;
+  display: none;
 }
 
 .button {

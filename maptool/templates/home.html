@@ -9,15 +9,27 @@
 {% block content %}
     <h1></h1>
     <div class="FeatureEditor">
-      <div class="featureButtons">
-        <button class="tablinks" ><span>Buses</span></button>
-        <button class="tablinks" ><span>Lines</span></button>
-        <button class="tablinks" ><span>Trafos</span></button>
-        <button class="tablinks" ><span>Ext. Grid</span></button>
-        <button class="tablinks" ><span>Std Types</span></button>
+      <div class="buttonsTab">
+        <button class="tablinks" onclick="openList(event, 'bus')"><span>Buses</span></button>
+        <button class="tablinks" onclick="openList(event, 'line')"><span>Lines</span></button>
+        <button class="tablinks" onclick="openList(event, 'trafo')"><span>Trafos</span></button>
+        <button class="tablinks" onclick="openList(event, 'ext_grid')"><span>Ext. Grid</span></button>
+        <button class="tablinks" onclick="openList(event, 'std_types')"><span>Std Types</span></button>
       </div>
-      <div class="featureListSelection">
-
+      <div id="bus" class="featureListTab">
+        <select id="busSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this)"></select>
+      </div>
+      <div id="line" class="featureListTab">
+        <select id="lineSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this)"></select>
+      </div>
+      <div id="trafo" class="featureListTab">
+        <select id="trafoSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this)"></select>
+      </div>
+      <div id="ext_grid" class="featureListTab">
+        <select id="ext_gridSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this)"></select>
+      </div>  
+      <div id="std_types" class="featureListTab">
+        <select id="std_typesSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this)"></select>
       </div>
       <div class="selectedFeatureEditor">
 

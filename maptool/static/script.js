@@ -1,22 +1,39 @@
-
-// TODO: Add ext_grid markers and transformators to grid
+//-----------------------------CRUCIAL TODOS-----------------------------//
 // TODO: Display data of selected bus/line etc in sidebar 
 // TODO: Write back features of all popups to JSON and send back JSON-file to create functioning pandapower data
-// TODO: Discuss with Soner which properties need to be editable
-// TODO: Deselect marker when clicking elsewhere on the map?
+// TODO: put functions into their own separate js file to clean up main script.js
+// TODO: put feature styles into css 
 
-//extends popup so we can save feature data for debugging purposes
+//-----------------------------TALK TODOS-----------------------------//
+// TODO: Discuss if actual map location search option is needed 
+// TODO: Discuss which feature properties need to be editable
+// TODO: Ask about trafo locations, change back to circle marker if necessary for better visualization
+// TODO: Ask if written documentation outside of code is necessary for project hand-in
+
+//-----------------------------OPTIONAL TODOS-----------------------------//
+// TODO: put geojson.to_map() ops into their own functions for line and circlemarker respectively to further clean up code and avoid repetition
+// TODO: Deselect marker when clicking elsewhere on the map?
+// TODO: Decide whether area selection needs different shape options or if we want to stick only with Polygon
+
+
+//extends popup so we can save and display feature data on map for debugging purposes
 // L.Popup.include({
 //     features: {}
 // });
 
 //extends path so we can save feature data in circlemarkers, lines for further use
-L.Path.include({
-    features: {}
-});
+//each marker on the map holds all information for their bus, line, trafo, etc
+// L.Path.include({
+//     features: {}
+// });
 
-//saves last selected path and resets its color when it's deselected
+//variable that saves last selected path and resets its style when it's deselected
 let clicked;
+let busList = [];
+let lineList = [];
+let trafoList = [];
+let ext_gridList = [];
+let std_typesList = [];
 
 const tileProvider = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const  mapOptions = {
@@ -39,8 +56,59 @@ map.pm.addControls({
     drawCircleMarker: false,
     drawText: false,
     cutPolygon: false
-  });  
+});  
 
+function openList(e, listName) {
+    tabcontent = document.getElementsByClassName("featureListTab");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    document.getElementById(listName).style.display = "inline-block";
+    e.currentTarget.className += " active";
+}
+
+function populateLists(listName, list) {
+    console.log(listName);
+    var x = document.getElementById(listName + "Select");
+
+    list = list.sort(function (a, b) {
+        return parseInt(a.feature.properties.index) - parseInt(b.feature.properties.index);
+    })
+    console.log(list);
+    x.size = (list.length > 24) ? 24 : list.length;
+    for (idx in list) {
+        var option = document.createElement("option");
+        option.text = list[idx].feature.properties.index;
+        option.value = idx;
+        x.add(option);
+    }
+}
+
+function fillSelectedFeatureEditor(sel) {
+    let idx = parseInt(sel.options[sel.selectedIndex].value);
+    let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
+    console.log(sel.id);
+    if(sel.id == 'busSelect') {
+        console.log(debugIdx, busList[idx].feature.properties.index);
+    }
+    if(sel.id == 'lineSelect') {
+        console.log(debugIdx, lineList[idx].feature.properties.index);
+    }
+    if(sel.id == 'trafoSelect') {
+        console.log(debugIdx, trafoList[idx].feature.properties.index);
+    }
+    if(sel.id == 'ext_gridSelect') {
+        console.log(debugIdx, ext_gridList[idx].feature.properties.index);
+    }
+}
+
+  //define styles for selected and unselected states of our map features
 function getStyleDict() {
     var styleDict = {BusStyles: [{  radius: 9,
                                     fillColor: "#d67900",
@@ -104,6 +172,7 @@ function createPopup(feature, layer) {
     layer.bindPopup(popup);
 }
 
+//function switches between Selected and Unselected stle for all map features
 function clickOnMarker(e, styleDict, feature) {
     let styles = ['BusStyles', 'LineStyles', 'ExtStyles', 'TrafoStyles'];
     let style = styles[feature];
@@ -115,6 +184,7 @@ function clickOnMarker(e, styleDict, feature) {
     clicked = [e.target, feature];
 }
 
+//function generates GeoJSON for a given feature (i.e. bus, line, trafo, ext_grid)
 function createFeatures(isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures) {
     let input_geoJSON = {"type" : "FeatureCollection", "features": []};     
     
@@ -132,6 +202,7 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
         input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
         input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
     }
+    //(ext_grid and trafo geolocation depend on geolocation of buses)
     else {
         let input_columns = JSON.parse(input['_object'])['columns'];
         let idx = [0, 0];
@@ -144,9 +215,7 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
         if(featureName == 'ext_grid') {
             idx[0] = input_columns.indexOf('bus', 0);
             for (entry in input_data) {
-                //console.log(input_data[entry][idx]);
                  for (geo_entry in input_geoIndices) {
-                     // console.log(input_geoIndices[geo_entry]);
                      if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
                          temp.push(input_geoCoords[geo_entry]);
                          break;
@@ -181,15 +250,8 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
              }
         }
         input_geoCoords = temp;
-
-        //console.log(featureName);
-        //console.log(input_geoCoords);
     }
     let currentFeatureProperties = {};
-
-    // if(isLines) {
-    //     console.log(input_geoCoords);
-    // }
 
     for (point in input_geoCoords) {
         currentFeatureProperties = {};
@@ -215,6 +277,7 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
             }
         }
 
+        //we add load, switch etc as subproperties on one of our main features
         if(propertyGroupNames != null && propertyGroupFeatures != null) {
             for (let property = 0; property < propertyGroupNames.length; property++) {
                 let propertyGroup = ppdata['_object'][propertyGroupNames[property]];
@@ -274,8 +337,9 @@ function displayNet() {
         
         L.geoJSON(line_geoJSON, {
             onEachFeature: function(feature, layer) {
-                layer.features = feature;
+                //layer.features = feature;
                 createPopup(feature, layer);
+                lineList.push(layer);
                 layer.on('click', function(e) {
                     clickOnMarker(e, getStyleDict(), 1);
                 })
@@ -288,10 +352,15 @@ function displayNet() {
         let ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable"];
         let ext_grid_geoJSON = createFeatures(false, ppdata, 'ext_grid', ext_grid_properties, null, null);
         L.geoJSON(ext_grid_geoJSON, {
-            onEachFeature: createPopup,
+            onEachFeature: function(feature, layer) {
+                //layer.features = feature;
+                createPopup(feature, layer);
+                ext_gridList.push(layer);
+            },
             pointToLayer: function (feature, latlng) {
                 var marker = L.circleMarker(latlng, getStyleDict()['ExtStyles'][1]);
-                marker.features = feature;
+                //marker.features = feature;
+
                 marker.on('click', function(e) {
                     clickOnMarker(e, getStyleDict(), 2);
                 });
@@ -308,10 +377,14 @@ function displayNet() {
         let bus_geoJSON = createFeatures(false, ppdata, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]);
 
         L.geoJSON(bus_geoJSON, {
-            onEachFeature: createPopup,
+            onEachFeature: function(feature, layer) {
+                //layer.features = feature;
+                createPopup(feature, layer);
+                busList.push(layer);
+            },
             pointToLayer: function (feature, latlng) {
                 var marker = L.circleMarker(latlng, getStyleDict()['BusStyles'][1]);
-                marker.features = feature;
+                //marker.features = feature;
                 marker.on('click', function(e) {
                     clickOnMarker(e, getStyleDict(), 0);
                 });
@@ -324,8 +397,9 @@ function displayNet() {
         let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', trafo_properties, null, null);
         L.geoJSON(trafo_geoJSON, {
             onEachFeature: function(feature, layer) {
-                layer.features = feature;
+                //layer.features = feature;
                 createPopup(feature, layer);
+                trafoList.push(layer);
                 layer.on('click', function(e) {
                     clickOnMarker(e, getStyleDict(), 3);
                 })
@@ -333,6 +407,12 @@ function displayNet() {
             style: getStyleDict()['TrafoStyles'][1]
         }).addTo(map);
         console.log('added all trafos');
+
+        populateLists('bus', busList);
+        populateLists('line', lineList);
+        populateLists('trafo', trafoList);
+        populateLists('ext_grid', ext_gridList);
+        //populateLists('std_types');
         
     });
 }
@@ -361,10 +441,17 @@ function WriteShapefiles() {
             }).catch((err) => console.error(err));
             });    
     }
+
     displayNet();
+
+    tabcontent = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "inline-flex";
+    }
+
 }
 
-//We only ever want to have one shape at the same time
+//We only ever want to have one shape at the same time for area selection
 map.on('pm:drawstart', ({ workingLayer }) => {
 var layers = L.PM.Utils.findLayers(map);
 layers.forEach((layer) =>{
@@ -376,7 +463,6 @@ layers.forEach((layer) =>{
 //TODO: disable opening a new popup if unsaved changes are displayed in sidebar or save changes automatically 
 map.on('popupopen', function(e) {
     //map.closePopup();
-    var marker = e.popup._source;
-    console.log(marker.features.properties);
-    //document.getElementById('latlon').innerHTML = 'Lat: ' + marker.getLatLng()['lat'] + ' Long: ' + marker.getLatLng()['lng']
+    //var marker = e.popup._source;
+    //console.log(marker.features.properties);
   });
