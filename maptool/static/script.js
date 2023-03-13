@@ -1,8 +1,8 @@
-//-----------------------------CRUCIAL TODOS-----------------------------//
+//-----------------------------CRUCIAL JS TODOS-----------------------------//
 // TODO: Display data of selected bus/line etc in sidebar 
 // TODO: Write back features of all popups to JSON and send back JSON-file to create functioning pandapower data
 // TODO: put functions into their own separate js file to clean up main script.js
-// TODO: put feature styles into css 
+// TODO: put marker styles into css
 
 //-----------------------------TALK TODOS-----------------------------//
 // TODO: Discuss if actual map location search option is needed 
@@ -58,10 +58,33 @@ map.pm.addControls({
     cutPolygon: false
 });  
 
+function populateLists(listName, list) {
+    //console.log(listName);
+    var x = document.getElementById(listName + "Select");
+
+    list = list.sort(function (a, b) {
+        return parseInt(a.feature.properties.index) - parseInt(b.feature.properties.index);
+    })
+    //console.log(list);
+    x.size = (list.length > 24) ? 24 : list.length;
+    for (idx in list) {
+        var option = document.createElement("option");
+        option.text = list[idx].feature.properties.index;
+        option.value = idx;
+        x.add(option);
+    }
+}
+
 function openList(e, listName) {
     tabcontent = document.getElementsByClassName("featureListTab");
     for (i = 0; i < tabcontent.length; i++) {
       tabcontent[i].style.display = "none";
+    }
+
+    editorcontent = document.getElementsByClassName('selectedFeatureEditor');
+
+    for (i = 0; i < editorcontent.length; i++) {
+        editorcontent[i].style.display = "none";
     }
 
     tablinks = document.getElementsByClassName("tablinks");
@@ -73,38 +96,76 @@ function openList(e, listName) {
     e.currentTarget.className += " active";
 }
 
-function populateLists(listName, list) {
-    console.log(listName);
-    var x = document.getElementById(listName + "Select");
+function fillSelectedFeatureEditor(sel, listName) {
+    let idx = parseInt(sel.options[sel.selectedIndex].value);
+    let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
+    //console.log(sel.id);
 
-    list = list.sort(function (a, b) {
-        return parseInt(a.feature.properties.index) - parseInt(b.feature.properties.index);
-    })
-    console.log(list);
-    x.size = (list.length > 24) ? 24 : list.length;
-    for (idx in list) {
-        var option = document.createElement("option");
-        option.text = list[idx].feature.properties.index;
-        option.value = idx;
-        x.add(option);
+    editorcontent = document.getElementsByClassName('selectedFeatureEditor');
+    for (i = 0; i < editorcontent.length; i++) {
+        editorcontent[i].style.display = "none";
+    }
+
+    document.getElementById(listName + 'Editor').style.display = 'inline-block';
+
+    let selectedObject = null;
+    let styleIndex = 0;
+    if(sel.id == 'busSelect') {
+        //console.log(debugIdx, busList[idx].feature.properties.index);
+        selectedObject = busList[idx];
+        }
+    if(sel.id == 'lineSelect') {
+        //console.log(debugIdx, lineList[idx].feature.properties.index);
+        selectedObject = lineList[idx];
+        styleIndex = 1;
+        }
+    if(sel.id == 'trafoSelect') {
+        //console.log(debugIdx, trafoList[idx].feature.properties.index);
+        selectedObject = trafoList[idx];
+        styleIndex = 3;
+        }
+    if(sel.id == 'ext_gridSelect') {
+        //console.log(debugIdx, ext_gridList[idx].feature.properties.index);
+        selectedObject = ext_gridList[idx];
+        styleIndex = 2;
+    }
+
+    clickOnMarker(selectedObject, getStyleDict(), styleIndex);
+
+    let editor_form = document.getElementById(listName + 'Form');
+    let editor_elems = editor_form.children;
+    console.log(selectedObject);
+    for (let i = 0; i < editor_elems.length; i++) {
+        if (editor_elems[i].nodeName == 'INPUT') {
+            if(selectedObject.feature.properties[editor_elems[i].name] != null) {
+                editor_elems[i].value = selectedObject.feature.properties[editor_elems[i].name];
+            }
+        }
     }
 }
 
-function fillSelectedFeatureEditor(sel) {
-    let idx = parseInt(sel.options[sel.selectedIndex].value);
-    let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
-    console.log(sel.id);
-    if(sel.id == 'busSelect') {
-        console.log(debugIdx, busList[idx].feature.properties.index);
-    }
-    if(sel.id == 'lineSelect') {
-        console.log(debugIdx, lineList[idx].feature.properties.index);
-    }
-    if(sel.id == 'trafoSelect') {
-        console.log(debugIdx, trafoList[idx].feature.properties.index);
-    }
-    if(sel.id == 'ext_gridSelect') {
-        console.log(debugIdx, ext_gridList[idx].feature.properties.index);
+function populateEditor(listName, selectedProperties) {
+    let editor_form = document.getElementById(listName + 'Form');
+
+    for (idx in selectedProperties) {
+        let label = document.createElement("label");
+        let input = document.createElement("input");
+
+        label.htmlFor = selectedProperties[idx];
+        label.innerHTML = selectedProperties[idx];
+
+        input.type="text";
+        input.id = selectedProperties[idx];
+        input.name = selectedProperties[idx];
+
+        //console.log(label);
+
+        editor_form.appendChild(label);
+        editor_form.appendChild(input);
+
+
+        //<label for="name">name</label>
+        //<input type="text" id="name" name="name">
     }
 }
 
@@ -173,15 +234,25 @@ function createPopup(feature, layer) {
 }
 
 //function switches between Selected and Unselected stle for all map features
-function clickOnMarker(e, styleDict, feature) {
+function clickOnMarker(target, styleDict, feature) {
     let styles = ['BusStyles', 'LineStyles', 'ExtStyles', 'TrafoStyles'];
     let style = styles[feature];
+
+    let zoomLevel = 14;
+
+    if(style == 'BusStyles' || style == 'ExtStyles') {
+        map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
+    }
+    else {
+        map.setView(target.getLatLngs()[0], Math.max(map.getZoom(), zoomLevel));
+    }
+
     if(clicked) {
         let oldStyle = styles[clicked[1]];
         clicked[0].setStyle(styleDict[oldStyle][1]);
     }
-    e.target.setStyle(styleDict[style][0]);
-    clicked = [e.target, feature];
+    target.setStyle(styleDict[style][0]);
+    clicked = [target, feature];
 }
 
 //function generates GeoJSON for a given feature (i.e. bus, line, trafo, ext_grid)
@@ -341,7 +412,7 @@ function displayNet() {
                 createPopup(feature, layer);
                 lineList.push(layer);
                 layer.on('click', function(e) {
-                    clickOnMarker(e, getStyleDict(), 1);
+                    clickOnMarker(e.target, getStyleDict(), 1);
                 })
             },
             style: getStyleDict()['LineStyles'][1]        
@@ -362,7 +433,7 @@ function displayNet() {
                 //marker.features = feature;
 
                 marker.on('click', function(e) {
-                    clickOnMarker(e, getStyleDict(), 2);
+                    clickOnMarker(e.target, getStyleDict(), 2);
                 });
                 return marker;
             }
@@ -386,7 +457,7 @@ function displayNet() {
                 var marker = L.circleMarker(latlng, getStyleDict()['BusStyles'][1]);
                 //marker.features = feature;
                 marker.on('click', function(e) {
-                    clickOnMarker(e, getStyleDict(), 0);
+                    clickOnMarker(e.target, getStyleDict(), 0);
                 });
                 return marker;
             }
@@ -401,7 +472,7 @@ function displayNet() {
                 createPopup(feature, layer);
                 trafoList.push(layer);
                 layer.on('click', function(e) {
-                    clickOnMarker(e, getStyleDict(), 3);
+                    clickOnMarker(e.target, getStyleDict(), 3);
                 })
             },
             style: getStyleDict()['TrafoStyles'][1]
@@ -412,7 +483,17 @@ function displayNet() {
         populateLists('line', lineList);
         populateLists('trafo', trafoList);
         populateLists('ext_grid', ext_gridList);
+
+        populateEditor('bus', bus_properties);
+        populateEditor('line', line_properties);
+        populateEditor('trafo', trafo_properties);
+        populateEditor('ext_grid', ext_grid_properties);
         //populateLists('std_types');
+
+        tabcontent = document.getElementsByClassName("tablinks");
+        for (i = 0; i < tabcontent.length; i++) {
+          tabcontent[i].style.display = "inline-flex";
+        }
         
     });
 }
@@ -443,11 +524,6 @@ function WriteShapefiles() {
     }
 
     displayNet();
-
-    tabcontent = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].style.display = "inline-flex";
-    }
 
 }
 

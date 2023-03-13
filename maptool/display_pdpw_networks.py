@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 #Test Netzwerk
 def getTestNetwork():
     net = nw.mv_oberrhein()
+    #net = nw.ieee_european_lv_asymmetric()
     geo_data_to_latlong(net, projection='epsg:31467')
     df = pp.to_json(net)
     return df

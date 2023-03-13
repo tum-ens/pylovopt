@@ -1,3 +1,9 @@
+#-----------------------------CRUCIAL PYTHON TODOS-----------------------------#
+# TODO: receive final pandapower net and verify correctness
+# TODO: add interaction with syngrid tool
+# TODO: add interaction with urbs tool
+
+
 import os
 import json
 from .display_pdpw_networks import getTestNetwork
@@ -34,7 +40,7 @@ def create_app(test_config=None):
             return net
 
         if request.method == 'POST':
-            print(request.get_json())
+            #print(request.get_json())
             return 'Sucess', 200
 
         #return render_template('network.html')
