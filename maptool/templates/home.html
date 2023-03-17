@@ -2,8 +2,6 @@
 
 {% block head %}
   {{ super() }}
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI=" crossorigin=""/>
-  <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
 {% endblock %}
 
 {% block content %}
@@ -46,17 +44,13 @@
       <div class="selectedFeatureEditor" id="std_typesEditor">
         <form id="std_typesForm"></form>
       </div>
-
     </div>
 
     <div class="actionButtons">
-      <button class="button" type="button" id="selectAreaButton" onclick="WriteShapefiles()">Select Area</button>
+      <button class="button" type="button" id="returnEditedNetButton">Finish Editing</button>
     </div>
 
-    <div id="map"></div>
-
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM=" crossorigin=""></script>
-    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
-    <script defer src="{{url_for('static', filename='script.js')}}"></script>
+    <script defer src="{{url_for('static', filename='generate_editable_network.js')}}"></script>
+    <script defer src="{{url_for('static', filename='display_editable_network_features.js')}}"></script>
 {% endblock %}
 

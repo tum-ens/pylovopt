@@ -1,8 +1,7 @@
 //-----------------------------CRUCIAL JS TODOS-----------------------------//
-// TODO: Display data of selected bus/line etc in sidebar 
-// TODO: Write back features of all popups to JSON and send back JSON-file to create functioning pandapower data
-// TODO: put functions into their own separate js file to clean up main script.js
-// TODO: put marker styles into css
+// TODO: Save changed data of selected bus/line etc in sidebar, check for correct inputs
+// TODO: Write back features of all markers to JSON and send back JSON-file to create functioning pandapower data
+// TODO: Add legend for each marker type
 
 //-----------------------------TALK TODOS-----------------------------//
 // TODO: Discuss if actual map location search option is needed 
@@ -14,163 +13,11 @@
 // TODO: put geojson.to_map() ops into their own functions for line and circlemarker respectively to further clean up code and avoid repetition
 // TODO: Deselect marker when clicking elsewhere on the map?
 // TODO: Decide whether area selection needs different shape options or if we want to stick only with Polygon
-
-
-//extends popup so we can save and display feature data on map for debugging purposes
-// L.Popup.include({
-//     features: {}
-// });
-
-//extends path so we can save feature data in circlemarkers, lines for further use
-//each marker on the map holds all information for their bus, line, trafo, etc
-// L.Path.include({
-//     features: {}
-// });
-
-//variable that saves last selected path and resets its style when it's deselected
-let clicked;
-let busList = [];
-let lineList = [];
-let trafoList = [];
-let ext_gridList = [];
-let std_typesList = [];
-
-const tileProvider = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-const  mapOptions = {
-    center: [48.4109158419, 7.7652256726],
-    zoom: 11,
-    pmIgnore: false
-    }
-    
-var map = new L.map('map', mapOptions);
-L.tileLayer(tileProvider, {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
-
-//We remove all preexisting options execpt quad, circle and polygon (might only use polygon for ease tbh)
-map.pm.addControls({  
-    position: 'topleft',  
-    drawPolyline: false,  
-    drawMarker: false,
-    drawCircleMarker: false,
-    drawText: false,
-    cutPolygon: false
-});  
-
-function populateLists(listName, list) {
-    //console.log(listName);
-    var x = document.getElementById(listName + "Select");
-
-    list = list.sort(function (a, b) {
-        return parseInt(a.feature.properties.index) - parseInt(b.feature.properties.index);
-    })
-    //console.log(list);
-    x.size = (list.length > 24) ? 24 : list.length;
-    for (idx in list) {
-        var option = document.createElement("option");
-        option.text = list[idx].feature.properties.index;
-        option.value = idx;
-        x.add(option);
-    }
-}
-
-function openList(e, listName) {
-    tabcontent = document.getElementsByClassName("featureListTab");
-    for (i = 0; i < tabcontent.length; i++) {
-      tabcontent[i].style.display = "none";
-    }
-
-    editorcontent = document.getElementsByClassName('selectedFeatureEditor');
-
-    for (i = 0; i < editorcontent.length; i++) {
-        editorcontent[i].style.display = "none";
-    }
-
-    tablinks = document.getElementsByClassName("tablinks");
-    for (i = 0; i < tablinks.length; i++) {
-      tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-
-    document.getElementById(listName).style.display = "inline-block";
-    e.currentTarget.className += " active";
-}
-
-function fillSelectedFeatureEditor(sel, listName) {
-    let idx = parseInt(sel.options[sel.selectedIndex].value);
-    let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
-    //console.log(sel.id);
-
-    editorcontent = document.getElementsByClassName('selectedFeatureEditor');
-    for (i = 0; i < editorcontent.length; i++) {
-        editorcontent[i].style.display = "none";
-    }
-
-    document.getElementById(listName + 'Editor').style.display = 'inline-block';
-
-    let selectedObject = null;
-    let styleIndex = 0;
-    if(sel.id == 'busSelect') {
-        //console.log(debugIdx, busList[idx].feature.properties.index);
-        selectedObject = busList[idx];
-        }
-    if(sel.id == 'lineSelect') {
-        //console.log(debugIdx, lineList[idx].feature.properties.index);
-        selectedObject = lineList[idx];
-        styleIndex = 1;
-        }
-    if(sel.id == 'trafoSelect') {
-        //console.log(debugIdx, trafoList[idx].feature.properties.index);
-        selectedObject = trafoList[idx];
-        styleIndex = 3;
-        }
-    if(sel.id == 'ext_gridSelect') {
-        //console.log(debugIdx, ext_gridList[idx].feature.properties.index);
-        selectedObject = ext_gridList[idx];
-        styleIndex = 2;
-    }
-
-    clickOnMarker(selectedObject, getStyleDict(), styleIndex);
-
-    let editor_form = document.getElementById(listName + 'Form');
-    let editor_elems = editor_form.children;
-    console.log(selectedObject);
-    for (let i = 0; i < editor_elems.length; i++) {
-        if (editor_elems[i].nodeName == 'INPUT') {
-            if(selectedObject.feature.properties[editor_elems[i].name] != null) {
-                editor_elems[i].value = selectedObject.feature.properties[editor_elems[i].name];
-            }
-        }
-    }
-}
-
-function populateEditor(listName, selectedProperties) {
-    let editor_form = document.getElementById(listName + 'Form');
-
-    for (idx in selectedProperties) {
-        let label = document.createElement("label");
-        let input = document.createElement("input");
-
-        label.htmlFor = selectedProperties[idx];
-        label.innerHTML = selectedProperties[idx];
-
-        input.type="text";
-        input.id = selectedProperties[idx];
-        input.name = selectedProperties[idx];
-
-        //console.log(label);
-
-        editor_form.appendChild(label);
-        editor_form.appendChild(input);
-
-
-        //<label for="name">name</label>
-        //<input type="text" id="name" name="name">
-    }
-}
+// TODO: put functions into their own separate js file to clean up main script.js
+// TODO: put marker styles into css
 
   //define styles for selected and unselected states of our map features
-function getStyleDict() {
+  function getStyleDict() {
     var styleDict = {BusStyles: [{  radius: 9,
                                     fillColor: "#d67900",
                                     color: "#4e2204",
@@ -254,6 +101,14 @@ function clickOnMarker(target, styleDict, feature) {
     target.setStyle(styleDict[style][0]);
     clicked = [target, feature];
 }
+
+//variable that saves last selected path and resets its style when it's deselected
+let clicked;
+let busList = [];
+let lineList = [];
+let trafoList = [];
+let ext_gridList = [];
+let std_typesList = [];
 
 //function generates GeoJSON for a given feature (i.e. bus, line, trafo, ext_grid)
 function createFeatures(isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures) {
@@ -391,18 +246,7 @@ function extractPropertiesFromNet(input, pointIndex, properties) {
     return output;
 }
 
-function displayNet() {
-    console.log('starting Fetch');
-    fetch('/network')
-    .then(function (response) {
-        return response.json();
-    }).then(function (ppdata) {
-        var layers = L.PM.Utils.findLayers(map);
-        layers.forEach((layer) =>{
-                layer.remove();
-        });
-        console.log('Begin displaying net:');
-
+function displayNet(ppdata) {
         let line_properties = ["name","from_bus", "to_bus","length_km","r_ohm_per_km", "x_ohm_per_km", "c_nf_per_km", "r0_ohm_per_km", "x0_ohm_per_km", "c0_nf_per_km", "max_i_ka", "std_type","df","g_us_per_km", "g0_us_per_km","parallel","max_loading_percent","alpha","temperature_degree_celsius", "tdpf","wind_speed_m_per_s", "wind_angle_degree", "conductor_outer_diameter_m", "air_temperature_degree_celsius","reference_temperature_degree_celsius", "solar_radiation_w_per_sq_m", "solar_absorptivity", "emissivity", "r_theta_kelvin_per_mw", "mc_joule_per_m_k"];
         let line_geoJSON = createFeatures(true, ppdata, 'line', line_properties, null, null);
         
@@ -449,26 +293,24 @@ function displayNet() {
 
         L.geoJSON(bus_geoJSON, {
             onEachFeature: function(feature, layer) {
-                //layer.features = feature;
                 createPopup(feature, layer);
                 busList.push(layer);
             },
             pointToLayer: function (feature, latlng) {
                 var marker = L.circleMarker(latlng, getStyleDict()['BusStyles'][1]);
-                //marker.features = feature;
                 marker.on('click', function(e) {
                     clickOnMarker(e.target, getStyleDict(), 0);
                 });
                 return marker;
             }
         }).addTo(map);
+
         console.log('added all buses');
 
         let trafo_properties = ["name", "hv_bus", "lv_bus", "std_type", "vk0_percent", "vkr0_percent", "mag0_percent", "mag0_rx", "si0_hv_partial", "tap_pos", "in_service", "max_loading_percent", "parallel", "df", "tap_dependent_impedance", "vk_percent_characteristic", "vkr_percent_characteristic", "xn_ohm"];
         let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', trafo_properties, null, null);
-        L.geoJSON(trafo_geoJSON, {
+        let moveTo = L.geoJSON(trafo_geoJSON, {
             onEachFeature: function(feature, layer) {
-                //layer.features = feature;
                 createPopup(feature, layer);
                 trafoList.push(layer);
                 layer.on('click', function(e) {
@@ -478,6 +320,8 @@ function displayNet() {
             style: getStyleDict()['TrafoStyles'][1]
         }).addTo(map);
         console.log('added all trafos');
+
+        map.fitBounds(moveTo.getBounds());
 
         populateLists('bus', busList);
         populateLists('line', lineList);
@@ -494,9 +338,7 @@ function displayNet() {
         for (i = 0; i < tabcontent.length; i++) {
           tabcontent[i].style.display = "inline-flex";
         }
-        
-    });
-}
+    }
 
 
 //generates GeoJSON files to pass to the python section of our code, gets called on button press
@@ -509,22 +351,33 @@ function WriteShapefiles() {
         });
         shapes = group.toGeoJSON();
         
-        shapes.features.forEach((shape)=>{
-            //console.log(shape);
-            //Post the selected area as geojson shapefile
-            fetch("http://127.0.0.1:5000/network", {
-                method: 'POST',
-                headers: {
-                    'Content-type': 'application/json'},
-                body: JSON.stringify(shape)
-            }).then(response =>{
-                console.log("Success")
-            }).catch((err) => console.error(err));
-            });    
+    //     shapes.features.forEach((shape)=>{
+    //         //console.log(shape);
+    //         //Post the selected area as geojson shapefile
+    //         fetch("http://127.0.0.1:5000//networks/editableNetwork", {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-type': 'application/json'},
+    //             body: JSON.stringify(shape)
+    //         }).then(response =>{
+    //             console.log("Success")
+    //         }).catch((err) => console.error(err));
+    //         });    
     }
 
-    displayNet();
-
+    console.log('starting Fetch');  
+    fetch('/networks/editableNetwork')
+    .then(function (response) {
+        return response.json();
+    }).then(function (ppdata) {
+        var layers = L.PM.Utils.findLayers(map);
+        layers.forEach((layer) =>{
+                layer.remove();
+        });
+        console.log(ppdata);
+        console.log('Begin displaying net:');
+        displayNet(ppdata);
+    });
 }
 
 //We only ever want to have one shape at the same time for area selection
@@ -541,4 +394,10 @@ map.on('popupopen', function(e) {
     //map.closePopup();
     //var marker = e.popup._source;
     //console.log(marker.features.properties);
+  });
+
+  window.addEventListener("load", (event) => {
+    if(window.location.pathname == '/networks') {
+        WriteShapefiles();
+    }
   });

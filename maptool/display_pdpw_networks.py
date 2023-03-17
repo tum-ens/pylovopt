@@ -6,29 +6,18 @@ from pandas_geojson import to_geojson
 import matplotlib.pyplot as plt
 
 #Test Netzwerk
-def getTestNetwork():
-    net = nw.mv_oberrhein()
+def getTestNetwork(testnet):
+    #net = nw.mv_oberrhein()
+    net = testnet
     #net = nw.ieee_european_lv_asymmetric()
-    geo_data_to_latlong(net, projection='epsg:31467')
+    #geo_data_to_latlong(net, projection='epsg:31467')
     df = pp.to_json(net)
     return df
 
 
-# def getTestNetwork():
-#     net = nw.mv_oberrhein()
-#     geo_data_to_latlong(net, projection='epsg:31467')
-#     df = net['bus_geodata'].drop('coords', axis=1).to_json()
-#     test_df = net['bus_geodata']
-#     geo_json = to_geojson(df=test_df, lat='y', lon='x',
-#                  properties=[])
-#     #print(geo_json)
-#     return geo_json
-#     #print(df.head())
 
-#     #return df
 
-# gdf = geopandas.GeoDataFrame(
-#     df, geometry=geopandas.points_from_xy(df.y, df.x))
+
 
 # fig, ax = plt.subplots()
 # ax.plot(gdf.x, gdf.y, 'bo')

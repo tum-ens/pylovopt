@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="ListSelection">
+  <select id="networkSelect" class ="featureSelect" size="24"></select>
+</div>
+
+<div class="actionButtons">
+  <a href="/networks" >
+    <button class="button" type="button">Select Network</button>
+  </a>
+</div>  
+
+<script defer src="{{url_for('static', filename='display_postcode.js')}}"></script>
+<script defer src="{{url_for('static', filename='generate_editable_network.js')}}"></script>
+{% endblock %}
