@@ -7,8 +7,6 @@ import sys
 import os
 
 from syngrid.GridGenerator import GridGenerator
-from syngrid import pgReaderWriter
-import geopandas as gpd
 import pandapower as pp
 
 from .display_pdpw_networks import getTestNetwork
@@ -35,55 +33,64 @@ def create_app(test_config=None):
         pass
 
 
-    # a simple page that says hello
+    #On first opening, display postal code selection gui
     @app.route('/')
     def home():
         return render_template('postcode.html')
     
-
+    #When user submits postal code or area selection in gui we return the corresponding postal code area boundary
     @app.route('/postcode', methods=['GET', 'POST'])
     def postcode():
         if request.method == 'POST':
             plz = {'key' : request.get_json()}
             session['plz'] = plz
-
-            return 'Success', 200
-
-        if request.method == 'GET':
-            plz = session.get('plz')['key']
-            gg = GridGenerator(plz=plz)
+            gg = GridGenerator(plz=request.get_json())
             pg = gg.pgr
-            postcode_gdf = pg.getGeoDataFrame(table="postcode_result", id=plz).to_crs(epsg=4326)
+            postcode_gdf = pg.getGeoDataFrame(table="postcode_result", id=request.get_json()).to_crs(epsg=4326)
             postcode_boundary = postcode_gdf.boundary.to_json()
 
             return postcode_boundary
     
+
     @app.route('/postcode/nets', methods=['GET', 'POST'])
     def postcodeNets():
+        #once the user has selected a preview net, he submits the corresponding kcid and bcid
+        if request.method == 'POST':
+            kcid_bcid = {'key' : request.get_json()}
+            session['kcid_bcid'] = kcid_bcid
+            return 'Success', 200
+        
+        #After receiving the postal code boundary the js code requests all nets of the selected version and plz
         if request.method == 'GET':
             plz = session.get('plz')['key']
             gg = GridGenerator(plz=plz)
             pg = gg.pgr
-            kcids_bcids = pg.getAllNetsOfVersion(plz)
+
+            versions = pg.getAllVersionsofPLZ(plz)
+            print("VERSIONS: ", versions[0][0])
+
+            nets = pg.getAllNetsOfVersion(plz, versions[0][0])
             netList = []
-            for version_id, kcid, bcid in kcids_bcids:
-                #if kcid < 2 and bcid < 4:
-                print(kcid, bcid)
-                netList.append(pp.to_json(pg.read_net(plz=plz, kcid=kcid, bcid=bcid)))
+
+            for kcid, bcid, grid in nets:
+                netList.append([kcid, bcid, pp.to_json(grid)]) 
+
             return netList
-   
     
+    #once the Select Network button is pressed, we return the editable network view 
     @app.route('/networks', methods=['GET', 'POST'])
     def networks():
         return render_template('home.html')
 
     @app.route('/networks/editableNetwork', methods=['GET', 'POST'])
     def editableNetwork():
+        #on opening of the network view the js code requests full information of the previously selected network
         if request.method == 'GET':
             plz = session.get('plz')['key']
+            kcid_bcid = session.get('kcid_bcid')['key']
             gg = GridGenerator(plz=plz)
             pg = gg.pgr
-            testnet = pg.read_net(plz=plz, kcid=1, bcid=4)
+            testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
 
             net = pp.to_json(testnet)
             return net
@@ -91,9 +98,6 @@ def create_app(test_config=None):
         if request.method == 'POST':
             #print(request.get_json())
             return 'Success', 200
-
-        #return render_template('network.html')
-        return render_template('home.html')
     return app
 
 

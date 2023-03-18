@@ -84,7 +84,6 @@ function createPopup(feature, layer) {
 function clickOnMarker(target, styleDict, feature) {
     let styles = ['BusStyles', 'LineStyles', 'ExtStyles', 'TrafoStyles'];
     let style = styles[feature];
-
     let zoomLevel = 14;
 
     if(style == 'BusStyles' || style == 'ExtStyles') {
@@ -100,6 +99,18 @@ function clickOnMarker(target, styleDict, feature) {
     }
     target.setStyle(styleDict[style][0]);
     clicked = [target, feature];
+
+    let featureLists = [busList, lineList, ext_gridList, trafoList];
+    let selectLists = ['bus', 'line', 'trafo', 'ext_grid'];
+    let featureList = featureLists[feature];
+    let selectList = selectLists[feature];
+
+    let selectedButton = document.getElementById(selectList + "ListButton");
+    selectedButton.click();
+
+    let selectedList = document.getElementById(selectList + "Select");
+    let newIndex = featureList.findIndex((entry) => entry === target);
+    selectedList.selectedIndex = newIndex;
 }
 
 //variable that saves last selected path and resets its style when it's deselected
@@ -379,22 +390,6 @@ function WriteShapefiles() {
         displayNet(ppdata);
     });
 }
-
-//We only ever want to have one shape at the same time for area selection
-map.on('pm:drawstart', ({ workingLayer }) => {
-var layers = L.PM.Utils.findLayers(map);
-layers.forEach((layer) =>{
-        layer.remove();
-});
-});
-
-//on clicking on an element, we display information of the selected node in our sidebar for editing
-//TODO: disable opening a new popup if unsaved changes are displayed in sidebar or save changes automatically 
-map.on('popupopen', function(e) {
-    //map.closePopup();
-    //var marker = e.popup._source;
-    //console.log(marker.features.properties);
-  });
 
   window.addEventListener("load", (event) => {
     if(window.location.pathname == '/networks') {

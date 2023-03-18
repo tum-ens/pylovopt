@@ -6,12 +6,12 @@
 
 {% block content %}
 <div class="ListSelection">
-  <select id="networkSelect" class ="featureSelect" size="24"></select>
+  <select id="networkSelect" class ="featureSelect" size="24" onchange="highlightSelectedPreviewLayer(this)"></select>
 </div>
 
 <div class="actionButtons">
   <a href="/networks" >
-    <button class="button" type="button">Select Network</button>
+    <button class="button" id="selectNetworkButton" type="button" onclick="sendBackSelectedNetworkKcidBcid()" disabled>Select Network</button>
   </a>
 </div>  
 

@@ -8,11 +8,11 @@
     <h1></h1>
     <div class="FeatureEditor">
       <div class="buttonsTab">
-        <button class="tablinks" onclick="openList(event, 'bus')"><span>Buses</span></button>
-        <button class="tablinks" onclick="openList(event, 'line')"><span>Lines</span></button>
-        <button class="tablinks" onclick="openList(event, 'trafo')"><span>Trafos</span></button>
-        <button class="tablinks" onclick="openList(event, 'ext_grid')"><span>Ext. Grid</span></button>
-        <button class="tablinks" onclick="openList(event, 'std_types')"><span>Std Types</span></button>
+        <button class="tablinks" id="busListButton" onclick="openList(event, 'bus')"><span>Buses</span></button>
+        <button class="tablinks" id="lineListButton" onclick="openList(event, 'line')"><span>Lines</span></button>
+        <button class="tablinks" id="trafoListButton" onclick="openList(event, 'trafo')"><span>Trafos</span></button>
+        <button class="tablinks" id="ext_gridListButton" onclick="openList(event, 'ext_grid')"><span>Ext. Grid</span></button>
+        <button class="tablinks" id="std_typesListButton" onclick="openList(event, 'std_types')"><span>Std Types</span></button>
       </div>
       <div id="bus" class="featureListTab">
         <select id="busSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this, 'bus')"></select>
