@@ -70,56 +70,215 @@
     return styleDict;
 }
 
-//Purely for debug, we will want to keep feature information within the markers themselves
-function createPopup(feature, layer) {
-    var popup = L.popup();
-    popup.setContent(
-        "Index: " + feature.properties.index + "<br>" 
-        + "Name: " + feature.properties.name + "<br>" 
-    );
-    layer.bindPopup(popup);
-}
-
-//function switches between Selected and Unselected stle for all map features
-function clickOnMarker(target, styleDict, feature) {
-    let styles = ['BusStyles', 'LineStyles', 'ExtStyles', 'TrafoStyles'];
-    let style = styles[feature];
-    let zoomLevel = 14;
-
-    if(style == 'BusStyles' || style == 'ExtStyles') {
-        map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
-    }
-    else {
-        map.setView(target.getLatLngs()[0], Math.max(map.getZoom(), zoomLevel));
-    }
-
-    if(clicked) {
-        let oldStyle = styles[clicked[1]];
-        clicked[0].setStyle(styleDict[oldStyle][1]);
-    }
-    target.setStyle(styleDict[style][0]);
-    clicked = [target, feature];
-
-    let featureLists = [busList, lineList, ext_gridList, trafoList];
-    let selectLists = ['bus', 'line', 'trafo', 'ext_grid'];
-    let featureList = featureLists[feature];
-    let selectList = selectLists[feature];
-
-    let selectedButton = document.getElementById(selectList + "ListButton");
-    selectedButton.click();
-
-    let selectedList = document.getElementById(selectList + "Select");
-    let newIndex = featureList.findIndex((entry) => entry === target);
-    selectedList.selectedIndex = newIndex;
-}
-
 //variable that saves last selected path and resets its style when it's deselected
 let clicked;
 let busList = [];
 let lineList = [];
 let trafoList = [];
 let ext_gridList = [];
-let std_typesList = [];
+
+let line_stdList;
+let trafo_stdList;
+let trafo3w_stdList;
+
+//generates GeoJSON files to pass to the python section of our code, gets called on button press
+function WriteShapefiles() {
+    var layers = L.PM.Utils.findLayers(map);
+    if(layers.length != 0) {
+        var group = L.featureGroup();
+        layers.forEach((layer)=>{
+            group.addLayer(layer);
+        });
+        shapes = group.toGeoJSON();
+    }
+
+    console.log('starting Fetch');  
+    fetch('/networks/editableNetwork')
+    .then(function (response) {
+        return response.json();
+    }).then(function (ppdata) {
+        var layers = L.PM.Utils.findLayers(map);
+        layers.forEach((layer) =>{
+                layer.remove();
+        });
+
+        extractStdTypes(ppdata);
+        fillStdTypeList();
+
+        console.log('Begin displaying net:');
+        displayNet(ppdata);
+
+
+    });
+}
+
+function extractStdTypes(ppdata) {
+    let input = ppdata['_object']['std_types'];
+    line_stdList= input['line'];
+    trafo_stdList = input['trafo'];
+    trafo3w_stdList = input['trafo3w'];
+}
+
+function fillStdTypeList() {
+    // for (std_type in line_stdList) {
+    //     for (property in line_stdList[std_type]) {
+    //         console.log(std_type, property);
+    //     }
+    // }
+    let lists = [line_stdList, trafo_stdList, trafo3w_stdList];
+
+    let st_type_selects = document.getElementsByClassName('std_type_featureSelect');
+    for (let i = 0; i < st_type_selects.length; i++) {
+        for (idx in lists[i]) {
+            var option = document.createElement("option");
+            option.text = idx;
+            option.value = idx;
+            st_type_selects[i].add(option);
+        }
+    }
+}
+
+function fillStdTypeEditor(sel, listName) {
+    let idx = sel.options[sel.selectedIndex].value;
+    
+    let selectedObject = null; 
+    if(sel.id == 'line_std_typesSelect') {
+        //console.log(debugIdx, busList[idx].feature.properties.index);
+        selectedObject = line_stdList[idx];
+        document.getElementById('line_std_typesForm').style.display = 'inline-block';
+        document.getElementById('trafo_std_typesForm').style.display = 'none';
+        document.getElementById('trafo3w_std_typesForm').style.display = 'none';
+    }
+    if(sel.id == 'trafo_std_typesSelect') {
+        //console.log(debugIdx, lineList[idx].feature.properties.index);
+        selectedObject = trafo_stdList[idx];
+        document.getElementById('line_std_typesForm').style.display = 'none';
+        document.getElementById('trafo_std_typesForm').style.display = 'inline-block';
+        document.getElementById('trafo3w_std_typesForm').style.display = 'none';
+    }
+    if(sel.id == 'trafo3w_std_typesSelect') {
+        //console.log(debugIdx, trafoList[idx].feature.properties.index);
+        selectedObject = trafo3w_stdList[idx];
+        document.getElementById('line_std_typesForm').style.display = 'none';
+        document.getElementById('trafo_std_typesForm').style.display = 'none';
+        document.getElementById('trafo3w_std_typesForm').style.display = 'inline-block';
+    }
+    
+    let editorcontent = document.getElementsByClassName('selectedFeatureEditor');
+    for (i = 0; i < editorcontent.length; i++) {
+        editorcontent[i].style.display = "none";
+    }
+
+    document.getElementById('std_typesEditor').style.display = 'inline-block';
+    
+    let editor_form = document.getElementById(listName + '_typesForm');
+    let editor_elems = editor_form.children;
+    for (let i = 0; i < editor_elems.length; i++) {
+        if (editor_elems[i].nodeName == 'INPUT') {
+            editor_elems[i].value = (selectedObject[editor_elems[i].name]);
+        }
+    }
+}
+
+function displayNet(ppdata) {
+    let line_std_properties = ["r_ohm_per_km", "x_ohm_per_km", "max_i_ka", "c_nf_per_km", "q_mm2", "type", "alpha"];
+    let trafo_std_properties = ["sn_mva", "vn_hv_kv", "vn_lv_kv", "vk_percent", "vkr_percent", "pfe_kw", "i0_percent", "shift_degree", "tap_side", "tap_neutral", "tap_min", "tap_max", "tap_step_percent", "tap_step_degree", "tap_phase_shifter"];
+    let trafo3w_std_properties = ["sn_hv_mva","sn_mv_mva","sn_lv_mva","vn_hv_kv", "vn_mv_kv","vn_lv_kv","vk_hv_percent", "vk_mv_percent","vk_lv_percent","vkr_hv_percent","vkr_mv_percent","vkr_lv_percent","pfe_kw","i0_percent","shift_mv_degree","shift_lv_degree","tap_side","tap_neutral","tap_min","tap_max","tap_step_percent"];
+
+    let line_properties = ["name","from_bus", "to_bus","length_km", "r0_ohm_per_km", "x0_ohm_per_km", "c0_nf_per_km","df","g_us_per_km", "g0_us_per_km","parallel","max_loading_percent","temperature_degree_celsius", "tdpf","wind_speed_m_per_s", "wind_angle_degree", "conductor_outer_diameter_m", "air_temperature_degree_celsius","reference_temperature_degree_celsius", "solar_radiation_w_per_sq_m", "solar_absorptivity", "emissivity", "r_theta_kelvin_per_mw", "mc_joule_per_m_k", "std_type"];
+    let line_geoJSON = createFeatures(true, ppdata, 'line', line_properties, null, null);
+    
+    L.geoJSON(line_geoJSON, {
+        onEachFeature: function(feature, layer) {
+            //layer.features = feature;
+            createPopup(feature, layer);
+            lineList.push(layer);
+            layer.on('click', function(e) {
+                clickOnMarker(e.target, getStyleDict(), 1);
+            })
+        },
+        style: getStyleDict()['LineStyles'][1]        
+    }).addTo(map);
+
+    console.log("added all lines");
+
+    let ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable"];
+    let ext_grid_geoJSON = createFeatures(false, ppdata, 'ext_grid', ext_grid_properties, null, null);
+    L.geoJSON(ext_grid_geoJSON, {
+        onEachFeature: function(feature, layer) {
+            //layer.features = feature;
+            createPopup(feature, layer);
+            ext_gridList.push(layer);
+        },
+        pointToLayer: function (feature, latlng) {
+            var marker = L.circleMarker(latlng, getStyleDict()['ExtStyles'][1]);
+            //marker.features = feature;
+
+            marker.on('click', function(e) {
+                clickOnMarker(e.target, getStyleDict(), 2);
+            });
+            return marker;
+        }
+    }).addTo(map);
+    console.log('added all external grids');
+
+    let bus_properties =  ["name","vn_kv","type","in_service", "max_vm_pu","min_vm_pu",]    
+    let load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable'];
+    let sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable'];
+    let switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka'];  
+
+    let bus_geoJSON = createFeatures(false, ppdata, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]);
+
+    L.geoJSON(bus_geoJSON, {
+        onEachFeature: function(feature, layer) {
+            createPopup(feature, layer);
+            busList.push(layer);
+        },
+        pointToLayer: function (feature, latlng) {
+            var marker = L.circleMarker(latlng, getStyleDict()['BusStyles'][1]);
+            marker.on('click', function(e) {
+                clickOnMarker(e.target, getStyleDict(), 0);
+            });
+            return marker;
+        }
+    }).addTo(map);
+
+    console.log('added all buses');
+
+    let trafo_properties = ["name", "hv_bus", "lv_bus", "vk0_percent", "vkr0_percent", "mag0_percent", "mag0_rx", "si0_hv_partial", "tap_pos", "in_service", "max_loading_percent", "parallel", "df", "tap_dependent_impedance", "vk_percent_characteristic", "vkr_percent_characteristic", "xn_ohm", "std_type"];
+    let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', trafo_properties, null, null);
+    let moveTo = L.geoJSON(trafo_geoJSON, {
+        onEachFeature: function(feature, layer) {
+            createPopup(feature, layer);
+            trafoList.push(layer);
+            layer.on('click', function(e) {
+                clickOnMarker(e.target, getStyleDict(), 3);
+            })
+        },
+        style: getStyleDict()['TrafoStyles'][1]
+    }).addTo(map);
+    console.log('added all trafos');
+
+    map.fitBounds(moveTo.getBounds());
+
+    populateLists('bus', busList);
+    populateLists('line', lineList);
+    populateLists('trafo', trafoList);
+    populateLists('ext_grid', ext_gridList);
+
+    populateEditor('bus', bus_properties);
+    populateEditor('line', line_properties, line_stdList, line_std_properties);
+    populateEditor('trafo', trafo_properties, trafo_stdList, trafo_std_properties);
+    populateEditor('ext_grid', ext_grid_properties);
+    populateEditor('line_std_types', line_std_properties);
+    populateEditor('trafo_std_types', trafo_std_properties);
+    populateEditor('trafo3w_std_types', trafo3w_std_properties);
+
+    tabcontent = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "inline-flex";
+    }
+}
 
 //function generates GeoJSON for a given feature (i.e. bus, line, trafo, ext_grid)
 function createFeatures(isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures) {
@@ -257,141 +416,7 @@ function extractPropertiesFromNet(input, pointIndex, properties) {
     return output;
 }
 
-function displayNet(ppdata) {
-        let line_properties = ["name","from_bus", "to_bus","length_km","r_ohm_per_km", "x_ohm_per_km", "c_nf_per_km", "r0_ohm_per_km", "x0_ohm_per_km", "c0_nf_per_km", "max_i_ka", "std_type","df","g_us_per_km", "g0_us_per_km","parallel","max_loading_percent","alpha","temperature_degree_celsius", "tdpf","wind_speed_m_per_s", "wind_angle_degree", "conductor_outer_diameter_m", "air_temperature_degree_celsius","reference_temperature_degree_celsius", "solar_radiation_w_per_sq_m", "solar_absorptivity", "emissivity", "r_theta_kelvin_per_mw", "mc_joule_per_m_k"];
-        let line_geoJSON = createFeatures(true, ppdata, 'line', line_properties, null, null);
-        
-        L.geoJSON(line_geoJSON, {
-            onEachFeature: function(feature, layer) {
-                //layer.features = feature;
-                createPopup(feature, layer);
-                lineList.push(layer);
-                layer.on('click', function(e) {
-                    clickOnMarker(e.target, getStyleDict(), 1);
-                })
-            },
-            style: getStyleDict()['LineStyles'][1]        
-        }).addTo(map);
-
-        console.log("added all lines");
-
-        let ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable"];
-        let ext_grid_geoJSON = createFeatures(false, ppdata, 'ext_grid', ext_grid_properties, null, null);
-        L.geoJSON(ext_grid_geoJSON, {
-            onEachFeature: function(feature, layer) {
-                //layer.features = feature;
-                createPopup(feature, layer);
-                ext_gridList.push(layer);
-            },
-            pointToLayer: function (feature, latlng) {
-                var marker = L.circleMarker(latlng, getStyleDict()['ExtStyles'][1]);
-                //marker.features = feature;
-
-                marker.on('click', function(e) {
-                    clickOnMarker(e.target, getStyleDict(), 2);
-                });
-                return marker;
-            }
-        }).addTo(map);
-        console.log('added all external grids');
-
-        let bus_properties =  ["name","vn_kv","type","in_service", "max_vm_pu","min_vm_pu",]    
-        let load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable'];
-        let sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable'];
-        let switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka'];  
-
-        let bus_geoJSON = createFeatures(false, ppdata, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]);
-
-        L.geoJSON(bus_geoJSON, {
-            onEachFeature: function(feature, layer) {
-                createPopup(feature, layer);
-                busList.push(layer);
-            },
-            pointToLayer: function (feature, latlng) {
-                var marker = L.circleMarker(latlng, getStyleDict()['BusStyles'][1]);
-                marker.on('click', function(e) {
-                    clickOnMarker(e.target, getStyleDict(), 0);
-                });
-                return marker;
-            }
-        }).addTo(map);
-
-        console.log('added all buses');
-
-        let trafo_properties = ["name", "hv_bus", "lv_bus", "std_type", "vk0_percent", "vkr0_percent", "mag0_percent", "mag0_rx", "si0_hv_partial", "tap_pos", "in_service", "max_loading_percent", "parallel", "df", "tap_dependent_impedance", "vk_percent_characteristic", "vkr_percent_characteristic", "xn_ohm"];
-        let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', trafo_properties, null, null);
-        let moveTo = L.geoJSON(trafo_geoJSON, {
-            onEachFeature: function(feature, layer) {
-                createPopup(feature, layer);
-                trafoList.push(layer);
-                layer.on('click', function(e) {
-                    clickOnMarker(e.target, getStyleDict(), 3);
-                })
-            },
-            style: getStyleDict()['TrafoStyles'][1]
-        }).addTo(map);
-        console.log('added all trafos');
-
-        map.fitBounds(moveTo.getBounds());
-
-        populateLists('bus', busList);
-        populateLists('line', lineList);
-        populateLists('trafo', trafoList);
-        populateLists('ext_grid', ext_gridList);
-
-        populateEditor('bus', bus_properties);
-        populateEditor('line', line_properties);
-        populateEditor('trafo', trafo_properties);
-        populateEditor('ext_grid', ext_grid_properties);
-        //populateLists('std_types');
-
-        tabcontent = document.getElementsByClassName("tablinks");
-        for (i = 0; i < tabcontent.length; i++) {
-          tabcontent[i].style.display = "inline-flex";
-        }
-    }
-
-
-//generates GeoJSON files to pass to the python section of our code, gets called on button press
-function WriteShapefiles() {
-    var layers = L.PM.Utils.findLayers(map);
-    if(layers.length != 0) {
-        var group = L.featureGroup();
-        layers.forEach((layer)=>{
-            group.addLayer(layer);
-        });
-        shapes = group.toGeoJSON();
-        
-    //     shapes.features.forEach((shape)=>{
-    //         //console.log(shape);
-    //         //Post the selected area as geojson shapefile
-    //         fetch("http://127.0.0.1:5000//networks/editableNetwork", {
-    //             method: 'POST',
-    //             headers: {
-    //                 'Content-type': 'application/json'},
-    //             body: JSON.stringify(shape)
-    //         }).then(response =>{
-    //             console.log("Success")
-    //         }).catch((err) => console.error(err));
-    //         });    
-    }
-
-    console.log('starting Fetch');  
-    fetch('/networks/editableNetwork')
-    .then(function (response) {
-        return response.json();
-    }).then(function (ppdata) {
-        var layers = L.PM.Utils.findLayers(map);
-        layers.forEach((layer) =>{
-                layer.remove();
-        });
-        console.log(ppdata);
-        console.log('Begin displaying net:');
-        displayNet(ppdata);
-    });
-}
-
-  window.addEventListener("load", (event) => {
+window.addEventListener("load", (event) => {
     if(window.location.pathname == '/networks') {
         WriteShapefiles();
     }

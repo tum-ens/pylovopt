@@ -16,6 +16,53 @@ function populateLists(listName, list) {
     }
 }
 
+function populateEditor(listName, selectedProperties, std_typeList, std_type_properties) {
+    let editor_form = document.getElementById(listName + 'Form');
+
+    for (idx in selectedProperties) {
+        let label = document.createElement("label");
+
+        label.htmlFor = selectedProperties[idx];
+        label.innerHTML = selectedProperties[idx];
+        editor_form.appendChild(label);
+        
+        if(selectedProperties[idx] == 'std_type') {
+            let form = document.createElement("select");
+            let ctr = 0;
+            for(type_idx in std_typeList) {
+                let option = document.createElement("option");
+                option.text = type_idx;
+                option.value = ctr;
+                form.add(option);
+                ctr++;
+            }
+            editor_form.appendChild(form);
+
+            for(prop_idx in std_type_properties) {
+                let Prop_label = document.createElement("label");
+
+                Prop_label.htmlFor = std_type_properties[prop_idx];
+                Prop_label.innerHTML = std_type_properties[prop_idx];
+                editor_form.appendChild(Prop_label);
+
+                let input = document.createElement("input");
+                input.type="text";
+                input.readOnly = true;
+                input.id = std_type_properties[prop_idx];
+                input.name = std_type_properties[prop_idx];
+                editor_form.appendChild(input);
+            }
+        }  
+        else {
+            let input = document.createElement("input");
+            input.type="text";
+            input.id = selectedProperties[idx];
+            input.name = selectedProperties[idx];
+            editor_form.appendChild(input);
+        }
+    }
+}
+
 function openList(e, listName) {
     tabcontent = document.getElementsByClassName("featureListTab");
     for (i = 0; i < tabcontent.length; i++) {
@@ -40,14 +87,7 @@ function openList(e, listName) {
 function fillSelectedFeatureEditor(sel, listName) {
     let idx = parseInt(sel.options[sel.selectedIndex].value);
     let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
-
-    editorcontent = document.getElementsByClassName('selectedFeatureEditor');
-    for (i = 0; i < editorcontent.length; i++) {
-        editorcontent[i].style.display = "none";
-    }
-
-    document.getElementById(listName + 'Editor').style.display = 'inline-block';
-
+    
     let selectedObject = null;
     let styleIndex = 0;
     if(sel.id == 'busSelect') {
@@ -71,34 +111,88 @@ function fillSelectedFeatureEditor(sel, listName) {
     }
 
     clickOnMarker(selectedObject, getStyleDict(), styleIndex);
+}
 
-    let editor_form = document.getElementById(listName + 'Form');
+function clickOnMarker(target, styleDict, feature) {
+    let styles = ['BusStyles', 'LineStyles', 'ExtStyles', 'TrafoStyles'];
+    let style = styles[feature];
+    let zoomLevel = 14;
+
+    if(style == 'BusStyles' || style == 'ExtStyles') {
+        map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
+    }
+    else {
+        map.setView(target.getLatLngs()[0], Math.max(map.getZoom(), zoomLevel));
+    }
+
+    if(clicked) {
+        let oldStyle = styles[clicked[1]];
+        clicked[0].setStyle(styleDict[oldStyle][1]);
+    }
+    target.setStyle(styleDict[style][0]);
+    clicked = [target, feature];
+
+    let featureLists = [busList, lineList, ext_gridList, trafoList];
+    let selectLists = ['bus', 'line', 'trafo', 'ext_grid'];
+    let featureList = featureLists[feature];
+    let selectList = selectLists[feature];
+
+    let selectedButton = document.getElementById(selectList + "ListButton");
+    selectedButton.click();
+
+    let selectedList = document.getElementById(selectList + "Select");
+    let newIndex = featureList.findIndex((entry) => entry === target);
+    selectedList.selectedIndex = newIndex;
+
+    let editorcontent = document.getElementsByClassName('selectedFeatureEditor');
+    for (i = 0; i < editorcontent.length; i++) {
+        editorcontent[i].style.display = "none";
+    }
+
+    document.getElementById(selectList + 'Editor').style.display = 'inline-block';
+
+    let editor_form = document.getElementById(selectList + 'Form');
     let editor_elems = editor_form.children;
-    console.log(selectedObject);
+
+    let selectedStdType;
     for (let i = 0; i < editor_elems.length; i++) {
         if (editor_elems[i].nodeName == 'INPUT') {
-            if(selectedObject.feature.properties[editor_elems[i].name] != null) {
-                editor_elems[i].value = selectedObject.feature.properties[editor_elems[i].name];
+            if(target.feature.properties[editor_elems[i].name] != null) {
+                editor_elems[i].value = target.feature.properties[editor_elems[i].name];
             }
+        }
+        if (editor_elems[i].nodeName == 'SELECT') {
+            selectedStdType = target.feature.properties['std_type']
+
+            for (let j = 0; j < editor_elems[i].options.length; j++) {
+                if (editor_elems[i].options[j].text == selectedStdType) {
+                    editor_elems[i].selectedIndex = j;
+                    break;
+                }
+            }
+            let k = 1;
+            if(selectList == 'line') {
+                for (idx in line_stdList[selectedStdType]) {
+                    //console.log(editor_elems[i+k+1].name, idx, line_stdList[selectedStdType][idx]);
+                    editor_elems[i+k+1].value = line_stdList[selectedStdType][idx];
+                    k += 2;
+                }
+            }
+            if(selectList == 'trafo') {
+
+            }
+            i += k;
         }
     }
 }
 
-function populateEditor(listName, selectedProperties) {
-    let editor_form = document.getElementById(listName + 'Form');
 
-    for (idx in selectedProperties) {
-        let label = document.createElement("label");
-        let input = document.createElement("input");
-
-        label.htmlFor = selectedProperties[idx];
-        label.innerHTML = selectedProperties[idx];
-
-        input.type="text";
-        input.id = selectedProperties[idx];
-        input.name = selectedProperties[idx];
-
-        editor_form.appendChild(label);
-        editor_form.appendChild(input);
-    }
+//Purely for debug, we will want to keep feature information within the markers themselves
+function createPopup(feature, layer) {
+    var popup = L.popup();
+    popup.setContent(
+        "Index: " + feature.properties.index + "<br>" 
+        + "Name: " + feature.properties.name + "<br>" 
+    );
+    layer.bindPopup(popup);
 }
