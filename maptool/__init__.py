@@ -1,6 +1,5 @@
 #-----------------------------CRUCIAL PYTHON TODOS-----------------------------#
 # TODO: receive final pandapower net and verify correctness
-# TODO: add interaction with syngrid tool
 # TODO: add interaction with urbs tool
 
 import sys
@@ -8,6 +7,8 @@ import os
 
 from syngrid.GridGenerator import GridGenerator
 import pandapower as pp
+import pandapower.networks as nw
+from pandapower.plotting.plotly.mapbox_plot import geo_data_to_latlong
 
 from .display_pdpw_networks import getTestNetwork
 from flask import Flask, render_template, jsonify, request, session
@@ -86,12 +87,14 @@ def create_app(test_config=None):
     def editableNetwork():
         #on opening of the network view the js code requests full information of the previously selected network
         if request.method == 'GET':
-            plz = session.get('plz')['key']
-            kcid_bcid = session.get('kcid_bcid')['key']
-            gg = GridGenerator(plz=plz)
-            pg = gg.pgr
-            testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
+            # plz = session.get('plz')['key']
+            # kcid_bcid = session.get('kcid_bcid')['key']
+            # gg = GridGenerator(plz=plz)
+            # pg = gg.pgr
+            # testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
 
+            testnet = nw.mv_oberrhein()
+            geo_data_to_latlong(testnet, projection='epsg:31467')
             net = pp.to_json(testnet)
             return net
 

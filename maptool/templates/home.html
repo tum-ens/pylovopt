@@ -11,6 +11,7 @@
         <button class="tablinks" id="busListButton" onclick="openList(event, 'bus')"><span>Buses</span></button>
         <button class="tablinks" id="lineListButton" onclick="openList(event, 'line')"><span>Lines</span></button>
         <button class="tablinks" id="trafoListButton" onclick="openList(event, 'trafo')"><span>Trafos</span></button>
+        <button class="tablinks" id="trafo3wListButton" onclick="openList(event, 'trafo3w')"><span>Trafos 3w</span></button>
         <button class="tablinks" id="ext_gridListButton" onclick="openList(event, 'ext_grid')"><span>Ext. Grid</span></button>
         <button class="tablinks" id="std_typesListButton" onclick="openList(event, 'std_types')"><span>Std Types</span></button>
       </div>
@@ -22,6 +23,9 @@
       </div>
       <div id="trafo" class="featureListTab">
         <select id="trafoSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this, 'trafo')"></select>
+      </div>
+      <div id="trafo3w" class="featureListTab">
+        <select id="trafo3wSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this, 'trafo3w')"></select>
       </div>
       <div id="ext_grid" class="featureListTab">
         <select id="ext_gridSelect" class ="featureSelect" size="24" onchange="fillSelectedFeatureEditor(this, 'ext_grid')"></select>
@@ -39,6 +43,9 @@
       </div>
       <div class="selectedFeatureEditor" id="trafoEditor">
         <form id="trafoForm"></form>
+      </div>
+      <div class="selectedFeatureEditor" id="trafo3wEditor">
+        <form id="trafo3wForm"></form>
       </div>
       <div class="selectedFeatureEditor" id="ext_gridEditor">
         <form id="ext_gridForm"></form>

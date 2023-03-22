@@ -11,6 +11,25 @@ L.tileLayer(tileProvider, {
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
+var legend = L.control({position: 'bottomleft'});
+    legend.onAdd = function (map) {
+    let colors = ['#0065BD', '#007deb', '#42bd4a', '#42bd4a', '#e6b029'];
+    var div = L.DomUtil.create('div', 'info legend'),
+    labels = ['<strong>Features</strong>'],
+    categories = ['Bus','Line','Trafo','Trafo3w','Ext. Grid'];
+
+    for (var i = 0; i < categories.length; i++) {
+
+            div.innerHTML += 
+            labels.push(
+                '<i class="dot" style="background:' + colors[i] + '"></i> ' + (categories[i] ? categories[i] : '+'));
+
+        }
+        div.innerHTML = labels.join('<br>');
+    return div;
+    };
+    legend.addTo(map);
+
 //We remove all preexisting options execpt quad, circle and polygon (might only use polygon for ease tbh)
 map.pm.addControls({  
     position: 'topleft',  

@@ -1,85 +1,80 @@
 //-----------------------------CRUCIAL JS TODOS-----------------------------//
-// TODO: Save changed data of selected bus/line etc in sidebar, check for correct inputs
+// TODO: define, check for correct inputs for all features
 // TODO: Write back features of all markers to JSON and send back JSON-file to create functioning pandapower data
 // TODO: Add legend for each marker type
+// TODO: Add trafo3w features to network
 
 //-----------------------------TALK TODOS-----------------------------//
-// TODO: Discuss if actual map location search option is needed 
-// TODO: Discuss which feature properties need to be editable
-// TODO: Ask about trafo locations, change back to circle marker if necessary for better visualization
 // TODO: Ask if written documentation outside of code is necessary for project hand-in
 
 //-----------------------------OPTIONAL TODOS-----------------------------//
 // TODO: put geojson.to_map() ops into their own functions for line and circlemarker respectively to further clean up code and avoid repetition
 // TODO: Deselect marker when clicking elsewhere on the map?
 // TODO: Decide whether area selection needs different shape options or if we want to stick only with Polygon
-// TODO: put functions into their own separate js file to clean up main script.js
-// TODO: put marker styles into css
-
-  //define styles for selected and unselected states of our map features
-  function getStyleDict() {
-    var styleDict = {BusStyles: [{  radius: 9,
-                                    fillColor: "#d67900",
-                                    color: "#4e2204",
-                                    weight: 1,
-                                    opacity: 1,
-                                    fillOpacity: 1
-                                }
-                                ,
-                                {   radius: 8,
-                                    fillColor: "#0065BD",
-                                    color: "#012b8c",
-                                    weight: 1,
-                                    opacity: 1,
-                                    fillOpacity: 1
-                                }],
-                     LineStyles: [{ color: "#ff0000",
-                                    weight: 4,
-                                    opacity: 1
-                                }
-                                ,
-                                {   color: "#007deb",
-                                    weight: 4,
-                                    opacity: 1
-                                }],
-                     ExtStyles: [{  radius: 15,
-                                    fillColor: "#f55353",
-                                    color: "#cf2d3b",
-                                    weight: 1,
-                                    opacity: 1,
-                                    fillOpacity: 1
-                                }
-                                ,
-                                {   radius: 14,
-                                    fillColor: "#f5da53",
-                                    color: "#e6b029",
-                                    weight: 1,
-                                    opacity: 1,
-                                    fillOpacity: 1
-                                }],
-                     TrafoStyles: [{color: "#ff0000",
-                                    weight: 10,
-                                    opacity: 1
-                                }
-                                ,
-                                {   color: "#42bd4a",
-                                    weight: 5,
-                                    opacity: 1
-                                }]            
-                    };
-    return styleDict;
-}
 
 //variable that saves last selected path and resets its style when it's deselected
 let clicked;
-let busList = [];
-let lineList = [];
-let trafoList = [];
-let ext_gridList = [];
 
-let line_stdList;
-let trafo_stdList;
-let trafo3w_stdList;
+let NetworkObject = {
+    'busList' : [],
+    'lineList' : [],
+    'trafoList' : [],
+    'trafo3wList' : [],
+    'ext_gridList' : [],
+
+    'line_stdList' : [],
+    'trafo_stdList' : [],
+    'trafo3w_stdList' : [],
+    
+    'busStyles': [{  radius: 9,
+            fillColor: "#d67900",
+            color: "#4e2204",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 1
+        }
+        ,
+        {   radius: 8,
+            fillColor: "#0065BD",
+            color: "#012b8c",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 1
+        }],
+    'lineStyles': [{ color: "#ff0000",
+            weight: 4,
+            opacity: 1
+        }
+        ,
+        {   color: "#007deb",
+            weight: 4,
+            opacity: 1
+        }],
+    'ext_gridStyles': [{  radius: 15,
+            fillColor: "#f55353",
+            color: "#cf2d3b",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 1
+        }
+        ,
+        {   radius: 14,
+            fillColor: "#f5da53",
+            color: "#e6b029",
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 1
+        }],
+    'trafoStyles': [{color: "#ff0000",
+            weight: 10,
+            opacity: 1
+        }
+        ,
+        {   color: "#42bd4a",
+            weight: 5,
+            opacity: 1
+        }]     
+}
 
 //generates GeoJSON files to pass to the python section of our code, gets called on button press
 function WriteShapefiles() {
@@ -114,9 +109,9 @@ function WriteShapefiles() {
 
 function extractStdTypes(ppdata) {
     let input = ppdata['_object']['std_types'];
-    line_stdList= input['line'];
-    trafo_stdList = input['trafo'];
-    trafo3w_stdList = input['trafo3w'];
+    NetworkObject.line_stdList= input['line'];
+    NetworkObject.trafo_stdList = input['trafo'];
+    NetworkObject.trafo3w_stdList = input['trafo3w'];
 }
 
 function fillStdTypeList() {
@@ -125,7 +120,7 @@ function fillStdTypeList() {
     //         console.log(std_type, property);
     //     }
     // }
-    let lists = [line_stdList, trafo_stdList, trafo3w_stdList];
+    let lists = [NetworkObject.line_stdList, NetworkObject.trafo_stdList, NetworkObject.trafo3w_stdList];
 
     let st_type_selects = document.getElementsByClassName('std_type_featureSelect');
     for (let i = 0; i < st_type_selects.length; i++) {
@@ -144,21 +139,21 @@ function fillStdTypeEditor(sel, listName) {
     let selectedObject = null; 
     if(sel.id == 'line_std_typesSelect') {
         //console.log(debugIdx, busList[idx].feature.properties.index);
-        selectedObject = line_stdList[idx];
+        selectedObject = NetworkObject.line_stdList[idx];
         document.getElementById('line_std_typesForm').style.display = 'inline-block';
         document.getElementById('trafo_std_typesForm').style.display = 'none';
         document.getElementById('trafo3w_std_typesForm').style.display = 'none';
     }
     if(sel.id == 'trafo_std_typesSelect') {
         //console.log(debugIdx, lineList[idx].feature.properties.index);
-        selectedObject = trafo_stdList[idx];
+        selectedObject = NetworkObject.trafo_stdList[idx];
         document.getElementById('line_std_typesForm').style.display = 'none';
         document.getElementById('trafo_std_typesForm').style.display = 'inline-block';
         document.getElementById('trafo3w_std_typesForm').style.display = 'none';
     }
     if(sel.id == 'trafo3w_std_typesSelect') {
         //console.log(debugIdx, trafoList[idx].feature.properties.index);
-        selectedObject = trafo3w_stdList[idx];
+        selectedObject = NetworkObject.trafo3w_stdList[idx];
         document.getElementById('line_std_typesForm').style.display = 'none';
         document.getElementById('trafo_std_typesForm').style.display = 'none';
         document.getElementById('trafo3w_std_typesForm').style.display = 'inline-block';
@@ -192,12 +187,12 @@ function displayNet(ppdata) {
         onEachFeature: function(feature, layer) {
             //layer.features = feature;
             createPopup(feature, layer);
-            lineList.push(layer);
+            NetworkObject.lineList.push(layer);
             layer.on('click', function(e) {
-                clickOnMarker(e.target, getStyleDict(), 1);
+                clickOnMarker(e.target, 'line');
             })
         },
-        style: getStyleDict()['LineStyles'][1]        
+        style: NetworkObject.lineStyles[1]       
     }).addTo(map);
 
     console.log("added all lines");
@@ -208,14 +203,14 @@ function displayNet(ppdata) {
         onEachFeature: function(feature, layer) {
             //layer.features = feature;
             createPopup(feature, layer);
-            ext_gridList.push(layer);
+            NetworkObject.ext_gridList.push(layer);
         },
         pointToLayer: function (feature, latlng) {
-            var marker = L.circleMarker(latlng, getStyleDict()['ExtStyles'][1]);
+            var marker = L.circleMarker(latlng, NetworkObject.ext_gridStyles[1]);
             //marker.features = feature;
 
             marker.on('click', function(e) {
-                clickOnMarker(e.target, getStyleDict(), 2);
+                clickOnMarker(e.target, 'ext_grid');
             });
             return marker;
         }
@@ -232,12 +227,12 @@ function displayNet(ppdata) {
     L.geoJSON(bus_geoJSON, {
         onEachFeature: function(feature, layer) {
             createPopup(feature, layer);
-            busList.push(layer);
+            NetworkObject.busList.push(layer);
         },
         pointToLayer: function (feature, latlng) {
-            var marker = L.circleMarker(latlng, getStyleDict()['BusStyles'][1]);
+            var marker = L.circleMarker(latlng, NetworkObject.busStyles[1]);
             marker.on('click', function(e) {
-                clickOnMarker(e.target, getStyleDict(), 0);
+                clickOnMarker(e.target, 'bus');
             });
             return marker;
         }
@@ -250,29 +245,29 @@ function displayNet(ppdata) {
     let moveTo = L.geoJSON(trafo_geoJSON, {
         onEachFeature: function(feature, layer) {
             createPopup(feature, layer);
-            trafoList.push(layer);
+            NetworkObject.trafoList.push(layer);
             layer.on('click', function(e) {
-                clickOnMarker(e.target, getStyleDict(), 3);
+                clickOnMarker(e.target, 'trafo');
             })
         },
-        style: getStyleDict()['TrafoStyles'][1]
+        style: NetworkObject.trafoStyles[1]
     }).addTo(map);
     console.log('added all trafos');
 
     map.fitBounds(moveTo.getBounds());
 
-    populateLists('bus', busList);
-    populateLists('line', lineList);
-    populateLists('trafo', trafoList);
-    populateLists('ext_grid', ext_gridList);
+    populateLists('bus');
+    populateLists('line');
+    populateLists('trafo');
+    populateLists('ext_grid');
 
-    populateEditor('bus', bus_properties);
-    populateEditor('line', line_properties, line_stdList, line_std_properties);
-    populateEditor('trafo', trafo_properties, trafo_stdList, trafo_std_properties);
-    populateEditor('ext_grid', ext_grid_properties);
-    populateEditor('line_std_types', line_std_properties);
-    populateEditor('trafo_std_types', trafo_std_properties);
-    populateEditor('trafo3w_std_types', trafo3w_std_properties);
+    populateEditor('bus', bus_properties, null, null);
+    populateEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties);
+    populateEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties);
+    populateEditor('ext_grid', ext_grid_properties, null, null);
+    populateEditor('line_std_types', line_std_properties, null, null);
+    populateEditor('trafo_std_types', trafo_std_properties, null, null);
+    populateEditor('trafo3w_std_types', trafo3w_std_properties, null, null);
 
     tabcontent = document.getElementsByClassName("tablinks");
     for (i = 0; i < tabcontent.length; i++) {

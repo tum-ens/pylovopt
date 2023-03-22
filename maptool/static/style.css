@@ -6,12 +6,55 @@ body {
     height: 100%;
     background: #fafafa;
     color: #333333;
+    overflow: hidden;
   }
   
 h1, h2, h3, h4, h5, h6 {
 color: #444444;
 }
 
+.flex-container {
+  height: 95%;
+  width: 100%;
+  top: 0%;
+  left: 0%;
+  position: absolute;
+  margin-top: 3rem;
+}
+
+#map{
+    height: 100%;
+    width: 100%;
+    z-index: 1;
+}
+
+.leaflet-top {
+  top: 10%;
+  transform: translate(0%, 10%);
+}
+
+.legend {
+  line-height: 18px;
+  background-color: white;
+  color: #555;
+  padding: 5px;
+  border-radius: 2px;
+}
+.legend i {
+  width: 10px;
+  height: 10px;
+  float: left;
+  margin-right: 8px;
+}
+
+.dot {
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* || Navigation Bar --------------------------*/
 .bg-steel {
 background-color: #0065BD;
 }
@@ -32,26 +75,15 @@ font-weight: 500;
   float: right;
   padding: 6px;
   border: none;
-  margin-top: 8px;
-  margin-right: 16px;
   font-size: 17px;
 }
 
-.flex-container {
-  height: 95%;
-  width: 100%;
-  top: 0%;
-  left: 0%;
-  position: absolute;
-  margin-top: 3rem;
+#SubmitPLZButton {
+  margin-right: 1%;
+  padding: 8px;
 }
 
-#map{
-    height: 100%;
-    width: 100%;
-    z-index: 1;
-}
-
+/* || Network in Postcode Area Selection Element --------------------------*/
 .ListSelection {
   position: absolute;
   top: 2.5%;
@@ -67,13 +99,14 @@ font-weight: 500;
   pointer-events: none;
 }
 
+/* || Body Element for Network Feature Editor --------------------------*/
 .FeatureEditor {
   position: absolute;
   top: 2.5%;
   right: 1%;
   background: #ffffff00;
   color: #333333;
-  height: 90%;
+  height: 80%;
   width: 35%;
   min-height: 40em;
   min-width: 40em;
@@ -82,6 +115,7 @@ font-weight: 500;
   pointer-events: none;
 }
 
+/* || Body Element for Feature Editor Tab Selection --------------------------*/
 .buttonsTab{
   position: absolute;
   top: 0px;
@@ -115,6 +149,7 @@ font-weight: 500;
   position:relative;
 	font-size: 18px;
   white-space: nowrap;
+  box-shadow: 5px 0px 5px #a9a9a95e;
 }
 
 .buttonsTab button:hover {
@@ -127,6 +162,11 @@ font-weight: 500;
   left: 0;
   transition: left .2s;
   color: black;
+  border-bottom-right-radius: 2px;
+  border-top-right-radius: 2px;
+  box-shadow: 2px 5px 5px #8383835e, 
+              2px -5px 5px #8383835e;
+  z-index: 2;
 }
 
 .tablinks span{
@@ -139,7 +179,6 @@ font-weight: 500;
   position: absolute;
   top: 0px;
   right: 5%;
-  background: #ffffff;
   color: #000000;
   height: 100%;
   width: 30%;
@@ -149,13 +188,20 @@ font-weight: 500;
   scrollbar-width: none; 
 }
 
+/* || Editor List of Features --------------------------*/
 .featureSelect {
+  position: relative;
   width: 100%;
   height: 100%;
   background-color: #ffffff;
-  border: none;
+  border: solid 1px #e7e7e7;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  border-top-left-radius: 2px;
   outline: none;
   pointer-events: all;
+  box-shadow:  2px 5px 5px #a9a9a95e;
+
 }
 
 .featureSelect::-webkit-scrollbar {
@@ -189,24 +235,49 @@ font-weight: 500;
   pointer-events: all;
   display: none;
 }
-
+/* || Feature Editor Main Form --------------------------*/
 form {
   width: 100%;
   height: 100%;
-  overflow-y:auto
+  overflow-y:auto;
+  box-shadow: -5px 5px 5px #a9a9a95e, -1px 5px 5px #a9a9a95e;
 }
 
-input[type="text"] {
-  width: 100%;
+label {
+  position: relative;
+  bottom: 5%;
+  padding: 0px 5px 0px 5px;
+}
+
+input[type=text] {
+  position: relative;
+  top: 5%;
+  width: 95%;
+  margin: 0px 5px 8px 5px;
   padding: 5px 10px;
-  margin: 8px 0;
   box-sizing: border-box;
+  border: none;
+  color: #808080;
+  border-bottom: solid 2px #CCCCCC;
 }
 
+input[type=text]:focus {
+  outline: none;
+  border: none;
+  font-weight: 600;
+  color: #0065BD;
+  border-bottom: solid 2px #0065BD;
+}
+
+input[type=text]:focus + label {
+  color: #0065BD;
+}
+
+/* || Generic Buttons --------------------------*/
 .actionButtons {
   position: absolute;
   bottom: 2.5%;
-  left: 1%;
+  right: 1%;
   background: #ff000000;
   color: #333333;
   height: 5%;
@@ -218,9 +289,15 @@ input[type="text"] {
   pointer-events: none;
 }
 
+#returnEditedNetButton, #selectNetworkButton {
+  position: absolute;
+  right: 0%;
+  bottom: 0%
+}
 .button {
-  background-color: #0065BD; /* Green */
+  background-color: #0065BD; 
   border: none;
+  border-radius: 2px;
   color: white;
   padding: 15px 32px;
   text-align: center;
@@ -232,10 +309,30 @@ input[type="text"] {
 }
 
 .button:hover {
-  background-color: #003359; /* Green */
+  background-color: #003359; 
   color: white;
 }
 
 .button:disabled {
   background-color: #4e4e4e;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888; 
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
 }

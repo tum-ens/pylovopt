@@ -1,12 +1,11 @@
 //fills html element for a given list of network features
-function populateLists(listName, list) {
+function populateLists(listName) {
     //console.log(listName);
     var x = document.getElementById(listName + "Select");
-
+    let list = NetworkObject[listName + 'List'];
     list = list.sort(function (a, b) {
         return parseInt(a.feature.properties.index) - parseInt(b.feature.properties.index);
     })
-    //console.log(list);
     x.size = (list.length > 24) ? 24 : list.length;
     for (idx in list) {
         var option = document.createElement("option");
@@ -21,10 +20,8 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
 
     for (idx in selectedProperties) {
         let label = document.createElement("label");
-
         label.htmlFor = selectedProperties[idx];
         label.innerHTML = selectedProperties[idx];
-        editor_form.appendChild(label);
         
         if(selectedProperties[idx] == 'std_type') {
             let form = document.createElement("select");
@@ -37,28 +34,30 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
                 ctr++;
             }
             editor_form.appendChild(form);
-
+            editor_form.appendChild(label);
             for(prop_idx in std_type_properties) {
-                let Prop_label = document.createElement("label");
-
-                Prop_label.htmlFor = std_type_properties[prop_idx];
-                Prop_label.innerHTML = std_type_properties[prop_idx];
-                editor_form.appendChild(Prop_label);
-
                 let input = document.createElement("input");
                 input.type="text";
                 input.readOnly = true;
                 input.id = std_type_properties[prop_idx];
                 input.name = std_type_properties[prop_idx];
                 editor_form.appendChild(input);
+
+                let Prop_label = document.createElement("label");
+
+                Prop_label.htmlFor = std_type_properties[prop_idx];
+                Prop_label.innerHTML = std_type_properties[prop_idx];
+                editor_form.appendChild(Prop_label);
             }
         }  
         else {
             let input = document.createElement("input");
             input.type="text";
+            input.setAttribute('onchange', 'writeBackEditedFeature(this)');
             input.id = selectedProperties[idx];
             input.name = selectedProperties[idx];
             editor_form.appendChild(input);
+            editor_form.appendChild(label);
         }
     }
 }
@@ -86,39 +85,16 @@ function openList(e, listName) {
 
 function fillSelectedFeatureEditor(sel, listName) {
     let idx = parseInt(sel.options[sel.selectedIndex].value);
-    let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
+    //let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
     
-    let selectedObject = null;
-    let styleIndex = 0;
-    if(sel.id == 'busSelect') {
-        //console.log(debugIdx, busList[idx].feature.properties.index);
-        selectedObject = busList[idx];
-        }
-    if(sel.id == 'lineSelect') {
-        //console.log(debugIdx, lineList[idx].feature.properties.index);
-        selectedObject = lineList[idx];
-        styleIndex = 1;
-        }
-    if(sel.id == 'trafoSelect') {
-        //console.log(debugIdx, trafoList[idx].feature.properties.index);
-        selectedObject = trafoList[idx];
-        styleIndex = 3;
-        }
-    if(sel.id == 'ext_gridSelect') {
-        //console.log(debugIdx, ext_gridList[idx].feature.properties.index);
-        selectedObject = ext_gridList[idx];
-        styleIndex = 2;
-    }
+    let selectedObject = NetworkObject[listName + 'List'][idx];
 
-    clickOnMarker(selectedObject, getStyleDict(), styleIndex);
+    clickOnMarker(selectedObject, listName);
 }
 
-function clickOnMarker(target, styleDict, feature) {
-    let styles = ['BusStyles', 'LineStyles', 'ExtStyles', 'TrafoStyles'];
-    let style = styles[feature];
+function clickOnMarker(target, feature) {
     let zoomLevel = 14;
-
-    if(style == 'BusStyles' || style == 'ExtStyles') {
+    if(feature == 'bus' || feature == 'ext_grid') {
         map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
     }
     else {
@@ -126,21 +102,18 @@ function clickOnMarker(target, styleDict, feature) {
     }
 
     if(clicked) {
-        let oldStyle = styles[clicked[1]];
-        clicked[0].setStyle(styleDict[oldStyle][1]);
+        let oldStyle = NetworkObject[clicked[1] + 'Styles'];
+        clicked[0].setStyle(oldStyle[1]);
     }
-    target.setStyle(styleDict[style][0]);
+    target.setStyle(NetworkObject[feature + 'Styles'][0]);
     clicked = [target, feature];
 
-    let featureLists = [busList, lineList, ext_gridList, trafoList];
-    let selectLists = ['bus', 'line', 'trafo', 'ext_grid'];
-    let featureList = featureLists[feature];
-    let selectList = selectLists[feature];
+    let featureList = NetworkObject[feature + 'List'];
 
-    let selectedButton = document.getElementById(selectList + "ListButton");
+    let selectedButton = document.getElementById(feature + "ListButton");
     selectedButton.click();
 
-    let selectedList = document.getElementById(selectList + "Select");
+    let selectedList = document.getElementById(feature + "Select");
     let newIndex = featureList.findIndex((entry) => entry === target);
     selectedList.selectedIndex = newIndex;
 
@@ -149,9 +122,9 @@ function clickOnMarker(target, styleDict, feature) {
         editorcontent[i].style.display = "none";
     }
 
-    document.getElementById(selectList + 'Editor').style.display = 'inline-block';
+    document.getElementById(feature + 'Editor').style.display = 'inline-block';
 
-    let editor_form = document.getElementById(selectList + 'Form');
+    let editor_form = document.getElementById(feature + 'Form');
     let editor_elems = editor_form.children;
 
     let selectedStdType;
@@ -159,6 +132,9 @@ function clickOnMarker(target, styleDict, feature) {
         if (editor_elems[i].nodeName == 'INPUT') {
             if(target.feature.properties[editor_elems[i].name] != null) {
                 editor_elems[i].value = target.feature.properties[editor_elems[i].name];
+            }
+            else {
+                editor_elems[i].value = '';
             }
         }
         if (editor_elems[i].nodeName == 'SELECT') {
@@ -171,18 +147,31 @@ function clickOnMarker(target, styleDict, feature) {
                 }
             }
             let k = 1;
-            if(selectList == 'line') {
-                for (idx in line_stdList[selectedStdType]) {
+                for (idx in NetworkObject[feature + '_stdList'][selectedStdType]) {
                     //console.log(editor_elems[i+k+1].name, idx, line_stdList[selectedStdType][idx]);
-                    editor_elems[i+k+1].value = line_stdList[selectedStdType][idx];
+                    editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][idx];
                     k += 2;
                 }
-            }
-            if(selectList == 'trafo') {
-
-            }
             i += k;
         }
+    }
+}
+
+function writeBackEditedFeature(target) {
+    let feature = target.parentElement.id.replace("Form", "");
+    let idxInFeatureList = document.getElementById(feature + "Select").selectedIndex
+    let featureName = target.id
+
+    console.log(feature, idxInFeatureList, target.value);
+    if(!feature.includes("std")) {
+        NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.value;
+        console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName]);
+    }
+    else {
+        let selectedElement = document.getElementById(feature + "Select")[idxInFeatureList].value;
+        feature = feature.replace("_types", "");
+        console.log(selectedElement);
+        NetworkObject[feature + "List"][selectedElement][featureName] = target.value;
     }
 }
 
