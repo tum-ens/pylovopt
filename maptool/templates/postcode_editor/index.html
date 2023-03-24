@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div class="list-selection">
+  <select id="networkSelect" class ="featureSelect" size="24" onchange="highlightSelectedPreviewLayer(this)"></select>
+</div>
+
+<div class="action-buttons">
+  <a href="/networks" >
+    <button class="action-buttons__button" id="selectNetworkButton" type="button" onclick="sendBackSelectedNetworkKcidBcid()" disabled>Select Network</button>
+  </a>
+</div>  
+
+<script defer src="{{url_for('static', filename='display_postcode.js')}}"></script>
+<script defer src="{{url_for('static', filename='generate_editable_network.js')}}"></script>
+{% endblock %}

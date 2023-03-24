@@ -61,6 +61,7 @@ background-color: #0065BD;
 
 .site-header .navbar-nav .nav-link {
 color: #cbd5db;
+cursor: pointer;
 }
 
 .site-header .navbar-nav .nav-link:hover {
@@ -78,13 +79,13 @@ font-weight: 500;
   font-size: 17px;
 }
 
-#SubmitPLZButton {
+#submit-plz-button {
   margin-right: 1%;
   padding: 8px;
 }
 
 /* || Network in Postcode Area Selection Element --------------------------*/
-.ListSelection {
+.list-selection {
   position: absolute;
   top: 2.5%;
   right: 1%;
@@ -100,7 +101,7 @@ font-weight: 500;
 }
 
 /* || Body Element for Network Feature Editor --------------------------*/
-.FeatureEditor {
+.feature-editor {
   position: absolute;
   top: 2.5%;
   right: 1%;
@@ -116,7 +117,7 @@ font-weight: 500;
 }
 
 /* || Body Element for Feature Editor Tab Selection --------------------------*/
-.buttonsTab{
+.feature-editor__buttons-tab{
   position: absolute;
   top: 0px;
   right: 0px;
@@ -128,7 +129,7 @@ font-weight: 500;
   pointer-events: all;
 }
 
-.buttonsTab button {
+.feature-editor__buttons-tab button {
 
   background-color: #0065bd;
   color: white;
@@ -152,12 +153,12 @@ font-weight: 500;
   box-shadow: 5px 0px 5px #a9a9a95e;
 }
 
-.buttonsTab button:hover {
+.feature-editor__buttons-tab button:hover {
   background-color: #3f90d6;
   
 }
 
-.buttonsTab button.active {
+.feature-editor__buttons-tab button.active {
   background-color: #ffffff;
   left: 0;
   transition: left .2s;
@@ -169,13 +170,13 @@ font-weight: 500;
   z-index: 2;
 }
 
-.tablinks span{
+.feature-editor__buttons-tab__tablinks span{
   display: inline-block;
   transform: rotate(90deg);
 }
 
 
-.featureListTab{
+.feature-editor__featurelist-tab{
   position: absolute;
   top: 0px;
   right: 5%;
@@ -189,7 +190,7 @@ font-weight: 500;
 }
 
 /* || Editor List of Features --------------------------*/
-.featureSelect {
+.feature-editor__featurelist-tab__feature-select {
   position: relative;
   width: 100%;
   height: 100%;
@@ -204,25 +205,25 @@ font-weight: 500;
 
 }
 
-.featureSelect::-webkit-scrollbar {
+.feature-editor__featurelist-tab__feature-select::-webkit-scrollbar, .feature-editor__featurelist-tab__stdtype-feature-select::-webkit-scrollbar {
   display: none;
 }
 
-.featureSelect option:hover {
+.feature-editor__featurelist-tab__feature-select option:hover {
   background-color: #c0d7e9;
 }
 
-.featureSelect option:checked {
+.feature-editor__featurelist-tab__feature-select option:checked {
   background-color: #0065BD;
   color: #ffffff;
 }
 
-.featureSelect option:checked:after {
+.feature-editor__featurelist-tab__feature-select option:checked:after {
   background-color: #0065BD;
   color: #ffffff;
 }
 
-.selectedFeatureEditor{
+.feature-editor__selected-feature-editor{
   position: absolute;
   top: 0px;
   left: 0px;
@@ -235,6 +236,20 @@ font-weight: 500;
   pointer-events: all;
   display: none;
 }
+
+.feature-editor__featurelist-tab__stdtype-feature-select {
+  width: 100%;
+  height: 33%;
+  background-color: #ffffff;
+  border: solid 1px #e7e7e7;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+  border-top-left-radius: 2px;
+  outline: none;
+  pointer-events: all;
+  box-shadow:  2px 5px 5px #a9a9a95e;
+}
+
 /* || Feature Editor Main Form --------------------------*/
 form {
   width: 100%;
@@ -251,7 +266,7 @@ label {
 
 input[type=text] {
   position: relative;
-  top: 5%;
+  top: 4%;
   width: 95%;
   margin: 0px 5px 8px 5px;
   padding: 5px 10px;
@@ -274,7 +289,7 @@ input[type=text]:focus + label {
 }
 
 /* || Generic Buttons --------------------------*/
-.actionButtons {
+.action-buttons {
   position: absolute;
   bottom: 2.5%;
   right: 1%;
@@ -294,7 +309,7 @@ input[type=text]:focus + label {
   right: 0%;
   bottom: 0%
 }
-.button {
+.action-buttons__button {
   background-color: #0065BD; 
   border: none;
   border-radius: 2px;
@@ -308,13 +323,17 @@ input[type=text]:focus + label {
   pointer-events: all;
 }
 
-.button:hover {
+.action-buttons__button:hover {
   background-color: #003359; 
   color: white;
 }
 
-.button:disabled {
+.action-buttons__button:disabled {
   background-color: #4e4e4e;
+}
+
+.urbs-results {
+  height: 200%;
 }
 
 /* width */

@@ -1,4 +1,6 @@
-from config import SAVE_PATH, PANDAPOWER_PATH, VOLTAGE_LIMITS_PATH, BUILDING_LIST_PATH, \
+import os
+
+from pandapower2urbs.config import LOCAL_PATH, SAVE_PATH, PANDAPOWER_PATH, VOLTAGE_LIMITS_PATH, BUILDING_LIST_PATH, \
                    CABLE_DATA_PATH, TRAFO_DATA_PATH, \
                    BUILDING_CONF_PATH, GLOBAL_PROP_PATH, COM_PROP_PATH, PRO_CONF_PATH, \
                    PRO_PROP_PATH, PRO_COM_PROP_PATH, STO_CONF_PATH, STO_PROP_PATH
@@ -21,9 +23,9 @@ def get_building_data(building_data_file_path, selected_buildings_path):
     building_data_df = pd.DataFrame(building_data)
     return building_data_df
     
- 
-if __name__ == '__main__': 
-    ##### read the model-forming data
+    
+def convertPandapower2Urbs():
+        ##### read the model-forming data
     building_conf = pd.read_csv(BUILDING_CONF_PATH).set_index('urbs_name')
     building_data = get_building_data(BUILDING_LIST_PATH, BUILDING_CONF_PATH).set_index('bid')
 
@@ -34,24 +36,25 @@ if __name__ == '__main__':
     global_df = pd.read_csv(GLOBAL_PROP_PATH, sep=',').set_index('Property')
     com_prop = pd.read_csv(COM_PROP_PATH, sep=',')
 
-
-
-
-
-
-
     ##### generate Site sheet
     # identify the bus index and label where the transformer is located
-    trafo_idx  = pp_grid.trafo.hv_bus[0] # 0
+    test_var = pp_grid.trafo.hv_bus.iloc[0]
+    trafo_idx  = pp_grid.trafo.hv_bus.iloc[0] # 0
     trafo_name = pp_grid.bus.name[trafo_idx] # Trafostation_OS
+    print("Start generating Site Sheet")
+    print("identified trafo bus index and label")
 
     # identify the bus index and label where the main busbar is located
-    mainbusbar_idx  = pp_grid.trafo.lv_bus[0]               #1
+    mainbusbar_idx  = pp_grid.trafo.lv_bus.iloc[0]               #1
     mainbusbar_name = pp_grid.bus.name[mainbusbar_idx] #main_busbar
+
+    print("identified main bus bar index and label")
 
     # identify the load buses, where the demands are defined (buildings)
     loadbus_idx =  pp_grid.bus[pp_grid.bus.index.isin(pp_grid.load.bus)].index
     loadbus_name = pp_grid.bus[pp_grid.bus.index.isin(pp_grid.load.bus)].name
+
+    print("identified load bus indexes and labels")
 
     # identify intermediate (branching) buses, where no demand is located
     intbus_idx  = pp_grid.bus[~pp_grid.bus.index.isin([trafo_idx]+
@@ -61,6 +64,7 @@ if __name__ == '__main__':
                                                      [mainbusbar_idx]+
                                                      pp_grid.load.bus.to_list())].name
 
+    print("identified intermediate bus indexes and labels")
 
     ##### construct Site sheet
     site_tuple = []
@@ -77,17 +81,18 @@ if __name__ == '__main__':
     site_df = pd.DataFrame(site_tuple, columns=['Name', 'area', 'base-voltage', 'ref-node',
                                                 'min-voltage', 'max-voltage', 'power_price_kw'])
 
-
+    print("Finished generating Site Sheet")
+    print("Start generating Demand Sheet")
     ##### construct Demand sheet
     nr_of_cars = {} # Number of electric cars each building
 
     demand_df = pd.DataFrame()
     demand_df.index.name = 't' # time steps as index
-    demand_conf = pd.read_csv('./dataset/demand/demand_conf.csv',sep=',').set_index('site')  # read demand conf file
+    demand_conf = pd.read_csv(os.path.join(LOCAL_PATH,'./dataset/demand/demand_conf.csv'),sep=',').set_index('site')  # read demand conf file
 
     # for each commodity demanded, read the available profiles
     for demand_com in demand_conf.columns:
-        demand_com_profiles = pd.read_csv('./dataset/demand/profiles/{}.csv'.format(demand_com),sep=',').set_index('t')
+        demand_com_profiles = pd.read_csv(os.path.join(LOCAL_PATH,'./dataset/demand/profiles/{}.csv').format(demand_com),sep=',').set_index('t')
 
         for demand_sit in demand_conf.index:
             # for the given demand commodity, scan through all the sites to see if they are involved
@@ -119,18 +124,16 @@ if __name__ == '__main__':
     demand_df["weight_typeperiod"] = "" # add a required empty column for the typical period weights
     demand_df.sort_index(inplace=True)
 
-
-
-
-
+    print("Finished generating Demand Sheet")
+    print("Start generating Supim Sheet")
 
     ##### Construct Supim sheet (e.g. hourly solar capacity factor)
     supim_df = pd.DataFrame()
     supim_df.index.name = 't'
-    supim_conf = pd.read_csv('./dataset/supim/supim_conf.csv',sep=',').set_index('site') # read configuration file
+    supim_conf = pd.read_csv(os.path.join(LOCAL_PATH,'./dataset/supim/supim_conf.csv'),sep=',').set_index('site') # read configuration file
     for supim_com in supim_conf.columns:
         # for each Supim commodity, read the available profiles
-        supim_com_profiles = pd.read_csv('./dataset/supim/profiles/{}.csv'.format(supim_com),sep=',').set_index('t')
+        supim_com_profiles = pd.read_csv(os.path.join(LOCAL_PATH,'./dataset/supim/profiles/{}.csv').format(supim_com),sep=',').set_index('t')
         for supim_sit in supim_conf.index:
             #for each site involved, see if a Supim profile is assigned for any given Supim commmodity
             if not pd.isna(supim_conf.loc[supim_sit][supim_com]):
@@ -142,13 +145,15 @@ if __name__ == '__main__':
     supim_df.loc[0] = 0
     supim_df.sort_index(inplace=True)
 
+    print("Finished generating Supim Sheet")
+    print("Start generating Timevareff Sheet")
 
     # add timevareff sheet (e.g. heat pump cop/car availability)
     timevareff_df = pd.DataFrame()
     timevareff_df.index.name = 't'
-    timevareff_conf = pd.read_csv('./dataset/timevareff/timevareff_conf.csv',sep=',').set_index('site')
+    timevareff_conf = pd.read_csv(os.path.join(LOCAL_PATH,'./dataset/timevareff/timevareff_conf.csv'),sep=',').set_index('site')
     for timevareff_pro in timevareff_conf.columns:
-        timevareff_pro_profiles = pd.read_csv('./dataset/timevareff/profiles/{}.csv'.format(timevareff_pro),sep=',').set_index('t')
+        timevareff_pro_profiles = pd.read_csv(os.path.join(LOCAL_PATH,'./dataset/timevareff/profiles/{}.csv').format(timevareff_pro),sep=',').set_index('t')
         for timevareff_sit in timevareff_conf.index:
             if not pd.isna(timevareff_conf.loc[timevareff_sit][timevareff_pro]):
                 # availability of multiple charging stations in each building are defined separately
@@ -171,11 +176,12 @@ if __name__ == '__main__':
     timevareff_df.sort_index(inplace=True)
 
     ##### Construct the Buy-Sell-Price multipliers (default: all ones)
-    buysellprice_df = pd.read_csv('./dataset/buysellprice/buysellprice.csv',sep=',').set_index('t')
+    buysellprice_df = pd.read_csv(os.path.join(LOCAL_PATH,'./dataset/buysellprice/buysellprice.csv'),sep=',').set_index('t')
     buysellprice_df.loc[0] = 0
     buysellprice_df.sort_index(inplace=True)
 
-
+    print("Finished generating Timevareff Sheet")
+    print("Start generating Process-Commodity Sheet")
 
     ##### Construct the Process-Commodity sheet
     process_commodity_df = pd.read_csv(PRO_COM_PROP_PATH, sep=',')
@@ -200,6 +206,9 @@ if __name__ == '__main__':
     # drop the charging_station entries that have no integer index
     process_commodity_df.drop(process_commodity_df[process_commodity_df.Process == 'charging_station'].index, 
                               inplace=True)
+
+    print("Finished generating Process-Commodity  Sheet")
+    print("Start generating Process Sheet")
 
     ##### Construct the Process sheet
     pro_conf = pd.read_csv(PRO_CONF_PATH, sep=',').set_index('urbs_name')
@@ -249,6 +258,8 @@ if __name__ == '__main__':
 
     ##### Construct the Process sheet
     commodity_tuple = []
+
+    print("Add commodities")
 
     ## Add electrical commodities for all grid buses
     # electricity (Active power flow)
@@ -304,6 +315,9 @@ if __name__ == '__main__':
     commodity_df = pd.DataFrame(commodity_tuple, columns=['Site', 'Commodity', 'Type', 'price', 'max', 'maxperhour'])
     commodity_df.drop_duplicates(inplace=True)
 
+    print("Finished generating Process  Sheet")
+    print("Start generating Transmission Sheet")
+
     ##### generate the Transmission sheet
     transmission_tuple = []
 
@@ -312,6 +326,8 @@ if __name__ == '__main__':
     # rontXXX: replacement options to controllable transformers (regelbarer Ortsnetztransformator) with XXX = cap. in kVA
     trafo_data = pd.read_csv(TRAFO_DATA_PATH,sep=',').set_index('id')
     built_kont_size = pp_grid.trafo.iloc[0].sn_mva * 1000 # read the capacity of existing trafo (kont) from pandapower file
+ 
+    print("Start adding Trafo entries")
 
     # add transformer entries
     for trafo in trafo_data.index:
@@ -373,7 +389,10 @@ if __name__ == '__main__':
                                    trafo_data.loc[trafo]['cap'],
                                    trafo_decommissionable,
                                    trafo_decom_saving))         
-        
+    
+
+    print("Start adding cable entries")
+
     # add cable entries
     cable_data = pd.read_csv(CABLE_DATA_PATH,sep=',').set_index('id')
 
@@ -464,6 +483,8 @@ if __name__ == '__main__':
                                                                 'resistance',	'difflimit',	'base_voltage',	'tra-block',
                                                                 'decommissionable',	'decom-saving'])
 
+    print("Start generating Storage Sheet Tuple")
+
     # generate storage sheet tuple
     sto_conf = pd.read_csv(STO_CONF_PATH, sep=',').set_index('urbs_name')
     sto_prop = pd.read_csv(STO_PROP_PATH, sep=',').set_index('name')
@@ -500,16 +521,34 @@ if __name__ == '__main__':
                                                       'eff-out', 'inv-cost-p', 'inv-cost-c', 'fix-cost-p', 'fix-cost-c', 'var-cost-p', 'var-cost-c', 'wacc', 'depreciation',
                                                       'init', 'discharge', 'ep-ratio', 'c-block', 'p-block', 'decommissionable', 'decom-saving-p', 'decom-saving-c'])
 
+    print("Write Excel File with constructed Sheets")
+
 ### Write Excel file with the constructed sheets
     with pd.ExcelWriter(SAVE_PATH, engine='xlsxwriter', options={'strings_to_numbers': True}) as writer:
         global_df.to_excel(writer, sheet_name='Global', index=True)
+        print("added global_df")
         site_df.to_excel(writer, sheet_name='Site', index=False)
+        print("added site_df")
         commodity_df.to_excel(writer, sheet_name='Commodity', index=False)
+        print("added commodity_df")
         process_df.to_excel(writer, sheet_name='Process', index=False)
+        print("added process_df")
         process_commodity_df.to_excel(writer, sheet_name='Process-Commodity', index=False)
+        print("added process_commodity_df")
         transmission_df.to_excel(writer, sheet_name='Transmission', index=False)
+        print("added transmission_df")
         storage_df.to_excel(writer, sheet_name='Storage', index=False)
+        print("added storage_df")
         demand_df.to_excel(writer, sheet_name='Demand', index=True)
+        print("added demand_df")
         supim_df.to_excel(writer, sheet_name='SupIm', index=True)
+        print("added supim_df")
         buysellprice_df.to_excel(writer, sheet_name='Buy-Sell-Price', index=True)
+        print("added buysellprice_df")
         timevareff_df.to_excel(writer, sheet_name='TimeVarEff', index=True)
+        print("added timevareff_df")
+
+    print("Done")
+
+if __name__ == '__main__': 
+    convertPandapower2Urbs()

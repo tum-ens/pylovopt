@@ -80,7 +80,7 @@ function displayPreviewNet(kcid, bcid, ppdata) {
 
 //fills the GUI list with all our layers
 function populateNetList(listName, list) {
-    let networkList = document.getElementsByClassName("ListSelection");
+    let networkList = document.getElementsByClassName("list-selection");
     networkList[0].style.display = "inline-block";
     let x = document.getElementById(listName + "Select");
 

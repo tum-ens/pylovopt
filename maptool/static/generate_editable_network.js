@@ -102,7 +102,8 @@ function WriteShapefiles() {
 
         console.log('Begin displaying net:');
         displayNet(ppdata);
-
+        
+        document.getElementById("nav-item-networks").setAttribute('href', '#scroll-to-top');
 
     });
 }
@@ -122,7 +123,7 @@ function fillStdTypeList() {
     // }
     let lists = [NetworkObject.line_stdList, NetworkObject.trafo_stdList, NetworkObject.trafo3w_stdList];
 
-    let st_type_selects = document.getElementsByClassName('std_type_featureSelect');
+    let st_type_selects = document.getElementsByClassName('feature-editor__featurelist-tab__stdtype-feature-select');
     for (let i = 0; i < st_type_selects.length; i++) {
         for (idx in lists[i]) {
             var option = document.createElement("option");
@@ -159,7 +160,7 @@ function fillStdTypeEditor(sel, listName) {
         document.getElementById('trafo3w_std_typesForm').style.display = 'inline-block';
     }
     
-    let editorcontent = document.getElementsByClassName('selectedFeatureEditor');
+    let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
     for (i = 0; i < editorcontent.length; i++) {
         editorcontent[i].style.display = "none";
     }
@@ -269,7 +270,7 @@ function displayNet(ppdata) {
     populateEditor('trafo_std_types', trafo_std_properties, null, null);
     populateEditor('trafo3w_std_types', trafo3w_std_properties, null, null);
 
-    tabcontent = document.getElementsByClassName("tablinks");
+    tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].style.display = "inline-flex";
     }

@@ -6,7 +6,7 @@ function populateLists(listName) {
     list = list.sort(function (a, b) {
         return parseInt(a.feature.properties.index) - parseInt(b.feature.properties.index);
     })
-    x.size = (list.length > 24) ? 24 : list.length;
+    //x.size = (list.length > 24) ? 24 : list.length;
     for (idx in list) {
         var option = document.createElement("option");
         option.text = list[idx].feature.properties.index;
@@ -63,18 +63,18 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
 }
 
 function openList(e, listName) {
-    tabcontent = document.getElementsByClassName("featureListTab");
+    tabcontent = document.getElementsByClassName("feature-editor__featurelist-tab");
     for (i = 0; i < tabcontent.length; i++) {
       tabcontent[i].style.display = "none";
     }
 
-    editorcontent = document.getElementsByClassName('selectedFeatureEditor');
+    editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
 
     for (i = 0; i < editorcontent.length; i++) {
         editorcontent[i].style.display = "none";
     }
 
-    tablinks = document.getElementsByClassName("tablinks");
+    tablinks = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
     for (i = 0; i < tablinks.length; i++) {
       tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
@@ -117,7 +117,7 @@ function clickOnMarker(target, feature) {
     let newIndex = featureList.findIndex((entry) => entry === target);
     selectedList.selectedIndex = newIndex;
 
-    let editorcontent = document.getElementsByClassName('selectedFeatureEditor');
+    let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
     for (i = 0; i < editorcontent.length; i++) {
         editorcontent[i].style.display = "none";
     }

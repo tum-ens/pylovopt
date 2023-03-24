@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+    <h1></h1>
+    <div class="feature-editor">
+      <div class="feature-editor__buttons-tab">
+        <button class="feature-editor__buttons-tab__tablinks" id="busListButton" onclick="openList(event, 'bus')"><span>Buses</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="lineListButton" onclick="openList(event, 'line')"><span>Lines</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="trafoListButton" onclick="openList(event, 'trafo')"><span>Trafos</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="trafo3wListButton" onclick="openList(event, 'trafo3w')"><span>Trafos 3w</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="ext_gridListButton" onclick="openList(event, 'ext_grid')"><span>Ext. Grid</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="std_typesListButton" onclick="openList(event, 'std_types')"><span>Std Types</span></button>
+      </div>
+      <div class="feature-editor__featurelist-tab" id="bus">
+        <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="fillSelectedFeatureEditor(this, 'bus')" multiple></select>
+      </div>
+      <div class="feature-editor__featurelist-tab" id="line">
+        <select class ="feature-editor__featurelist-tab__feature-select"  id="lineSelect" onchange="fillSelectedFeatureEditor(this, 'line')" multiple></select>
+      </div>
+      <div class="feature-editor__featurelist-tab" id="trafo">
+        <select  class ="feature-editor__featurelist-tab__feature-select" id="trafoSelect" onchange="fillSelectedFeatureEditor(this, 'trafo')" multiple></select>
+      </div>
+      <div class="feature-editor__featurelist-tab" id="trafo3w">
+        <select class ="feature-editor__featurelist-tab__feature-select" id="trafo3wSelect" onchange="fillSelectedFeatureEditor(this, 'trafo3w')" multiple></select>
+      </div>
+      <div class="feature-editor__featurelist-tab" id="ext_grid">
+        <select class ="feature-editor__featurelist-tab__feature-select" id="ext_gridSelect" onchange="fillSelectedFeatureEditor(this, 'ext_grid')" multiple></select>
+      </div>  
+      <div class="feature-editor__featurelist-tab" id="std_types">
+        <select class ="feature-editor__featurelist-tab__stdtype-feature-select" id="line_std_typesSelect" onchange="fillStdTypeEditor(this, 'line_std') " multiple></select>
+        <select class ="feature-editor__featurelist-tab__stdtype-feature-select" id="trafo_std_typesSelect" onchange="fillStdTypeEditor(this, 'trafo_std')" multiple></select>
+        <select class ="feature-editor__featurelist-tab__stdtype-feature-select" id="trafo3w_std_typesSelect" onchange="fillStdTypeEditor(this, 'trafo3w_std')" multiple></select>
+      </div>
+      <div class="feature-editor__selected-feature-editor" id="busEditor">
+          <form id="busForm"></form>
+      </div>
+      <div class="feature-editor__selected-feature-editor" id="lineEditor">
+        <form id="lineForm"></form>
+      </div>
+      <div class="feature-editor__selected-feature-editor" id="trafoEditor">
+        <form id="trafoForm"></form>
+      </div>
+      <div class="feature-editor__selected-feature-editor" id="trafo3wEditor">
+        <form id="trafo3wForm"></form>
+      </div>
+      <div class="feature-editor__selected-feature-editor" id="ext_gridEditor">
+        <form id="ext_gridForm"></form>
+      </div>
+      <div class="feature-editor__selected-feature-editor" id="std_typesEditor">
+        <form id="line_std_typesForm"></form>
+        <form id="trafo_std_typesForm"></form>
+        <form id="trafo3w_std_typesForm"></form>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="action-buttons__button" type="button" id="returnEditedNetButton" onclick="returnEditedNet()">Finish Editing</button>
+    </div>
+
+    {% include "network_editor/include/urbs_results.html" %}
+
+    <script defer src="{{url_for('static', filename='generate_editable_network.js')}}"></script>
+    <script defer src="{{url_for('static', filename='display_editable_network_features.js')}}"></script>
+    <script defer src="{{url_for('static', filename='collect_returnable_network_features.js')}}"></script>
+{% endblock %}
+
