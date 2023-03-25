@@ -54,6 +54,29 @@ color: #444444;
   display: inline-block;
 }
 
+.button {
+  background-color: #0065BD; 
+  border: none;
+  border-radius: 2px;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  transition-duration: 0.4s;
+  pointer-events: all;
+}
+
+.button:hover {
+  background-color: #003359; 
+  color: white;
+}
+
+.button:disabled {
+  background-color: #4e4e4e;
+}
+
 /* || Navigation Bar --------------------------*/
 .bg-steel {
 background-color: #0065BD;
@@ -174,6 +197,10 @@ font-weight: 500;
   transform: rotate(90deg);
 }
 
+.feature-editor__featurelist-tab__add-feature-button {
+  width: 100%;
+  padding: 6px;
+}
 
 .feature-editor__featurelist-tab{
   position: absolute;
@@ -309,10 +336,6 @@ input[type=text]:focus + label {
   bottom: 0%
 }
 .action-buttons__button {
-  background-color: #0065BD; 
-  border: none;
-  border-radius: 2px;
-  color: white;
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;
@@ -320,15 +343,6 @@ input[type=text]:focus + label {
   font-size: 16px;
   transition-duration: 0.4s;
   pointer-events: all;
-}
-
-.action-buttons__button:hover {
-  background-color: #003359; 
-  color: white;
-}
-
-.action-buttons__button:disabled {
-  background-color: #4e4e4e;
 }
 
 .urbs-results {

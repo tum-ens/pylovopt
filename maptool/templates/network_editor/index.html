@@ -16,18 +16,23 @@
         <button class="feature-editor__buttons-tab__tablinks" id="std_typesListButton" onclick="openList(event, 'std_types')"><span>Std Types</span></button>
       </div>
       <div class="feature-editor__featurelist-tab" id="bus">
+        <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('bus')">Add Bus</button>
         <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="fillSelectedFeatureEditor(this, 'bus')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="line">
+        <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('line')">Add Line</button>
         <select class ="feature-editor__featurelist-tab__feature-select"  id="lineSelect" onchange="fillSelectedFeatureEditor(this, 'line')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="trafo">
+        <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('trafo')">Add Trafo</button>
         <select  class ="feature-editor__featurelist-tab__feature-select" id="trafoSelect" onchange="fillSelectedFeatureEditor(this, 'trafo')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="trafo3w">
+        <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('butrafo3ws')">Add Trafo 3w</button>
         <select class ="feature-editor__featurelist-tab__feature-select" id="trafo3wSelect" onchange="fillSelectedFeatureEditor(this, 'trafo3w')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="ext_grid">
+        <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('ext_grid')">Add Ext. Grid</button>
         <select class ="feature-editor__featurelist-tab__feature-select" id="ext_gridSelect" onchange="fillSelectedFeatureEditor(this, 'ext_grid')" multiple></select>
       </div>  
       <div class="feature-editor__featurelist-tab" id="std_types">
@@ -58,7 +63,7 @@
     </div>
 
     <div class="action-buttons">
-      <button class="action-buttons__button" type="button" id="returnEditedNetButton" onclick="returnEditedNet()">Finish Editing</button>
+      <button class="button action-buttons__button" type="button" id="returnEditedNetButton" onclick="returnEditedNet()">Finish Editing</button>
     </div>
 
     {% include "network_editor/include/urbs_results.html" %}
@@ -66,5 +71,6 @@
     <script defer src="{{url_for('static', filename='generate_editable_network.js')}}"></script>
     <script defer src="{{url_for('static', filename='display_editable_network_features.js')}}"></script>
     <script defer src="{{url_for('static', filename='collect_returnable_network_features.js')}}"></script>
+    <script defer src="{{url_for('static', filename='add_new_network_features.js')}}"></script>
 {% endblock %}
 

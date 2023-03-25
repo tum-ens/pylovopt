@@ -1,6 +1,6 @@
-//fills html element for a given list of network features
+//fills html element for a given list of network features at intial editable network generation
+//the index property of a feature and the option index do not have to match
 function populateLists(listName) {
-    //console.log(listName);
     var x = document.getElementById(listName + "Select");
     let list = NetworkObject[listName + 'List'];
     list = list.sort(function (a, b) {
@@ -15,6 +15,8 @@ function populateLists(listName) {
     }
 }
 
+//The feature editor window template for all feature types gets filled at runtime
+//input fields and labels depend entirely on the properties defined in the displayNetwork function
 function populateEditor(listName, selectedProperties, std_typeList, std_type_properties) {
     let editor_form = document.getElementById(listName + 'Form');
 
@@ -62,6 +64,7 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
     }
 }
 
+//gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
 function openList(e, listName) {
     tabcontent = document.getElementsByClassName("feature-editor__featurelist-tab");
     for (i = 0; i < tabcontent.length; i++) {
@@ -81,8 +84,23 @@ function openList(e, listName) {
 
     document.getElementById(listName).style.display = "inline-block";
     e.currentTarget.className += " active";
+
+    //if a list element had been selected previously and the tab had been closed without another feature editor being opened elsewhere, we reopen the editor window of the 
+    //currently selected feature
+    if(listName == 'std_types') {
+
+    }
+    else {
+        console.log(listName);
+        if (document.getElementById(listName + 'Select').selectedIndex != -1) {
+            let editor = document.getElementById(listName + "Editor")
+            editor.style.display = "inline-block";
+        }
+    }
 }
 
+//writes values of the currently selected feature into the input fields of the editor window
+//vestigial, should probably be folded into clickOnMarker entirely
 function fillSelectedFeatureEditor(sel, listName) {
     let idx = parseInt(sel.options[sel.selectedIndex].value);
     //let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
@@ -92,8 +110,11 @@ function fillSelectedFeatureEditor(sel, listName) {
     clickOnMarker(selectedObject, listName);
 }
 
+//When clicking on a map element or making a selection from a list, we highlight the relevant element, open the Editor window and fill its input fields
+//with the relevant values
 function clickOnMarker(target, feature) {
-    let zoomLevel = 14;
+    if(!map.pm.globalDrawModeEnabled()) {
+        let zoomLevel = 14;
     if(feature == 'bus' || feature == 'ext_grid') {
         map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
     }
@@ -101,8 +122,13 @@ function clickOnMarker(target, feature) {
         map.setView(target.getLatLngs()[0], Math.max(map.getZoom(), zoomLevel));
     }
 
+    //resets previously selected markers
     if(clicked) {
         let oldStyle = NetworkObject[clicked[1] + 'Styles'];
+        //makes sure the list that holds the previously selected feature deselects all options
+        if(clicked[1] != feature) {
+            document.getElementById(clicked[1] + 'Select').value = "";
+        }
         clicked[0].setStyle(oldStyle[1]);
     }
     target.setStyle(NetworkObject[feature + 'Styles'][0]);
@@ -127,6 +153,8 @@ function clickOnMarker(target, feature) {
     let editor_form = document.getElementById(feature + 'Form');
     let editor_elems = editor_form.children;
 
+    //features can have a std_type input and other input fields related to that std_type. Std_type properties should only be editable via the std_type list
+    //for all other features, the properties are still added as read-only, while std_types are selectable from a dropdown menu
     let selectedStdType;
     for (let i = 0; i < editor_elems.length; i++) {
         if (editor_elems[i].nodeName == 'INPUT') {
@@ -148,12 +176,12 @@ function clickOnMarker(target, feature) {
             }
             let k = 1;
                 for (idx in NetworkObject[feature + '_stdList'][selectedStdType]) {
-                    //console.log(editor_elems[i+k+1].name, idx, line_stdList[selectedStdType][idx]);
                     editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][idx];
                     k += 2;
                 }
             i += k;
         }
+    }
     }
 }
 
@@ -176,7 +204,8 @@ function writeBackEditedFeature(target) {
 }
 
 
-//Purely for debug, we will want to keep feature information within the markers themselves
+//Purely for debug atm, we will want to keep feature information within the markers themselves
+//might be worth considering to display the editor window via the popup (visually too messy?)
 function createPopup(feature, layer) {
     var popup = L.popup();
     popup.setContent(
