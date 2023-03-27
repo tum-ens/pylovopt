@@ -28,7 +28,7 @@
         <select  class ="feature-editor__featurelist-tab__feature-select" id="trafoSelect" onchange="fillSelectedFeatureEditor(this, 'trafo')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="trafo3w">
-        <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('butrafo3ws')">Add Trafo 3w</button>
+        <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('trafo3ws')">Add Trafo 3w</button>
         <select class ="feature-editor__featurelist-tab__feature-select" id="trafo3wSelect" onchange="fillSelectedFeatureEditor(this, 'trafo3w')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="ext_grid">
@@ -42,23 +42,29 @@
       </div>
       <div class="feature-editor__selected-feature-editor" id="busEditor">
           <form id="busForm"></form>
+          <button class="button feature-editor__selected-feature-editor__delete-button" onclick="deleteFeature('bus')">Delete Feature</button>
       </div>
       <div class="feature-editor__selected-feature-editor" id="lineEditor">
         <form id="lineForm"></form>
+        <button class="button feature-editor__selected-feature-editor__delete-button" onclick="deleteFeature('line')">Delete Feature</button>
       </div>
       <div class="feature-editor__selected-feature-editor" id="trafoEditor">
         <form id="trafoForm"></form>
+        <button class="button feature-editor__selected-feature-editor__delete-button" onclick="deleteFeature('trafo')">Delete Feature</button>
       </div>
       <div class="feature-editor__selected-feature-editor" id="trafo3wEditor">
         <form id="trafo3wForm"></form>
+        <button class="button feature-editor__selected-feature-editor__delete-button" onclick="deleteFeature('trafo3w')">Delete Feature</button>
       </div>
       <div class="feature-editor__selected-feature-editor" id="ext_gridEditor">
         <form id="ext_gridForm"></form>
+        <button class="button feature-editor__selected-feature-editor__delete-button" onclick="deleteFeature('ext_grid')">Delete Feature</button>
       </div>
       <div class="feature-editor__selected-feature-editor" id="std_typesEditor">
         <form id="line_std_typesForm"></form>
         <form id="trafo_std_typesForm"></form>
         <form id="trafo3w_std_typesForm"></form>
+        <button class="button feature-editor__selected-feature-editor__delete-button" onclick="deleteFeature('std_types')">Delete Feature</button>
       </div>
     </div>
 

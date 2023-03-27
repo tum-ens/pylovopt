@@ -19,8 +19,20 @@ function addFeature(feature) {
     }
 }
 
+function deleteFeature(featureName) {
+    featureSelect = document.getElementById(featureName + 'Select');
+    if (featureSelect.selectedIndex != -1) {
+        //console.log(NetworkObject[featureName + 'List'][featureSelect.selectedIndex]);
+        map.removeLayer(NetworkObject[featureName + 'List'][featureSelect.selectedIndex]);
+        NetworkObject[featureName + 'List'].splice(featureSelect.selectedIndex, 1);
+        //console.log(NetworkObject[featureName + 'List'][featureSelect.selectedIndex]);
+        featureSelect.remove(featureSelect.selectedIndex);
+        document.getElementById(featureName + 'Editor').style.display = 'none';
+    }
+
+}
+
 map.on('pm:create', (e) => {
-    console.log(e);
     e.marker.remove();
     let featureName = '';
     let featureType = '';
@@ -75,14 +87,13 @@ map.on('pm:create', (e) => {
     if (featureType == 'Point') {
         L.geoJSON(featureGeoJSON, {
             onEachFeature: function(feature, layer) {
-                console.log("Adding feature")
                 createPopup(feature, layer);
                 NetworkObject[featureName + 'List'].push(layer);
             },
             pointToLayer: function (feature, latlng) {
                 var marker = L.circleMarker(latlng, NetworkObject[featureName + 'Styles'][1]);
                 marker.on('click', function(e) {
-                    clickOnMarker(e.target, featureName);
+                    clickOnMarker(e.target, featureName, 0);
                 });
                 return marker;
             }
@@ -96,7 +107,7 @@ map.on('pm:create', (e) => {
                 createPopup(feature, layer);
                 NetworkObject[featureName + 'List'].push(layer);
                 layer.on('click', function(e) {
-                    clickOnMarker(e.target, featureName);
+                    clickOnMarker(e.target, featureName, 0);
                 })
             },
             style: NetworkObject[featureName + 'Styles'][1]       
@@ -106,7 +117,10 @@ map.on('pm:create', (e) => {
     let featureSelect = document.getElementById(featureName + "Select");
     var option = document.createElement("option");
     option.text = featureToAdd.properties.index;
-    option.value = featureSelect.options.length;
+    //option.value = featureSelect.options.length;
     featureSelect.add(option);
 
+    let selectedObject = NetworkObject[featureName + 'List'][featureSelect.options.length - 1];
+    console.log(selectedObject);
+    clickOnMarker(selectedObject, featureName, 1);
   });

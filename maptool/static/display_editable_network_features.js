@@ -10,7 +10,7 @@ function populateLists(listName) {
     for (idx in list) {
         var option = document.createElement("option");
         option.text = list[idx].feature.properties.index;
-        option.value = idx;
+        //option.value = idx;
         x.add(option);
     }
 }
@@ -102,86 +102,86 @@ function openList(e, listName) {
 //writes values of the currently selected feature into the input fields of the editor window
 //vestigial, should probably be folded into clickOnMarker entirely
 function fillSelectedFeatureEditor(sel, listName) {
-    let idx = parseInt(sel.options[sel.selectedIndex].value);
+    let idx = parseInt(sel.selectedIndex);
     //let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
     
     let selectedObject = NetworkObject[listName + 'List'][idx];
 
-    clickOnMarker(selectedObject, listName);
+    clickOnMarker(selectedObject, listName, 0);
 }
 
 //When clicking on a map element or making a selection from a list, we highlight the relevant element, open the Editor window and fill its input fields
 //with the relevant values
-function clickOnMarker(target, feature) {
-    if(!map.pm.globalDrawModeEnabled()) {
+function clickOnMarker(target, feature, drawModeOverride) {
+    if((!map.pm.globalDrawModeEnabled()) || drawModeOverride) {
         let zoomLevel = 14;
-    if(feature == 'bus' || feature == 'ext_grid') {
-        map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
-    }
-    else {
-        map.setView(target.getLatLngs()[0], Math.max(map.getZoom(), zoomLevel));
-    }
-
-    //resets previously selected markers
-    if(clicked) {
-        let oldStyle = NetworkObject[clicked[1] + 'Styles'];
-        //makes sure the list that holds the previously selected feature deselects all options
-        if(clicked[1] != feature) {
-            document.getElementById(clicked[1] + 'Select').value = "";
+        if(feature == 'bus' || feature == 'ext_grid') {
+            map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
         }
-        clicked[0].setStyle(oldStyle[1]);
-    }
-    target.setStyle(NetworkObject[feature + 'Styles'][0]);
-    clicked = [target, feature];
-
-    let featureList = NetworkObject[feature + 'List'];
-
-    let selectedButton = document.getElementById(feature + "ListButton");
-    selectedButton.click();
-
-    let selectedList = document.getElementById(feature + "Select");
-    let newIndex = featureList.findIndex((entry) => entry === target);
-    selectedList.selectedIndex = newIndex;
-
-    let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
-    for (i = 0; i < editorcontent.length; i++) {
-        editorcontent[i].style.display = "none";
-    }
-
-    document.getElementById(feature + 'Editor').style.display = 'inline-block';
-
-    let editor_form = document.getElementById(feature + 'Form');
-    let editor_elems = editor_form.children;
-
-    //features can have a std_type input and other input fields related to that std_type. Std_type properties should only be editable via the std_type list
-    //for all other features, the properties are still added as read-only, while std_types are selectable from a dropdown menu
-    let selectedStdType;
-    for (let i = 0; i < editor_elems.length; i++) {
-        if (editor_elems[i].nodeName == 'INPUT') {
-            if(target.feature.properties[editor_elems[i].name] != null) {
-                editor_elems[i].value = target.feature.properties[editor_elems[i].name];
-            }
-            else {
-                editor_elems[i].value = '';
-            }
+        else {
+            map.setView(target.getLatLngs()[0], Math.max(map.getZoom(), zoomLevel));
         }
-        if (editor_elems[i].nodeName == 'SELECT') {
-            selectedStdType = target.feature.properties['std_type']
 
-            for (let j = 0; j < editor_elems[i].options.length; j++) {
-                if (editor_elems[i].options[j].text == selectedStdType) {
-                    editor_elems[i].selectedIndex = j;
-                    break;
+        //resets previously selected markers
+        if(clicked) {
+            let oldStyle = NetworkObject[clicked[1] + 'Styles'];
+            //makes sure the list that holds the previously selected feature deselects all options
+            if(clicked[1] != feature) {
+                document.getElementById(clicked[1] + 'Select').value = "";
+            }
+            clicked[0].setStyle(oldStyle[1]);
+        }
+        target.setStyle(NetworkObject[feature + 'Styles'][0]);
+        clicked = [target, feature];
+
+        let featureList = NetworkObject[feature + 'List'];
+
+        let selectedButton = document.getElementById(feature + "ListButton");
+        selectedButton.click();
+
+        let selectedList = document.getElementById(feature + "Select");
+        let newIndex = featureList.findIndex((entry) => entry === target);
+        selectedList.selectedIndex = newIndex;
+
+        let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
+        for (i = 0; i < editorcontent.length; i++) {
+            editorcontent[i].style.display = "none";
+        }
+
+        document.getElementById(feature + 'Editor').style.display = 'inline-block';
+
+        let editor_form = document.getElementById(feature + 'Form');
+        let editor_elems = editor_form.children;
+
+        //features can have a std_type input and other input fields related to that std_type. Std_type properties should only be editable via the std_type list
+        //for all other features, the properties are still added as read-only, while std_types are selectable from a dropdown menu
+        let selectedStdType;
+        for (let i = 0; i < editor_elems.length; i++) {
+            if (editor_elems[i].nodeName == 'INPUT') {
+                if(target.feature.properties[editor_elems[i].name] != null) {
+                    editor_elems[i].value = target.feature.properties[editor_elems[i].name];
+                }
+                else {
+                    editor_elems[i].value = '';
                 }
             }
-            let k = 1;
-                for (idx in NetworkObject[feature + '_stdList'][selectedStdType]) {
-                    editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][idx];
-                    k += 2;
+            if (editor_elems[i].nodeName == 'SELECT') {
+                selectedStdType = target.feature.properties['std_type']
+
+                for (let j = 0; j < editor_elems[i].options.length; j++) {
+                    if (editor_elems[i].options[j].text == selectedStdType) {
+                        editor_elems[i].selectedIndex = j;
+                        break;
+                    }
                 }
-            i += k;
+                let k = 1;
+                    for (idx in NetworkObject[feature + '_stdList'][selectedStdType]) {
+                        editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][idx];
+                        k += 2;
+                    }
+                i += k;
+            }
         }
-    }
     }
 }
 

@@ -190,7 +190,7 @@ function displayNet(ppdata) {
             createPopup(feature, layer);
             NetworkObject.lineList.push(layer);
             layer.on('click', function(e) {
-                clickOnMarker(e.target, 'line');
+                clickOnMarker(e.target, 'line', 0);
             })
         },
         style: NetworkObject.lineStyles[1]       
@@ -211,7 +211,7 @@ function displayNet(ppdata) {
             //marker.features = feature;
 
             marker.on('click', function(e) {
-                clickOnMarker(e.target, 'ext_grid');
+                clickOnMarker(e.target, 'ext_grid', 0);
             });
             return marker;
         }
@@ -233,7 +233,7 @@ function displayNet(ppdata) {
         pointToLayer: function (feature, latlng) {
             var marker = L.circleMarker(latlng, NetworkObject.busStyles[1]);
             marker.on('click', function(e) {
-                clickOnMarker(e.target, 'bus');
+                clickOnMarker(e.target, 'bus', 0);
             });
             return marker;
         }
@@ -248,7 +248,7 @@ function displayNet(ppdata) {
             createPopup(feature, layer);
             NetworkObject.trafoList.push(layer);
             layer.on('click', function(e) {
-                clickOnMarker(e.target, 'trafo');
+                clickOnMarker(e.target, 'trafo', 0);
             })
         },
         style: NetworkObject.trafoStyles[1]

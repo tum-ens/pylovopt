@@ -27,6 +27,8 @@ def editableNetwork():
 
         #--------------------------------PURELY FOR DEBUG--------------------------------#
         from maptool import net as testnet
+        #from .generateEditableNetwork import createFeatures
+        #createFeatures(False, pp.from_json(testnet), 'bus',0,0,0)
         #--------------------------------PURELY FOR DEBUG--------------------------------#
         return testnet
 
