@@ -1,3 +1,5 @@
+let featuresToDeleteList = [];
+
 function addFeature(feature) {
     let style = NetworkObject[feature + 'Styles'][1];
     let type = '';
@@ -19,8 +21,73 @@ function addFeature(feature) {
     }
 }
 
+function closeForm() {
+    for (feature in featuresToDeleteList) {
+        featuresToDeleteList[feature][0].setStyle(featuresToDeleteList[feature][0].defaultOptions);
+    }
+    document.getElementById("popupForm").style.display = "none";
+  }
+
+function prepareFeatureDelete(featureName, featureLists) {
+    if(featureName == 'bus') {
+        document.getElementById("popupForm").style.display = "block";
+        let featureSelect = document.getElementById(featureName + 'Select');
+        //console.log(featureSelect.options[featureSelect.selectedIndex].text);
+
+        featuresToDeleteList.push([NetworkObject['busList'][featureSelect.selectedIndex], 'bus', featureSelect.selectedIndex]);
+        for (featureType in featureLists) {
+            for (feature in NetworkObject[featureLists[featureType] + 'List']) {
+                //console.log(featureSelect.options[featureSelect.selectedIndex].text, NetworkObject[lists[featureType] + 'List'][feature].feature.properties.from_bus)
+                if (featureSelect.options[featureSelect.selectedIndex].text ==  NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.from_bus) {
+                    featuresToDeleteList.push( [NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                }
+                if (featureSelect.options[featureSelect.selectedIndex].text ==  NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.to_bus) {
+                    featuresToDeleteList.push( [NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                }
+                if(featureSelect.options[featureSelect.selectedIndex].text ==  NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.bus) {
+                    featuresToDeleteList.push( [NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                }
+                if(featureSelect.options[featureSelect.selectedIndex].text ==  NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.hv_bus) {
+                    featuresToDeleteList.push( [NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                }   
+                if(featureSelect.options[featureSelect.selectedIndex].text ==  NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.lv_bus) {
+                    featuresToDeleteList.push( [NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                }
+                
+            }
+        }
+
+        //highlight all features that are about to be deleted
+        for (feature in featuresToDeleteList) {
+            featuresToDeleteList[feature][0].setStyle({fillColor: 'red', color: 'red'});
+        }
+    }
+}
+
+function deleteConnectedFeatures() {
+    let lineCount = 0;
+    let trafoCount = 0;
+    let ext_gridCount = 0;
+    for (feature in featuresToDeleteList) {
+        let featureName = featuresToDeleteList[feature][1];
+        let featureIndex = featuresToDeleteList[feature][2] - lineCount * (featureName == 'line') - trafoCount * (featureName == 'trafo') - lineCount * (ext_gridCount == 'ext_grid')
+        let featureSelect = document.getElementById(featureName + 'Select');
+        map.removeLayer(NetworkObject[featureName + 'List'][featureIndex]);
+        NetworkObject[featureName + 'List'].splice(featureIndex, 1);
+        featureSelect.remove(featureIndex);
+
+        lineCount += (featureName == 'line');
+        trafoCount += (featureName == 'trafo');
+        ext_gridCount += (featureName == 'ext_grid');
+    } 
+
+    featuresToDeleteList = [];
+    document.getElementById('busEditor').style.display = 'none';
+    document.getElementById("popupForm").style.display = "none";
+}
+
 function deleteFeature(featureName) {
-    featureSelect = document.getElementById(featureName + 'Select');
+    let featureSelect = document.getElementById(featureName + 'Select');
     if (featureSelect.selectedIndex != -1) {
         //console.log(NetworkObject[featureName + 'List'][featureSelect.selectedIndex]);
         map.removeLayer(NetworkObject[featureName + 'List'][featureSelect.selectedIndex]);

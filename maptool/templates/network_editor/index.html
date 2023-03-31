@@ -42,7 +42,7 @@
       </div>
       <div class="feature-editor__selected-feature-editor" id="busEditor">
           <form id="busForm"></form>
-          <button class="button feature-editor__selected-feature-editor__delete-button" onclick="deleteFeature('bus')">Delete Feature</button>
+          <button class="button feature-editor__selected-feature-editor__delete-button" onclick="prepareFeatureDelete('bus', ['line', 'trafo', 'trafo3w', 'ext_grid'])">Delete Feature</button>
       </div>
       <div class="feature-editor__selected-feature-editor" id="lineEditor">
         <form id="lineForm"></form>
@@ -65,6 +65,16 @@
         <form id="trafo_std_typesForm"></form>
         <form id="trafo3w_std_typesForm"></form>
         <button class="button feature-editor__selected-feature-editor__delete-button" onclick="deleteFeature('std_types')">Delete Feature</button>
+      </div>
+    </div>
+
+    <div class="loginPopup">
+      <div class="formPopup" id="popupForm">
+        <form class="formContainer">
+          All features connected to the bus will also be deleted
+          <button type="button" class="btn" onclick="deleteConnectedFeatures()">Delete Features</button>
+          <button type="button" class="btn cancel" onclick="closeForm()">Cancel</button>
+        </form>
       </div>
     </div>
 

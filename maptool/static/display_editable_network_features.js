@@ -27,6 +27,7 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
         
         if(selectedProperties[idx] == 'std_type') {
             let form = document.createElement("select");
+            form.classList.add('feature-editor__selected-feature-editor__stdtype-feature-select')
             let ctr = 0;
             for(type_idx in std_typeList) {
                 let option = document.createElement("option");
@@ -176,8 +177,13 @@ function clickOnMarker(target, feature, drawModeOverride) {
                 }
                 let k = 1;
                     for (idx in NetworkObject[feature + '_stdList'][selectedStdType]) {
-                        editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][idx];
-                        k += 2;
+                        if(feature == 'trafo') {
+                            console.log(idx, editor_elems[i+k+1].name);
+                        }
+                        if(NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name] != undefined) {
+                            editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name];
+                        }
+                        k += 2; // + 2 because we need to skip the label elements
                     }
                 i += k;
             }

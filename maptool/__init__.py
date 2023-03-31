@@ -11,8 +11,12 @@ from flask import Flask, render_template, jsonify, request, session
 import pandapower as pp
 import pandapower.networks as nw
 from pandapower.plotting.plotly.mapbox_plot import geo_data_to_latlong
-testnet = nw.mv_oberrhein()
-geo_data_to_latlong(testnet, projection='epsg:31467')
+# testnet = nw.mv_oberrhein()
+# geo_data_to_latlong(testnet, projection='epsg:31467')
+
+testnet = pp.from_json('7068068.json')
+geo_data_to_latlong(testnet, projection='epsg:32632')
+
 net = pp.to_json(testnet)
 #--------------------------------PURELY FOR DEBUG--------------------------------#
 

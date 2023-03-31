@@ -26,7 +26,7 @@ let NetworkObject = {
     'trafo_stdList' : [],
     'trafo3w_stdList' : [],
     
-    'busStyles': [{  radius: 9,
+    'busStyles': [{  radius: 5,
             fillColor: "#d67900",
             color: "#4e2204",
             weight: 1,
@@ -34,7 +34,7 @@ let NetworkObject = {
             fillOpacity: 1
         }
         ,
-        {   radius: 8,
+        {   radius: 3,
             fillColor: "#0065BD",
             color: "#012b8c",
             weight: 1,
@@ -42,12 +42,12 @@ let NetworkObject = {
             fillOpacity: 1
         }],
     'lineStyles': [{ color: "#ff0000",
-            weight: 4,
+            weight: 2,
             opacity: 1
         }
         ,
         {   color: "#007deb",
-            weight: 4,
+            weight: 2,
             opacity: 1
         }],
     'ext_gridStyles': [{  radius: 15,
@@ -66,7 +66,7 @@ let NetworkObject = {
             fillOpacity: 1
         }],
     'trafoStyles': [{color: "#ff0000",
-            weight: 10,
+            weight: 7,
             opacity: 1
         }
         ,
@@ -299,6 +299,7 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
         let input_columns = JSON.parse(input['_object'])['columns'];
         let idx = [0, 0];
         let temp = [];
+        let temp_indices = [];
 
         input_geodata = ppdata['_object']['bus_geodata'];
         input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
@@ -310,9 +311,10 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
                  for (geo_entry in input_geoIndices) {
                      if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
                          temp.push(input_geoCoords[geo_entry]);
+                         temp_indices.push(entry);
                          break;
                      }
-     
+
                  }
              }
         }
@@ -327,6 +329,7 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
                      if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
                         let x1 = [input_geoCoords[geo_entry][0], input_geoCoords[geo_entry][1]];
                         tempLine.push(x1);
+                        temp_indices.push(entry);
 
                         for (let second_entry = 0; second_entry < input_geoIndices.length; second_entry++) {
                             if (input_data[entry][idx[1]] == input_geoIndices[second_entry]) {
@@ -342,6 +345,7 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
              }
         }
         input_geoCoords = temp;
+        input_geoIndices = temp_indices;
     }
     let currentFeatureProperties = {};
 
@@ -360,12 +364,22 @@ function createFeatures(isLines, ppdata, featureName, featureProperties, propert
 
         //corresponding index value associated with the bus
         let pointIndex = input_geoIndices[point];
-        let pointNameIndex = (input_indices.indexOf(pointIndex, 0) != -1) ? input_indices.indexOf(pointIndex, 0) : pointIndex;
+        let pointNameIndex = 0;
+        if (input_indices.indexOf(pointIndex, 0) != -1) {
+            pointNameIndex = input_indices.indexOf(pointIndex, 0)
+        } else {
+            pointNameIndex = pointIndex;
+        }
 
         if(featureProperties != null) {
             currentFeatureProperties.index = pointIndex;
             for (property in featureProperties) {
-                currentFeatureProperties[featureProperties[property]] = (input_columns.indexOf(featureProperties[property], 0) == -1) ? null : input_data[pointNameIndex][input_columns.indexOf(featureProperties[property], 0)];
+                if(input_columns.indexOf(featureProperties[property], 0) == -1) {
+                    currentFeatureProperties[featureProperties[property]] = null
+                }
+                else {
+                    currentFeatureProperties[featureProperties[property]] = input_data[pointNameIndex][input_columns.indexOf(featureProperties[property], 0)];
+                }
             }
         }
 
