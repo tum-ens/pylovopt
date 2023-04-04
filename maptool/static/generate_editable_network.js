@@ -15,6 +15,21 @@
 //variable that saves last selected path and resets its style when it's deselected
 let clicked;
 
+let line_std_properties = ["r_ohm_per_km", "x_ohm_per_km", "max_i_ka", "c_nf_per_km", "q_mm2", "type", "alpha"];
+let trafo_std_properties = ["sn_mva", "vn_hv_kv", "vn_lv_kv", "vk_percent", "vkr_percent", "pfe_kw", "i0_percent", "shift_degree", "tap_side", "tap_neutral", "tap_min", "tap_max", "tap_step_percent", "tap_step_degree", "tap_phase_shifter"];
+let trafo3w_std_properties = ["sn_hv_mva","sn_mv_mva","sn_lv_mva","vn_hv_kv", "vn_mv_kv","vn_lv_kv","vk_hv_percent", "vk_mv_percent","vk_lv_percent","vkr_hv_percent","vkr_mv_percent","vkr_lv_percent","pfe_kw","i0_percent","shift_mv_degree","shift_lv_degree","tap_side","tap_neutral","tap_min","tap_max","tap_step_percent"];
+
+let line_properties = ["name","from_bus", "to_bus","length_km", "r0_ohm_per_km", "x0_ohm_per_km", "c0_nf_per_km","df","g_us_per_km", "g0_us_per_km","parallel","max_loading_percent","temperature_degree_celsius", "tdpf","wind_speed_m_per_s", "wind_angle_degree", "conductor_outer_diameter_m", "air_temperature_degree_celsius","reference_temperature_degree_celsius", "solar_radiation_w_per_sq_m", "solar_absorptivity", "emissivity", "r_theta_kelvin_per_mw", "mc_joule_per_m_k", "std_type"];
+
+let ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable"];
+
+let bus_properties =  ["name","vn_kv","type","in_service", "max_vm_pu","min_vm_pu",]    
+let load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable'];
+let sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable'];
+let switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka'];  
+
+let trafo_properties = ["name", "hv_bus", "lv_bus", "vk0_percent", "vkr0_percent", "mag0_percent", "mag0_rx", "si0_hv_partial", "tap_pos", "in_service", "max_loading_percent", "parallel", "df", "tap_dependent_impedance", "vk_percent_characteristic", "vkr_percent_characteristic", "xn_ohm", "std_type"];
+
 let NetworkObject = {
     'busList' : [],
     'lineList' : [],
@@ -73,6 +88,13 @@ let NetworkObject = {
         {   color: "#42bd4a",
             weight: 5,
             opacity: 1
+        }],
+    'nonEditableStyles' : [{color: "#363636",
+            fillColor: "#363636",
+            weight: 2,
+            radius: 3,
+            opacity: 1,
+            fillOpacity: 1
         }]     
 }
 
@@ -88,7 +110,20 @@ function WriteShapefiles() {
     }
 
     console.log('starting Fetch');  
-    fetch('/networks/editableNetwork')
+    let fetchString = 'editableNetwork';
+    let isEditableNetwork = true;
+    document.getElementById("nav-item-networks").setAttribute('href', '/networks');
+
+    if(window.location.pathname == '/networks') {
+        fetchString = '/networks/editableNetwork';
+        document.getElementById("nav-item-networks").setAttribute('href', '#scroll-to-top');
+
+    }
+    if(window.location.pathname == '/demand') {
+        fetchString = '/demand/editableNetwork';
+        isEditableNetwork = false;
+    }    
+    fetch(fetchString)
     .then(function (response) {
         return response.json();
     }).then(function (ppdata) {
@@ -97,14 +132,36 @@ function WriteShapefiles() {
                 layer.remove();
         });
 
-        extractStdTypes(ppdata);
-        fillStdTypeList();
-
         console.log('Begin displaying net:');
-        displayNet(ppdata);
-        
-        document.getElementById("nav-item-networks").setAttribute('href', '#scroll-to-top');
+        displayNet(ppdata, isEditableNetwork);
 
+        populateLists('bus');
+
+        if(window.location.pathname == '/networks' ) {
+            extractStdTypes(ppdata);
+            fillStdTypeList();
+
+            populateLists('line');
+            populateLists('trafo');
+            populateLists('ext_grid');
+    
+            populateEditor('bus', bus_properties, null, null);
+            populateEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties);
+            populateEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties);
+            populateEditor('ext_grid', ext_grid_properties, null, null);
+            populateEditor('line_std_types', line_std_properties, null, null);
+            populateEditor('trafo_std_types', trafo_std_properties, null, null);
+            populateEditor('trafo3w_std_types', trafo3w_std_properties, null, null);
+
+            tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "inline-flex";
+            }
+        }
+
+        if(window.location.pathname == '/demand') {
+            document.getElementById('bus').style.display = 'inline-block';
+        }
     });
 }
 
@@ -116,11 +173,6 @@ function extractStdTypes(ppdata) {
 }
 
 function fillStdTypeList() {
-    // for (std_type in line_stdList) {
-    //     for (property in line_stdList[std_type]) {
-    //         console.log(std_type, property);
-    //     }
-    // }
     let lists = [NetworkObject.line_stdList, NetworkObject.trafo_stdList, NetworkObject.trafo3w_stdList];
 
     let st_type_selects = document.getElementsByClassName('feature-editor__featurelist-tab__stdtype-feature-select');
@@ -176,104 +228,72 @@ function fillStdTypeEditor(sel, listName) {
     }
 }
 
-function displayNet(ppdata) {
-    let line_std_properties = ["r_ohm_per_km", "x_ohm_per_km", "max_i_ka", "c_nf_per_km", "q_mm2", "type", "alpha"];
-    let trafo_std_properties = ["sn_mva", "vn_hv_kv", "vn_lv_kv", "vk_percent", "vkr_percent", "pfe_kw", "i0_percent", "shift_degree", "tap_side", "tap_neutral", "tap_min", "tap_max", "tap_step_percent", "tap_step_degree", "tap_phase_shifter"];
-    let trafo3w_std_properties = ["sn_hv_mva","sn_mv_mva","sn_lv_mva","vn_hv_kv", "vn_mv_kv","vn_lv_kv","vk_hv_percent", "vk_mv_percent","vk_lv_percent","vkr_hv_percent","vkr_mv_percent","vkr_lv_percent","pfe_kw","i0_percent","shift_mv_degree","shift_lv_degree","tap_side","tap_neutral","tap_min","tap_max","tap_step_percent"];
 
-    let line_properties = ["name","from_bus", "to_bus","length_km", "r0_ohm_per_km", "x0_ohm_per_km", "c0_nf_per_km","df","g_us_per_km", "g0_us_per_km","parallel","max_loading_percent","temperature_degree_celsius", "tdpf","wind_speed_m_per_s", "wind_angle_degree", "conductor_outer_diameter_m", "air_temperature_degree_celsius","reference_temperature_degree_celsius", "solar_radiation_w_per_sq_m", "solar_absorptivity", "emissivity", "r_theta_kelvin_per_mw", "mc_joule_per_m_k", "std_type"];
-    let line_geoJSON = createFeatures(true, ppdata, 'line', line_properties, null, null);
-    
-    L.geoJSON(line_geoJSON, {
-        onEachFeature: function(feature, layer) {
-            //layer.features = feature;
-            createPopup(feature, layer);
-            NetworkObject.lineList.push(layer);
-            layer.on('click', function(e) {
-                clickOnMarker(e.target, 'line', 0);
-            })
-        },
-        style: NetworkObject.lineStyles[1]       
-    }).addTo(map);
+function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature) {
+    if (isLines) {
+        L.geoJSON(input_geoJSON, {
+            onEachFeature: function(feature, layer) {
+                if(isEditableFeature) {
+                    createPopup(feature, layer);
+                }
+                NetworkObject[featureName + 'List'].push(layer);
+                if(isEditableFeature) {
+                    layer.on('click', function(e) {
+                        clickOnMarker(e.target, featureName, 0);
+                    })
+                }
+            },
+            style: (isEditableFeature) ? NetworkObject[featureName + 'Styles'][1] : NetworkObject.nonEditableStyles[0]
+        }).addTo(map);
+    }
+    else {
+        L.geoJSON(input_geoJSON, {
+            onEachFeature: function(feature, layer) {
+                if(isEditableFeature) {
+                    createPopup(feature, layer);
+                }
+                NetworkObject[featureName + 'List'].push(layer);
+            },
+            pointToLayer: function (feature, latlng) {
+                var marker = L.circleMarker(latlng, (isEditableFeature) ? NetworkObject[featureName + 'Styles'][1] : NetworkObject.nonEditableStyles[0]);
+                if(isEditableFeature) {
+                    marker.on('click', function(e) {
+                        clickOnMarker(e.target, featureName, 0);
+                    });
+                }else if(featureName == 'bus') {
+                    if (Object.keys(feature.properties.load).length) {
+                        console.log(Object.keys(feature.properties.load).length);
+                        marker.setStyle(NetworkObject.busStyles[1]);
+                        marker.on('click', function(e) {
+                            resetStyle(e.target, 'bus');
+                        });
+                    }
+                }
 
+                return marker;
+            }
+        }).addTo(map);
+    }
+}
+
+function displayNet(ppdata, isEditableNetwork) {
+    let line_geoJSON = createFeatures(true, ppdata, 'line', (isEditableNetwork) ? line_properties : null, null, null);
+    addGeoJSONtoMap(true, line_geoJSON, 'line', isEditableNetwork);
     console.log("added all lines");
 
-    let ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable"];
-    let ext_grid_geoJSON = createFeatures(false, ppdata, 'ext_grid', ext_grid_properties, null, null);
-    L.geoJSON(ext_grid_geoJSON, {
-        onEachFeature: function(feature, layer) {
-            //layer.features = feature;
-            createPopup(feature, layer);
-            NetworkObject.ext_gridList.push(layer);
-        },
-        pointToLayer: function (feature, latlng) {
-            var marker = L.circleMarker(latlng, NetworkObject.ext_gridStyles[1]);
-            //marker.features = feature;
-
-            marker.on('click', function(e) {
-                clickOnMarker(e.target, 'ext_grid', 0);
-            });
-            return marker;
-        }
-    }).addTo(map);
+    let ext_grid_geoJSON = createFeatures(false, ppdata, 'ext_grid', (isEditableNetwork) ? ext_grid_properties : null, null, null);
+    addGeoJSONtoMap(false, ext_grid_geoJSON, 'ext_grid', isEditableNetwork);
     console.log('added all external grids');
-
-    let bus_properties =  ["name","vn_kv","type","in_service", "max_vm_pu","min_vm_pu",]    
-    let load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable'];
-    let sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable'];
-    let switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka'];  
 
     let bus_geoJSON = createFeatures(false, ppdata, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]);
 
-    L.geoJSON(bus_geoJSON, {
-        onEachFeature: function(feature, layer) {
-            createPopup(feature, layer);
-            NetworkObject.busList.push(layer);
-        },
-        pointToLayer: function (feature, latlng) {
-            var marker = L.circleMarker(latlng, NetworkObject.busStyles[1]);
-            marker.on('click', function(e) {
-                clickOnMarker(e.target, 'bus', 0);
-            });
-            return marker;
-        }
-    }).addTo(map);
+    addGeoJSONtoMap(false, bus_geoJSON, 'bus', isEditableNetwork);
 
     console.log('added all buses');
 
-    let trafo_properties = ["name", "hv_bus", "lv_bus", "vk0_percent", "vkr0_percent", "mag0_percent", "mag0_rx", "si0_hv_partial", "tap_pos", "in_service", "max_loading_percent", "parallel", "df", "tap_dependent_impedance", "vk_percent_characteristic", "vkr_percent_characteristic", "xn_ohm", "std_type"];
-    let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', trafo_properties, null, null);
-    let moveTo = L.geoJSON(trafo_geoJSON, {
-        onEachFeature: function(feature, layer) {
-            createPopup(feature, layer);
-            NetworkObject.trafoList.push(layer);
-            layer.on('click', function(e) {
-                clickOnMarker(e.target, 'trafo', 0);
-            })
-        },
-        style: NetworkObject.trafoStyles[1]
-    }).addTo(map);
+    let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', (isEditableNetwork) ? trafo_properties : null, null, null);
+    addGeoJSONtoMap(true, trafo_geoJSON, 'trafo', isEditableNetwork);
     console.log('added all trafos');
-
-    map.fitBounds(moveTo.getBounds());
-
-    populateLists('bus');
-    populateLists('line');
-    populateLists('trafo');
-    populateLists('ext_grid');
-
-    populateEditor('bus', bus_properties, null, null);
-    populateEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties);
-    populateEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties);
-    populateEditor('ext_grid', ext_grid_properties, null, null);
-    populateEditor('line_std_types', line_std_properties, null, null);
-    populateEditor('trafo_std_types', trafo_std_properties, null, null);
-    populateEditor('trafo3w_std_types', trafo3w_std_properties, null, null);
-
-    tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "inline-flex";
-    }
 }
 
 //function generates GeoJSON for a given feature (i.e. bus, line, trafo, ext_grid)
@@ -427,7 +447,8 @@ function extractPropertiesFromNet(input, pointIndex, properties) {
 }
 
 window.addEventListener("load", (event) => {
-    if(window.location.pathname == '/networks') {
+    console.log(window.location.pathname);
+    if(window.location.pathname == '/networks' || window.location.pathname == '/demand') {
         WriteShapefiles();
     }
   });

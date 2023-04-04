@@ -111,38 +111,43 @@ function fillSelectedFeatureEditor(sel, listName) {
     clickOnMarker(selectedObject, listName, 0);
 }
 
+function resetStyle(target, feature) {
+    let zoomLevel = 14;
+    if(feature == 'bus' || feature == 'ext_grid') {
+        map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
+    }
+    else {
+        map.setView(target.getLatLngs()[0], Math.max(map.getZoom(), zoomLevel));
+    }
+
+    if(clicked) {
+        let oldStyle = NetworkObject[clicked[1] + 'Styles'];
+        //makes sure the list that holds the previously selected feature deselects all options
+        if(clicked[1] != feature) {
+            document.getElementById(clicked[1] + 'Select').value = "";
+        }
+        clicked[0].setStyle(oldStyle[1]);
+    }
+    target.setStyle(NetworkObject[feature + 'Styles'][0]);
+    clicked = [target, feature];
+
+    let featureList = NetworkObject[feature + 'List'];
+    let selectedList = document.getElementById(feature + "Select");
+    let newIndex = featureList.findIndex((entry) => entry === target);
+    selectedList.selectedIndex = newIndex;
+}
+
 //When clicking on a map element or making a selection from a list, we highlight the relevant element, open the Editor window and fill its input fields
 //with the relevant values
 function clickOnMarker(target, feature, drawModeOverride) {
     if((!map.pm.globalDrawModeEnabled()) || drawModeOverride) {
-        let zoomLevel = 14;
-        if(feature == 'bus' || feature == 'ext_grid') {
-            map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));
-        }
-        else {
-            map.setView(target.getLatLngs()[0], Math.max(map.getZoom(), zoomLevel));
-        }
-
         //resets previously selected markers
-        if(clicked) {
-            let oldStyle = NetworkObject[clicked[1] + 'Styles'];
-            //makes sure the list that holds the previously selected feature deselects all options
-            if(clicked[1] != feature) {
-                document.getElementById(clicked[1] + 'Select').value = "";
-            }
-            clicked[0].setStyle(oldStyle[1]);
-        }
-        target.setStyle(NetworkObject[feature + 'Styles'][0]);
-        clicked = [target, feature];
+        resetStyle(target, feature);
 
         let featureList = NetworkObject[feature + 'List'];
 
         let selectedButton = document.getElementById(feature + "ListButton");
         selectedButton.click();
-
-        let selectedList = document.getElementById(feature + "Select");
-        let newIndex = featureList.findIndex((entry) => entry === target);
-        selectedList.selectedIndex = newIndex;
 
         let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
         for (i = 0; i < editorcontent.length; i++) {

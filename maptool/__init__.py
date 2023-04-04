@@ -40,9 +40,13 @@ def create_app(test_config=None):
 
     from maptool.postcode_editor import bp as postcode_bp
     from maptool.network_editor import bp as network_bp
+    from maptool.demand_editor import bp as demand_bp
+
 
     app.register_blueprint(postcode_bp)
     app.register_blueprint(network_bp)
+    app.register_blueprint(demand_bp)
+
 
     #On first opening, display postal code selection gui
     @app.route('/')

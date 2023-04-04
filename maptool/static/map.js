@@ -1,3 +1,5 @@
+var map;
+
 const tileProvider = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const  mapOptions = {
     center: [48.4109158419, 7.7652256726],
@@ -5,11 +7,13 @@ const  mapOptions = {
     pmIgnore: false
     }
     
-var map = new L.map('map', mapOptions);
-L.tileLayer(tileProvider, {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-}).addTo(map);
+if (map == undefined) {
+    map = new L.map('map', mapOptions);
+    L.tileLayer(tileProvider, {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+}
 
 var legend = L.control({position: 'bottomleft'});
     legend.onAdd = function (map) {
