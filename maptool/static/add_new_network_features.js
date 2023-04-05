@@ -25,6 +25,7 @@ function closeForm() {
     for (feature in featuresToDeleteList) {
         featuresToDeleteList[feature][0].setStyle(featuresToDeleteList[feature][0].defaultOptions);
     }
+    featuresToDeleteList = [];
     document.getElementById("popupForm").style.display = "none";
   }
 
@@ -56,7 +57,6 @@ function prepareFeatureDelete(featureName, featureLists) {
                 
             }
         }
-
         //highlight all features that are about to be deleted
         for (feature in featuresToDeleteList) {
             featuresToDeleteList[feature][0].setStyle({fillColor: 'red', color: 'red'});
@@ -130,7 +130,6 @@ map.on('pm:create', (e) => {
         featureProperties[property] = null;
     }  
 
-    // TODO: Add feature to GUI list
     let featureCoords = [];
 
     if (featureType == 'Point') {

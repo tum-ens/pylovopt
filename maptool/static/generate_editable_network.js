@@ -99,7 +99,7 @@ let NetworkObject = {
 }
 
 //generates GeoJSON files to pass to the python section of our code, gets called on button press
-function WriteShapefiles() {
+function WriteShapefiles() {  
     var layers = L.PM.Utils.findLayers(map);
     if(layers.length != 0) {
         var group = L.featureGroup();
@@ -161,6 +161,25 @@ function WriteShapefiles() {
 
         if(window.location.pathname == '/demand') {
             document.getElementById('bus').style.display = 'inline-block';
+            let demandList = document.getElementById('demandList');
+            for (let i = 0; i < NetworkObject.busList.length; i++) {
+                let demandSelect = document.createElement('select');
+                for (let j = 0; j < 4; j++) {
+                    let option = document.createElement("option");
+                    option.text = NetworkObject.busList[i].feature.properties.index;
+                    demandSelect.add(option);
+                    demandSelect.className = "feature-editor__featurelist-tab__demand-select";
+                }
+        
+                let demandListElem = document.createElement('li');
+                if (i % 2 == 0) {
+                    demandSelect.style.backgroundColor = "#cfcfcf";
+                }
+                demandListElem.appendChild(demandSelect);
+                demandList.appendChild(demandListElem);
+            }
+
+            scrollSync('.scroll-sync');
         }
     });
 }

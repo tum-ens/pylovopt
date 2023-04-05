@@ -214,6 +214,26 @@ function writeBackEditedFeature(target) {
     }
 }
 
+function scrollSync(selector) {
+    let active = null;
+    document.querySelectorAll(selector).forEach(function(select) {
+        select.addEventListener("mouseenter", function(e) {
+        active = e.target;
+      });
+  
+      select.addEventListener("scroll", function(e) {
+        if (e.target !== active) return;
+  
+        document.querySelectorAll(selector).forEach(function(target) {
+          if (active === target) return;
+          
+          target.scrollTop = active.scrollTop;
+          target.scrollLeft = active.scrollLeft;
+        });
+      });
+    });
+  }
+
 
 //Purely for debug atm, we will want to keep feature information within the markers themselves
 //might be worth considering to display the editor window via the popup (visually too messy?)
