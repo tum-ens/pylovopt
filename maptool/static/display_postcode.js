@@ -44,8 +44,17 @@ function getPostalCodeArea(plz_type) {
                     'Content-type': 'application/json'},
                 body: JSON.stringify(shapes)
             }).then(function (response) {
-                console.log(response.json());
-            });
+                return(response.json());
+            }).then(function (building_data) {
+                console.log(group);
+                group.remove();
+                var layers = L.PM.Utils.findLayers(map);
+                layers.forEach((layer) =>{
+                        layer.remove();
+                    });
+                L.geoJSON(building_data).addTo(map);
+
+            }).catch((err) => console.error(err));
         }
     }
 }

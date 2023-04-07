@@ -53,10 +53,7 @@ def postcodeNets():
 def postcodeArea():
     if request.method == 'POST':
         shape = str(request.get_json()['features'][0]['geometry'])
-        print(shape)
 
         gg = GridGenerator(plz=80801)
-        buildings = gg.pgr.test__getPlzIntersectionFromShapefile(shape)
-
-        print(buildings)
-        return {'Success': 200}
+        buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile(shape)
+        return buildings

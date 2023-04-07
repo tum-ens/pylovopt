@@ -2,7 +2,7 @@ var map;
 
 const tileProvider = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 const  mapOptions = {
-    center: [48.4109158419, 7.7652256726],
+    center: [49.717189494, 11.0392827],
     zoom: 11,
     pmIgnore: false
     }
