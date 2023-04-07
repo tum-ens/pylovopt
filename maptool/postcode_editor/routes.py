@@ -11,8 +11,14 @@ def postcode():
         session['plz'] = plz
         gg = GridGenerator(plz=request.get_json())
         pg = gg.pgr
-        postcode_gdf = pg.getGeoDataFrame(table="postcode_result", id=request.get_json()).to_crs(epsg=4326)
-        postcode_boundary = postcode_gdf.boundary.to_json()
+        print(request.get_json())
+
+        versions = pg.getAllVersionsofPLZ(request.get_json())
+        print("VERSIONS: ", versions[0][0])
+
+
+        postcode_gdf = pg.getGeoDataFrame(table="postcode_result", id=request.get_json(), version_id=versions[0][0])
+        postcode_boundary = postcode_gdf.to_crs(epsg=4326).boundary.to_json()
 
         return postcode_boundary
 
@@ -41,3 +47,16 @@ def postcodeNets():
             netList.append([kcid, bcid, pp.to_json(grid)]) 
 
         return netList
+
+
+@bp.route('/postcode/area', methods=['GET', 'POST'])
+def postcodeArea():
+    if request.method == 'POST':
+        shape = str(request.get_json()['features'][0]['geometry'])
+        print(shape)
+
+        gg = GridGenerator(plz=80801)
+        buildings = gg.pgr.test__getPlzIntersectionFromShapefile(shape)
+
+        print(buildings)
+        return {'Success': 200}

@@ -6,10 +6,11 @@
 
 {% block content %}
 <div class="list-selection">
-  <select id="networkSelect" class ="featureSelect" size="24" onchange="highlightSelectedPreviewLayer(this)"></select>
+  <select id="networkSelect" class ="feature-editor__featurelist-tab__feature-select" size="24" onchange="highlightSelectedPreviewLayer(this)"></select>
 </div>
 
 <div class="action-buttons">
+  <button class="button action-buttons__button" id="selectPLZAreaButton" type="button" onclick="getPostalCodeArea('plz-area')">Select Area</button>
   <a href="/networks" >
     <button class="button action-buttons__button" id="selectNetworkButton" type="button" onclick="sendBackSelectedNetworkKcidBcid()" disabled>Select Network</button>
   </a>

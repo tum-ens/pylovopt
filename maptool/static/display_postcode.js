@@ -1,33 +1,53 @@
 let previousSelectedPreviewLayer;
 let netList = [];
 
-function getPostalCodeArea() {
-    let plz = document.getElementById("PLZ").value;
-    fetch("http://127.0.0.1:5000/postcode", {
+function getPostalCodeArea(plz_type) {
+    if (plz_type == 'plz-number') {
+        let plz = document.getElementById("PLZ").value;
+        fetch("http://127.0.0.1:5000/postcode", {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'},
+                    body: JSON.stringify(plz)
+            }).then(function (response) {
+                return response.json();
+            }).then(function (postcodeData) {
+                let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: 'green'}}).addTo(map);
+                map.fitBounds(postcodeGeoJSON.getBounds());
+                console.log('added plz area');
+                
+                console.log('starting Postcode nets fetch');
+                fetch('/postcode/nets')
+                .then(function (response) {
+                    return response.json();
+                }).then(function (postcodeNets) {
+                    for(let i = 0; i < postcodeNets.length; i++) {
+                        displayPreviewNet(postcodeNets[i][0], postcodeNets[i][1], JSON.parse(postcodeNets[i][2]));
+                    }
+                    console.log('added all nets in plz area');
+                    populateNetList('network', netList)
+                });
+            }).catch((err) => console.error(err));
+    }
+    if (plz_type == 'plz-area') {
+        var layers = L.PM.Utils.findLayers(map);
+        if(layers.length != 0) {
+            var group = L.featureGroup();
+            layers.forEach((layer)=>{
+                group.addLayer(layer);
+            });
+            shapes = group.toGeoJSON();
+            console.log(shapes.features[0].geometry);
+            fetch("http://127.0.0.1:5000/postcode/area", {
                 method: 'POST',
                 headers: {
                     'Content-type': 'application/json'},
-                body: JSON.stringify(plz)
-        }).then(function (response) {
-            return response.json();
-        }).then(function (postcodeData) {
-            let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: 'green'}}).addTo(map);
-            map.fitBounds(postcodeGeoJSON.getBounds());
-            console.log('added plz area');
-            
-            console.log('starting Postcode nets fetch');
-            fetch('/postcode/nets')
-            .then(function (response) {
-                return response.json();
-            }).then(function (postcodeNets) {
-                for(let i = 0; i < postcodeNets.length; i++) {
-                    displayPreviewNet(postcodeNets[i][0], postcodeNets[i][1], JSON.parse(postcodeNets[i][2]));
-                    //console.log("Added net " + i);
-                }
-                console.log('added all nets in plz area');
-                populateNetList('network', netList)
+                body: JSON.stringify(shapes)
+            }).then(function (response) {
+                console.log(response.json());
             });
-        }).catch((err) => console.error(err));
+        }
+    }
 }
 
 //we only display the lines of all networks for performance reasons, showing buses adds too many nodes
@@ -36,7 +56,7 @@ function displayPreviewNet(kcid, bcid, ppdata) {
     let line_geoJSON = createFeatures(true, ppdata, 'line', null, null, null);
     
     let linePreviewLayer = L.geoJSON(line_geoJSON, {
-        style: getStyleDict()['LineStyles'][1]        
+        style: NetworkObject.lineStyles[1]        
     }).addTo(map);
 
     netList.push([kcid, bcid, linePreviewLayer]);
