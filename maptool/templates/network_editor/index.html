@@ -84,9 +84,9 @@
 
     {% include "network_editor/include/urbs_results.html" %}
 
-    <script defer src="{{url_for('static', filename='generate_editable_network.js')}}"></script>
-    <script defer src="{{url_for('static', filename='display_editable_network_features.js')}}"></script>
-    <script defer src="{{url_for('static', filename='collect_returnable_network_features.js')}}"></script>
-    <script defer src="{{url_for('static', filename='add_new_network_features.js')}}"></script>
+    <script defer src="{{url_for('static', filename='/network_editor/generate_editable_network.js')}}"></script>
+    <script defer src="{{url_for('static', filename='/network_editor/display_editable_network_features.js')}}"></script>
+    <script defer src="{{url_for('static', filename='/network_editor/collect_returnable_network_features.js')}}"></script>
+    <script defer src="{{url_for('static', filename='/network_editor/add_new_network_features.js')}}"></script>
 {% endblock %}
 

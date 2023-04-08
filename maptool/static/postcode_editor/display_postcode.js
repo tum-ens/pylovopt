@@ -1,5 +1,7 @@
 let previousSelectedPreviewLayer;
 let netList = [];
+let res_building_geojson;
+let oth_building_geojson;
 
 function getPostalCodeArea(plz_type) {
     if (plz_type == 'plz-number') {
@@ -37,7 +39,6 @@ function getPostalCodeArea(plz_type) {
                 group.addLayer(layer);
             });
             shapes = group.toGeoJSON();
-            console.log(shapes.features[0].geometry);
             fetch("http://127.0.0.1:5000/postcode/area", {
                 method: 'POST',
                 headers: {
@@ -52,7 +53,21 @@ function getPostalCodeArea(plz_type) {
                 layers.forEach((layer) =>{
                         layer.remove();
                     });
-                L.geoJSON(building_data).addTo(map);
+                if(building_data.res_buildings.features != null) {
+                    res_building_geojson = L.geoJSON(building_data.res_buildings, {
+                        onEachFeature: function(feature, layer) {
+                            onEachFeature (feature, layer);
+                        }
+                    }).addTo(map);
+                }
+
+                if(building_data.oth_buildings.features != null) {
+                    oth_building_geojson = L.geoJSON(building_data.oth_buildings, {
+                        onEachFeature: function(feature, layer) {
+                            onEachFeature (feature, layer);
+                        }
+                    }).addTo(map);
+                }
 
             }).catch((err) => console.error(err));
         }
@@ -65,7 +80,7 @@ function displayPreviewNet(kcid, bcid, ppdata) {
     let line_geoJSON = createFeatures(true, ppdata, 'line', null, null, null);
     
     let linePreviewLayer = L.geoJSON(line_geoJSON, {
-        style: NetworkObject.lineStyles[1]        
+        style: NetworkObject.lineStyles[1], 
     }).addTo(map);
 
     netList.push([kcid, bcid, linePreviewLayer]);
@@ -145,3 +160,54 @@ function sendBackSelectedNetworkKcidBcid() {
         }).catch((err) => console.error(err));
 }
 
+
+
+function highlightBuildingFeature(e) {
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+
+    layer.bringToFront();
+}
+
+function resetBuildingHighlight(e) {
+    res_building_geojson.resetStyle(e.target);
+}
+
+function zoomToBuildingFeature(e) {
+    map.fitBounds(e.target.getBounds());
+}
+
+function displayBuildingEditOptions(e) {
+    zoomToBuildingFeature(e);
+}
+
+function onEachFeature(feature, layer) {
+    createBuildingPopup(feature, layer);
+    layer.on({
+        mouseover: highlightBuildingFeature,
+        mouseout: resetBuildingHighlight,
+        click: displayBuildingEditOptions
+    });
+}
+
+function createBuildingPopup(feature, layer) {
+    var container = L.DomUtil.create('div');
+    var button = L.DomUtil.create('button', 'button cancel', container);
+    button.innerText = 'delete Building';
+    button.onclick = function() {
+        console.log(layer);
+        map.removeLayer(layer);
+    }
+
+    var popup = L.popup();
+    popup.setContent(
+        button
+    );
+    layer.bindPopup(popup);
+}

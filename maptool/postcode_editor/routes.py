@@ -7,15 +7,11 @@ import pandapower as pp
 @bp.route('/postcode', methods=['GET', 'POST'])
 def postcode():
     if request.method == 'POST':
-        plz = {'key' : request.get_json()}
+        plz = {'value' : request.get_json()}
         session['plz'] = plz
         gg = GridGenerator(plz=request.get_json())
         pg = gg.pgr
-        print(request.get_json())
-
         versions = pg.getAllVersionsofPLZ(request.get_json())
-        print("VERSIONS: ", versions[0][0])
-
 
         postcode_gdf = pg.getGeoDataFrame(table="postcode_result", id=request.get_json(), version_id=versions[0][0])
         postcode_boundary = postcode_gdf.to_crs(epsg=4326).boundary.to_json()
@@ -27,13 +23,13 @@ def postcode():
 def postcodeNets():
     #once the user has selected a preview net, he submits the corresponding kcid and bcid
     if request.method == 'POST':
-        kcid_bcid = {'key' : request.get_json()}
+        kcid_bcid = {'value' : request.get_json()}
         session['kcid_bcid'] = kcid_bcid
         return 'Success', 200
     
     #After receiving the postal code boundary the js code requests all nets of the selected version and plz
     if request.method == 'GET':
-        plz = session.get('plz')['key']
+        plz = session.get('plz')['value']
         gg = GridGenerator(plz=plz)
         pg = gg.pgr
 
@@ -55,5 +51,6 @@ def postcodeArea():
         shape = str(request.get_json()['features'][0]['geometry'])
 
         gg = GridGenerator(plz=80801)
-        buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile(shape)
-        return buildings
+        res_buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile('res', shape)
+        oth_buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile('oth', shape)
+        return {"res_buildings" : res_buildings, "oth_buildings" : oth_buildings}
