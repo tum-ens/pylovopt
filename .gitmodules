@@ -1,3 +1,4 @@
 [submodule "Connector-syn-grid"]
 	path = Connector-syn-grid
 	url = https://github.com/DBaur22/Connector-syn-grid.git
+	branch = maptool
