@@ -59,9 +59,8 @@ Then navigate to http://127.0.0.1:5000 in a browser of your choice (though prefe
 Once you have opened the tool in a browser of your choice you will be presented with a map view centered somewhere in Bavaria.
 
 ### Selecting an area for your networks
-1. You can enter a german PLZ into the input in the top right corner to show all already existing nets for that PLZ. Note that the selection depends on the version_id specified in Syngrids version_config.py file. At the moment there is no way to choose a version in the GUI or show if any results exist at all for a given PLZ. These features will be added shortly. <br>
-Valid PLZs and Version_Ids at the moment are for example (91301, 11.2), (80801, 11.2) <br>
-Once you have submitted a valid PLZ and written a valid id into the version_config.py file, the tool will display the generated networks on the map. You can choose one of them by clicking on it or selecting it via the list on the right and clicking "Select Network"
+1. You can enter a german PLZ into the input in the top right corner to show all already existing nets for that PLZ. A popup window will let you select one of the available networks for that area, or you can choose to create a new version of the network. NOTE: At this moment, choosing a new version does nothing.
+Once you have submitted a valid PLZ, the tool will display the generated networks on the map. You can choose one of them by clicking on it or selecting it via the list on the right and clicking "Select Network"
 2. You can select an area by drawing a shape on the map via the tools on the left side of the page and then clicking the "Select Area" button. At the moment this will only display all the buildings the database can find within the selected area. Clicking on individual buildings opens a popup that allows you to delete a specific building
 
 ### Editing a selected network
