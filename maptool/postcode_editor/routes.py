@@ -50,7 +50,8 @@ def postcodeArea():
     if request.method == 'POST':
         shape = str(request.get_json()['features'][0]['geometry'])
 
-        gg = GridGenerator(plz=80801)
+        gg = GridGenerator(plz='99999', geom_shape=shape)
         res_buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile('res', shape)
         oth_buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile('oth', shape)
+        #gg.generate_grid_from_geom()
         return {"res_buildings" : res_buildings, "oth_buildings" : oth_buildings}
