@@ -9,7 +9,24 @@
   <select id="networkSelect" class ="feature-editor__featurelist-tab__feature-select" size="24" onchange="highlightSelectedPreviewLayer(this)"></select>
 </div>
 
+
+<div class="loginPopup">
+  <div class="formPopup" id="popupForm">
+    <form class="formContainer">
+      The following versions are available for the given PLZ:
+      <div class="form-popup__version-select" id="versionRadioButtons">
+      </div>
+      <button type="button" class="btn" onclick="chooseVersionOfPlzNetwork()">Choose Version</button>
+      <button type="button" class="btn cancel" onclick="closeForm()">Cancel</button>
+    </form>
+  </div>
+</div>
+
 <div class="action-buttons">
+  <div class="action-buttons-searchfield">
+    <input type="number" id="PLZ" value="80801">
+    <button class="button action-buttons__button" id="submit-plz-button" type="submit" onclick="selectVersionOfPostalCodeNetwork()">Submit</button>
+  </div>
   <button class="button action-buttons__button" id="selectPLZAreaButton" type="button" onclick="getPostalCodeArea('plz-area')">Select Area</button>
   <a href="/networks" >
     <button class="button action-buttons__button" id="selectNetworkButton" type="button" onclick="sendBackSelectedNetworkKcidBcid()" disabled>Select Network</button>

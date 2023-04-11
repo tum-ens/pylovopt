@@ -160,7 +160,7 @@ function clickOnMarker(target, feature, drawModeOverride) {
         let editor_elems = editor_form.children;
 
         //features can have a std_type input and other input fields related to that std_type. Std_type properties should only be editable via the std_type list
-        //for all other features, the properties are still added as read-only, while std_types are selectable from a dropdown menu
+        //for all features that correspond to the std_type, the properties are still added as read-only, while std_types are selectable from a dropdown menu
         let selectedStdType;
         for (let i = 0; i < editor_elems.length; i++) {
             if (editor_elems[i].nodeName == 'INPUT') {
@@ -196,6 +196,7 @@ function clickOnMarker(target, feature, drawModeOverride) {
     }
 }
 
+//onchange function for editor view. If a field is changed, its new value is written back to the relevant object
 function writeBackEditedFeature(target) {
     let feature = target.parentElement.id.replace("Form", "");
     let idxInFeatureList = document.getElementById(feature + "Select").selectedIndex

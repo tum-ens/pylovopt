@@ -3,10 +3,114 @@ let netList = [];
 let res_building_geojson;
 let oth_building_geojson;
 
+let res_style = {
+    fillColor: "#0065BD",
+    color: "#0065BD",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.5
+}
+
+let oth_style = {
+    fillColor: "#E37222",
+    color: "#E37222",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.7
+}
+
+
+function selectVersionOfPostalCodeNetwork() {
+    let plz = document.getElementById("PLZ").value;
+    fetch("http://127.0.0.1:5000/postcode", {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'},
+                body: JSON.stringify(plz)
+        }).then(function (response) {
+            return response.json();
+        }).then(function (versionData) {
+            document.getElementById("popupForm").style.display = "block"
+            console.log(versionData);
+
+            let versionRadioButtonsDiv = document.getElementById("versionRadioButtons");
+            for (version in versionData) {
+                let versionRadioButton = document.createElement("INPUT");
+                versionRadioButton.setAttribute("type", "radio");
+                versionRadioButton.name = "versionRadioButton";
+                versionRadioButton.id = versionData[version][0];
+                versionRadioButton.value = versionData[version][0];
+                versionRadioButtonsDiv.append(versionRadioButton);
+
+                let versionLabel = document.createElement("LABEL");
+                versionLabel.htmlFor = versionData[version][0];
+                versionLabel.innerHTML = versionData[version][0];
+                versionRadioButtonsDiv.append(versionLabel);    
+                versionRadioButtonsDiv.append(document.createElement("br"))
+            }
+
+            let newVersionRadioButton = document.createElement("INPUT");
+            newVersionRadioButton.setAttribute("type", "radio");
+            newVersionRadioButton.name = "versionRadioButton";
+            newVersionRadioButton.id = "newVersionRadioButton";
+            newVersionRadioButton.value = "0.0";
+            versionRadioButtonsDiv.append(newVersionRadioButton);
+
+            let newVersionLabel = document.createElement("LABEL");
+            newVersionLabel.htmlFor = "newVersionRadioButton";
+            newVersionLabel.innerHTML = "New Version";
+            versionRadioButtonsDiv.append(newVersionLabel);  
+
+            let newVersionTextInput = document.createElement("INPUT");
+            newVersionTextInput.setAttribute("type", "number");
+            newVersionTextInput.name = "newVersionTextInput";
+            newVersionTextInput.id = "newVersionTextInput";
+            newVersionTextInput.placeholder = "new Version";
+            versionRadioButtonsDiv.append(newVersionTextInput);
+
+
+        }).catch((err) => console.error(err));
+}
+
+function chooseVersionOfPlzNetwork() {
+
+    let versionElement = document.querySelector('input[name="versionRadioButton"]:checked')
+    if(versionElement) {
+        let version = versionElement.value;
+
+        if(version == "0.0") {
+            let newVersionInput = document.getElementById("newVersionTextInput");
+            if (newVersionInput.value) {
+                version = newVersionInput.value;
+            }
+            else {
+                //TODO: flash input field red
+                return
+            }
+        }
+
+        console.log(version)
+        fetch("http://127.0.0.1:5000/postcode/plz/version", {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'},
+            body: JSON.stringify(version)
+        }).then(function (response) {
+            return response.json();
+        }).then(function (version) {
+            getPostalCodeArea('plz-number');
+            closeForm();
+        }).catch((err) => console.error(err));
+    } 
+    else {
+        alert("please select a version");
+    }
+}
+
 function getPostalCodeArea(plz_type) {
     if (plz_type == 'plz-number') {
         let plz = document.getElementById("PLZ").value;
-        fetch("http://127.0.0.1:5000/postcode", {
+        fetch("http://127.0.0.1:5000/postcode/plz", {
                     method: 'POST',
                     headers: {
                         'Content-type': 'application/json'},
@@ -14,7 +118,7 @@ function getPostalCodeArea(plz_type) {
             }).then(function (response) {
                 return response.json();
             }).then(function (postcodeData) {
-                let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: 'green'}}).addTo(map);
+                let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: '#A2AD00', dashArray: '5'}}).addTo(map);
                 map.fitBounds(postcodeGeoJSON.getBounds());
                 console.log('added plz area');
                 
@@ -55,15 +159,18 @@ function getPostalCodeArea(plz_type) {
                     });
                 if(building_data.res_buildings.features != null) {
                     res_building_geojson = L.geoJSON(building_data.res_buildings, {
+                        style : res_style,
                         onEachFeature: function(feature, layer) {
+                            feature.properties.type = 'res';
                             onEachFeature (feature, layer);
                         }
                     }).addTo(map);
                 }
-
                 if(building_data.oth_buildings.features != null) {
                     oth_building_geojson = L.geoJSON(building_data.oth_buildings, {
+                        style : oth_style,
                         onEachFeature: function(feature, layer) {
+                            feature.properties.type = 'oth'
                             onEachFeature (feature, layer);
                         }
                     }).addTo(map);
@@ -164,10 +271,15 @@ function sendBackSelectedNetworkKcidBcid() {
 
 function highlightBuildingFeature(e) {
     var layer = e.target;
+    let color = '#a14d12'
+
+    if(e.target.feature.properties.type == 'res') {
+        color = '#003359'
+    }
 
     layer.setStyle({
         weight: 5,
-        color: '#666',
+        color: color,
         dashArray: '',
         fillOpacity: 0.7
     });
@@ -176,7 +288,11 @@ function highlightBuildingFeature(e) {
 }
 
 function resetBuildingHighlight(e) {
-    res_building_geojson.resetStyle(e.target);
+    if(e.target.feature.properties.type == 'res') {
+        res_building_geojson.resetStyle(e.target);
+    }else {
+        oth_building_geojson.resetStyle(e.target);
+    }
 }
 
 function zoomToBuildingFeature(e) {
@@ -210,4 +326,8 @@ function createBuildingPopup(feature, layer) {
         button
     );
     layer.bindPopup(popup);
+}
+
+function closeForm() {
+    document.getElementById("popupForm").style.display = 'none';
 }

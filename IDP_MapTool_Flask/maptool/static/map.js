@@ -15,7 +15,8 @@ if (map == undefined) {
     }).addTo(map);
 }
 
-var legend = L.control({position: 'bottomleft'});
+if (window.location.pathname == '/networks') {
+    var legend = L.control({position: 'bottomleft'});
     legend.onAdd = function (map) {
     let colors = ['#0065BD', '#007deb', '#42bd4a', '#42bd4a', '#e6b029'];
     var div = L.DomUtil.create('div', 'info legend'),
@@ -33,6 +34,7 @@ var legend = L.control({position: 'bottomleft'});
     return div;
     };
     legend.addTo(map);
+}
 
 //We remove all preexisting options execpt quad, circle and polygon (might only use polygon for ease tbh)
 map.pm.addControls({  

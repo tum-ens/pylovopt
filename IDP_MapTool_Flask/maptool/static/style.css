@@ -123,16 +123,11 @@ color: #ffffff;
 font-weight: 500;
 }
 
-.site-header .navbar input[type=number] {
-  float: right;
+input[type=number] {
   padding: 6px;
   border: none;
   font-size: 17px;
-}
-
-#submit-plz-button {
-  margin-right: 1%;
-  padding: 8px;
+  height: 100%;
 }
 
 /* || Network in Postcode Area Selection Element --------------------------*/
@@ -419,6 +414,7 @@ input[type=text]:focus + label {
   opacity: 1;
 }
 
+
 /* || Generic Buttons --------------------------*/
 .action-buttons {
   position: absolute;
@@ -427,7 +423,7 @@ input[type=text]:focus + label {
   background: #ff000000;
   color: #333333;
   height: 5%;
-  width: 20%;
+  width: 100%;
   min-height: 3em;
   min-width: 6em;
   z-index: 99;
@@ -435,19 +431,33 @@ input[type=text]:focus + label {
   pointer-events: none;
 }
 
-#returnEditedNetButton, #selectNetworkButton {
-  position: absolute;
-  right: 0%;
-  bottom: 0%
+.action-buttons-searchfield {
+  position:absolute;
+  pointer-events: fill;
+  left: 2rem;
+  bottom: 0rem;
+  height: 100%;
 }
+
 .action-buttons__button {
-  padding: 15px 32px;
+  position: absolute;
+  white-space: nowrap;
+  padding: 12px 32px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
   transition-duration: 0.4s;
   pointer-events: all;
+  bottom: 0rem;
+}
+
+#returnEditedNetButton, #selectNetworkButton {
+  right: 0rem;
+}
+
+#selectPLZAreaButton{
+  right: 11rem;
 }
 
 .urbs-results {

@@ -1,5 +1,6 @@
 let featuresToDeleteList = [];
 
+//switches leaflet map mode to draw and makes sure we place down the correct marker type
 function addFeature(feature) {
     let style = NetworkObject[feature + 'Styles'][1];
     let type = '';
@@ -21,6 +22,7 @@ function addFeature(feature) {
     }
 }
 
+//closes deletion popup window and resets all highlighted features in the map view
 function closeForm() {
     for (feature in featuresToDeleteList) {
         featuresToDeleteList[feature][0].setStyle(featuresToDeleteList[feature][0].defaultOptions);
@@ -29,11 +31,13 @@ function closeForm() {
     document.getElementById("popupForm").style.display = "none";
   }
 
+//TODO: This is awful. Change this
+//if you try to delete a bus, tries to find all connected features (lines, ext_grids, trafos) and marks them as about to be deleted as well 
 function prepareFeatureDelete(featureName, featureLists) {
     if(featureName == 'bus') {
+        //opens the delete popup window that allows the user to back out of deleting the bus
         document.getElementById("popupForm").style.display = "block";
         let featureSelect = document.getElementById(featureName + 'Select');
-        //console.log(featureSelect.options[featureSelect.selectedIndex].text);
 
         featuresToDeleteList.push([NetworkObject['busList'][featureSelect.selectedIndex], 'bus', featureSelect.selectedIndex]);
         for (featureType in featureLists) {
@@ -89,10 +93,8 @@ function deleteConnectedFeatures() {
 function deleteFeature(featureName) {
     let featureSelect = document.getElementById(featureName + 'Select');
     if (featureSelect.selectedIndex != -1) {
-        //console.log(NetworkObject[featureName + 'List'][featureSelect.selectedIndex]);
         map.removeLayer(NetworkObject[featureName + 'List'][featureSelect.selectedIndex]);
         NetworkObject[featureName + 'List'].splice(featureSelect.selectedIndex, 1);
-        //console.log(NetworkObject[featureName + 'List'][featureSelect.selectedIndex]);
         featureSelect.remove(featureSelect.selectedIndex);
         document.getElementById(featureName + 'Editor').style.display = 'none';
     }

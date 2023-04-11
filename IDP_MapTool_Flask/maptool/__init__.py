@@ -8,6 +8,9 @@ import os
 from flask import Flask, render_template, jsonify, request, session
 
 #--------------------------------PURELY FOR DEBUG--------------------------------#
+#uses a generic network to test visualization and editabilty in case the database is unavailable again
+#can either use the pandapower-supplied default oberreihn-network or a custom one via json or csv-file
+
 # import pandapower as pp
 # import pandapower.networks as nw
 # from pandapower.plotting.plotly.mapbox_plot import geo_data_to_latlong

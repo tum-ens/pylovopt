@@ -12,6 +12,7 @@ def demand():
 @bp.route('/demand/editableNetwork', methods=['GET', 'POST'])
 def editableNetwork():
     #on opening of the network view the js code requests full information of the previously selected network
+    #we return the network with previously chosen and session-dependant plz, kcid and bcid with all features
     if request.method == 'GET':
         plz = session.get('plz')['value']
         kcid_bcid = session.get('kcid_bcid')['value']
