@@ -35,37 +35,43 @@ function selectVersionOfPostalCodeNetwork() {
 
             let versionRadioButtonsDiv = document.getElementById("versionRadioButtons");
             for (version in versionData) {
+                let versionRadioButtonDiv = document.createElement("div");
+                versionRadioButtonDiv.classList.add("form_popup__version-select__radio-button");
                 let versionRadioButton = document.createElement("INPUT");
                 versionRadioButton.setAttribute("type", "radio");
                 versionRadioButton.name = "versionRadioButton";
                 versionRadioButton.id = versionData[version][0];
                 versionRadioButton.value = versionData[version][0];
-                versionRadioButtonsDiv.append(versionRadioButton);
+                versionRadioButtonDiv.append(versionRadioButton);
 
                 let versionLabel = document.createElement("LABEL");
                 versionLabel.htmlFor = versionData[version][0];
                 versionLabel.innerHTML = versionData[version][0];
-                versionRadioButtonsDiv.append(versionLabel);    
-                versionRadioButtonsDiv.append(document.createElement("br"))
+                versionRadioButtonDiv.append(versionLabel);    
+                versionRadioButtonDiv.append(document.createElement("br"))
+                versionRadioButtonsDiv.append(versionRadioButtonDiv);
             }
 
+            let versionRadioButtonDiv = document.createElement("div");
+            versionRadioButtonDiv.classList.add("form_popup__version-select__radio-button");
             let newVersionRadioButton = document.createElement("INPUT");
             newVersionRadioButton.setAttribute("type", "radio");
             newVersionRadioButton.name = "versionRadioButton";
             newVersionRadioButton.id = "newVersionRadioButton";
             newVersionRadioButton.value = "0.0";
-            versionRadioButtonsDiv.append(newVersionRadioButton);
+            versionRadioButtonDiv.append(newVersionRadioButton);
 
             let newVersionLabel = document.createElement("LABEL");
             newVersionLabel.htmlFor = "newVersionRadioButton";
             newVersionLabel.innerHTML = "New Version";
-            versionRadioButtonsDiv.append(newVersionLabel);  
+            versionRadioButtonDiv.append(newVersionLabel);  
 
             let newVersionTextInput = document.createElement("INPUT");
             newVersionTextInput.setAttribute("type", "number");
             newVersionTextInput.name = "newVersionTextInput";
             newVersionTextInput.id = "newVersionTextInput";
             newVersionTextInput.placeholder = "new Version";
+            versionRadioButtonsDiv.append(versionRadioButtonDiv);
             versionRadioButtonsDiv.append(newVersionTextInput);
 
 
@@ -118,7 +124,7 @@ function getPostalCodeArea(plz_type) {
             }).then(function (response) {
                 return response.json();
             }).then(function (postcodeData) {
-                let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: '#A2AD00', dashArray: '5'}}).addTo(map);
+                let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: '#003359', dashArray: '5'}}).addTo(map);
                 map.fitBounds(postcodeGeoJSON.getBounds());
                 console.log('added plz area');
                 
@@ -203,8 +209,10 @@ function displayPreviewNet(kcid, bcid, ppdata) {
                 previousSelectedPreviewLayer.resetStyle(layer)
             })
         }
-        linePreviewLayer.setStyle({ color: 'red'})
+        linePreviewLayer.setStyle({ color: '#E37222', weight: 3})
         previousSelectedPreviewLayer = linePreviewLayer;
+
+        map.fitBounds(linePreviewLayer.getBounds());
 
         let selectedNetwork = document.getElementById("networkSelect");
         let newIndex = netList.findIndex((entry) => entry[2] === linePreviewLayer);
@@ -216,7 +224,7 @@ function displayPreviewNet(kcid, bcid, ppdata) {
 
     function styleWhenMouseOver(e) {
         if(linePreviewLayer != previousSelectedPreviewLayer) {
-            linePreviewLayer.setStyle({ color: 'green', fillColor: 'green' })
+            linePreviewLayer.setStyle({ color: '#005293', fillColor: '#005293' , weight: 3})
         }
     }
     function styleWhenMouseOut(e) {

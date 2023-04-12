@@ -7,9 +7,13 @@ function addFeature(feature) {
     if(feature == 'bus' || feature =='ext_grid') {
         type = 'Point'
         map.pm.enableDraw('CircleMarker', {
-            snappable: (feature == 'ext_grid'), 
+            snappable: true, 
+            snapDistance: 20,
+            requireSnapToFinish : (feature == 'ext_grid'),
             continueDrawing: false,
             pathOptions: style,
+            snapIgnore: (feature == 'ext_grid'),
+
           })
     }
     else {
@@ -17,7 +21,9 @@ function addFeature(feature) {
         map.pm.enableDraw('Line', {
             snappable: true,
             snapDistance: 20,
+            requireSnapToFinish: true, 
             pathOptions: style,
+            snapIgnore: true,
           })
     }
 }
@@ -101,13 +107,46 @@ function deleteFeature(featureName) {
 
 }
 
+let snapped = false;   
+let snappedFeature;
+let snappedFeatures = [];
+
+
+map.on('pm:drawstart', ({ workingLayer }) => {
+    workingLayer.on('pm:snap', (e) => {
+        if (e.shape == 'Line' && e.layerInteractedWith.feature != undefined) {
+            console.log(e);
+            snappedFeature = e.layerInteractedWith.feature.properties.name;
+            snapped = true;
+        }
+        else {
+            snappedFeature = e.layerInteractedWith._parentCopy.feature.properties.name
+        }
+    });
+    
+    workingLayer.on('pm:unsnap', (e) => {
+        snapped = false;    
+    });
+
+    workingLayer.on('pm:vertexadded', (e) => {
+        if(map.pm.Draw.Line.enabled() && e.layer.getLatLngs().length == 1) {
+            if(!snapped) {
+                map.pm.Draw.Line._removeLastVertex(); 
+            }
+            else {
+                snappedFeatures.push(snappedFeature);
+            }
+        }
+    });
+  });
+
 map.on('pm:create', (e) => {
-    e.marker.remove();
     let featureName = '';
     let featureType = '';
 
     if(e.shape == 'Line') {
         featureType = 'LineString'
+        snappedFeatures.push(snappedFeature);
 
         if ( e.marker.options.color == NetworkObject.lineStyles[1].color) {
             featureName = 'line';
@@ -132,6 +171,29 @@ map.on('pm:create', (e) => {
         featureProperties[property] = null;
     }  
 
+    if (featureName == 'line') {
+        featureProperties['from_bus'] = snappedFeatures[0];
+        featureProperties['to_bus'] = snappedFeatures[1];
+
+        let coords = e.marker.getLatLngs();
+        let length = 0;
+        for (let i = 0; i < coords.length - 1; i++) {
+            length += coords[i].distanceTo(coords[i + 1]);
+        }
+        
+        featureProperties['length_km'] = length/1000;
+    }
+    if (featureName == 'trafo') {
+        featureProperties['hv_bus'] = snappedFeatures[0];
+        featureProperties['lv_bus'] = snappedFeatures[1];
+
+    }
+    if(featureName == 'ext_grid') {
+        featureProperties['bus'] = snappedFeature;
+    }
+
+    snappedFeatures = [];
+
     let featureCoords = [];
 
     if (featureType == 'Point') {
@@ -144,7 +206,7 @@ map.on('pm:create', (e) => {
         }
     }
 
-    featureProperties['index'] = featureList[featureList.length - 1].feature.properties['index'] + 1;
+    featureProperties['index'] = parseInt(featureList[featureList.length - 1].feature.properties['index']) + 1;
     let featureGeoJSON = {"type" : "FeatureCollection", "features": []};    
     let featureToAdd = {"type": "Feature", 
                         "geometry": {"coordinates": featureCoords, "type": featureType}, 
@@ -171,7 +233,6 @@ map.on('pm:create', (e) => {
     else {
         L.geoJSON(featureGeoJSON, {
             onEachFeature: function(feature, layer) {
-                //layer.features = feature;
                 createPopup(feature, layer);
                 NetworkObject[featureName + 'List'].push(layer);
                 layer.on('click', function(e) {
@@ -185,10 +246,11 @@ map.on('pm:create', (e) => {
     let featureSelect = document.getElementById(featureName + "Select");
     var option = document.createElement("option");
     option.text = featureToAdd.properties.index;
-    //option.value = featureSelect.options.length;
     featureSelect.add(option);
 
     let selectedObject = NetworkObject[featureName + 'List'][featureSelect.options.length - 1];
-    console.log(selectedObject);
+    //console.log(selectedObject);
     clickOnMarker(selectedObject, featureName, 1);
+
+    e.marker.remove();
   });

@@ -67,11 +67,7 @@ def postcodeNets():
         plz = session.get('plz')['value']
         gg = GridGenerator(plz=plz)
         pg = gg.pgr
-
-        versions = pg.getAllVersionsofPLZ(plz)
-        print("VERSIONS: ", versions[0][0])
-
-        nets = pg.getAllNetsOfVersion(plz, versions[0][0])
+        nets = pg.getAllNetsOfVersion(plz, session['plz_version'])
         netList = []
 
         for kcid, bcid, grid in nets:

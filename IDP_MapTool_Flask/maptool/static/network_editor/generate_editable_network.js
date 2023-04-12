@@ -249,8 +249,10 @@ function fillStdTypeEditor(sel, listName) {
 
 
 function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature) {
+    let newGeoJson
     if (isLines) {
-        L.geoJSON(input_geoJSON, {
+        newGeoJson = L.geoJSON(input_geoJSON, {
+            snapIgnore:true,
             onEachFeature: function(feature, layer) {
                 if(isEditableFeature) {
                     createPopup(feature, layer);
@@ -266,7 +268,7 @@ function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature)
         }).addTo(map);
     }
     else {
-        L.geoJSON(input_geoJSON, {
+        newGeoJson = L.geoJSON(input_geoJSON, {
             onEachFeature: function(feature, layer) {
                 if(isEditableFeature) {
                     createPopup(feature, layer);
@@ -293,6 +295,7 @@ function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature)
             }
         }).addTo(map);
     }
+    map.fitBounds(newGeoJson.getBounds());
 }
 
 function displayNet(ppdata, isEditableNetwork) {

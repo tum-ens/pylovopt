@@ -37,22 +37,26 @@ if (window.location.pathname == '/networks') {
 }
 
 //We remove all preexisting options execpt quad, circle and polygon (might only use polygon for ease tbh)
-map.pm.addControls({  
-    position: 'topleft',  
-    drawPolyline: false,  
-    drawMarker: false,
-    drawCircleMarker: false,
-    drawText: false,
-    cutPolygon: false
-});  
+if (window.location.pathname == '/postcode') {
+    map.pm.addControls({  
+        position: 'topleft',  
+        drawPolyline: false,  
+        drawMarker: false,
+        drawCircleMarker: false,
+        drawText: false,
+        cutPolygon: false
+    });  
+}
 
 // We only ever want to have one shape at the same time for area selection
+if (window.location.pathname == '/postcode') {
 map.on('pm:drawstart', ({ workingLayer }) => {
     var layers = L.PM.Utils.findLayers(map);
     layers.forEach((layer) =>{
             layer.remove();
         });
     });
+}
 
 //on clicking on an element, we display information of the selected node in our sidebar for editing
 //TODO: disable opening a new popup if unsaved changes are displayed in sidebar or save changes automatically 

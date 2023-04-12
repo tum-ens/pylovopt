@@ -383,7 +383,17 @@ input[type=text]:focus + label {
   padding: 20px;
   background-color: #fff;
 }
-.formContainer input[type=text],
+
+.form-popup__version-select {
+  outline: #000000;
+}
+
+.form_popup__version-select__radio-button {
+  float: left;
+  clear: both;
+}
+
+.formContainer input[type=number],
 .formContainer input[type=password] {
   width: 100%;
   padding: 15px;
@@ -391,7 +401,7 @@ input[type=text]:focus + label {
   border: none;
   background: #eee;
 }
-.formContainer input[type=text]:focus,
+.formContainer input[type=number]:focus,
 .formContainer input[type=password]:focus {
   background-color: #ddd;
   outline: none;

@@ -107,7 +107,7 @@ function fillSelectedFeatureEditor(sel, listName) {
     //let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
     
     let selectedObject = NetworkObject[listName + 'List'][idx];
-
+    
     clickOnMarker(selectedObject, listName, 0);
 }
 
@@ -143,7 +143,6 @@ function clickOnMarker(target, feature, drawModeOverride) {
     if((!map.pm.globalDrawModeEnabled()) || drawModeOverride) {
         //resets previously selected markers
         resetStyle(target, feature);
-
         let featureList = NetworkObject[feature + 'List'];
 
         let selectedButton = document.getElementById(feature + "ListButton");
