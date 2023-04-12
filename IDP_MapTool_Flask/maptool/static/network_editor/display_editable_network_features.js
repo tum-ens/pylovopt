@@ -1,3 +1,9 @@
+/*
+This file contains everything related to the network editor windows.
+This includes filling the feature lists and generating the editor input fields, as well as making sure changed inputs are saved
+*/
+
+//only called once on network generation
 //fills html element for a given list of network features at intial editable network generation
 //the index property of a feature and the option index do not have to match
 function populateLists(listName) {
@@ -15,10 +21,26 @@ function populateLists(listName) {
     }
 }
 
+//only called once on network generation
 //The feature editor window template for all feature types gets filled at runtime
 //input fields and labels depend entirely on the properties defined in the displayNetwork function
-function populateEditor(listName, selectedProperties, std_typeList, std_type_properties) {
+function populateEditor(listName, selectedProperties, std_typeList, std_type_properties, secondaryFeatureName) {
     let editor_form = document.getElementById(listName + 'Form');
+    let formDiv = document.createElement('DIV');
+    let formDivId = listName + 'FormDiv';
+    formDiv.classList.add('feature-editor__selected-feature-editor__div');
+    if (secondaryFeatureName != null) {
+        formDivId = secondaryFeatureName + 'FormDiv';
+        formDiv.style.display = 'None'
+
+        let label = document.createElement("label");
+        label.innerHTML = secondaryFeatureName.toUpperCase();
+        label.classList.add('secondary-feature-label');
+
+        formDiv.appendChild(label);
+    }
+
+    formDiv.id = formDivId;
 
     for (idx in selectedProperties) {
         let label = document.createElement("label");
@@ -28,6 +50,7 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
         if(selectedProperties[idx] == 'std_type') {
             let form = document.createElement("select");
             form.classList.add('feature-editor__selected-feature-editor__stdtype-feature-select')
+            form.setAttribute('onchange', 'writeBackEditedFeature(this, "' + listName + '_std_typesFormDiv")');
             let ctr = 0;
             for(type_idx in std_typeList) {
                 let option = document.createElement("option");
@@ -36,34 +59,36 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
                 form.add(option);
                 ctr++;
             }
-            editor_form.appendChild(form);
-            editor_form.appendChild(label);
+            formDiv.appendChild(form);
+            formDiv.appendChild(label);
             for(prop_idx in std_type_properties) {
                 let input = document.createElement("input");
                 input.type="text";
                 input.readOnly = true;
                 input.id = std_type_properties[prop_idx];
                 input.name = std_type_properties[prop_idx];
-                editor_form.appendChild(input);
+                formDiv.appendChild(input);
 
                 let Prop_label = document.createElement("label");
 
                 Prop_label.htmlFor = std_type_properties[prop_idx];
                 Prop_label.innerHTML = std_type_properties[prop_idx];
-                editor_form.appendChild(Prop_label);
+                formDiv.appendChild(Prop_label);
             }
         }  
         else {
             let input = document.createElement("input");
             input.type="text";
-            input.setAttribute('onchange', 'writeBackEditedFeature(this)');
+            input.setAttribute('onchange', 'writeBackEditedFeature(this, "' + formDivId + '")');
             input.id = selectedProperties[idx];
             input.name = selectedProperties[idx];
-            editor_form.appendChild(input);
-            editor_form.appendChild(label);
+            formDiv.appendChild(input);
+            formDiv.appendChild(label);
         }
     }
+    editor_form.appendChild(formDiv);
 }
+
 
 //gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
 function openList(e, listName) {
@@ -92,7 +117,6 @@ function openList(e, listName) {
 
     }
     else {
-        console.log(listName);
         if (document.getElementById(listName + 'Select').selectedIndex != -1) {
             let editor = document.getElementById(listName + "Editor")
             editor.style.display = "inline-block";
@@ -103,14 +127,13 @@ function openList(e, listName) {
 //writes values of the currently selected feature into the input fields of the editor window
 //vestigial, should probably be folded into clickOnMarker entirely
 function fillSelectedFeatureEditor(sel, listName) {
-    let idx = parseInt(sel.selectedIndex);
-    //let debugIdx = parseInt(sel.options[sel.selectedIndex].text);
-    
+    let idx = parseInt(sel.selectedIndex);    
     let selectedObject = NetworkObject[listName + 'List'][idx];
     
     clickOnMarker(selectedObject, listName, 0);
 }
 
+//resets the styling of the previously selected feature and sets the new styling of the now selected feature
 function resetStyle(target, feature) {
     let zoomLevel = 14;
     if(feature == 'bus' || feature == 'ext_grid') {
@@ -137,13 +160,11 @@ function resetStyle(target, feature) {
     selectedList.selectedIndex = newIndex;
 }
 
-//When clicking on a map element or making a selection from a list, we highlight the relevant element, open the Editor window and fill its input fields
-//with the relevant values
+//When clicking on a map element or making a selection from a list, we highlight the relevant element, open the Editor window and fill its input fields with the relevant values
 function clickOnMarker(target, feature, drawModeOverride) {
     if((!map.pm.globalDrawModeEnabled()) || drawModeOverride) {
         //resets previously selected markers
         resetStyle(target, feature);
-        let featureList = NetworkObject[feature + 'List'];
 
         let selectedButton = document.getElementById(feature + "ListButton");
         selectedButton.click();
@@ -156,55 +177,99 @@ function clickOnMarker(target, feature, drawModeOverride) {
         document.getElementById(feature + 'Editor').style.display = 'inline-block';
 
         let editor_form = document.getElementById(feature + 'Form');
-        let editor_elems = editor_form.children;
+        let editor_divs = editor_form.children;
 
-        //features can have a std_type input and other input fields related to that std_type. Std_type properties should only be editable via the std_type list
-        //for all features that correspond to the std_type, the properties are still added as read-only, while std_types are selectable from a dropdown menu
-        let selectedStdType;
-        for (let i = 0; i < editor_elems.length; i++) {
-            if (editor_elems[i].nodeName == 'INPUT') {
-                if(target.feature.properties[editor_elems[i].name] != null) {
-                    editor_elems[i].value = target.feature.properties[editor_elems[i].name];
+        for (let i = 0; i < editor_divs.length; i++) {
+            let editor_elems = editor_form.children[i].children;
+            let target_properties = target.feature.properties
+            
+            //At the moment we know that only busses have more than one div and we know that load is the second, sgen the third div 
+            //TODO: Change this to work regardless of network structure
+            if(feature == 'bus') {
+                if (i == 1) {
+                    target_properties = target.feature.properties.load;
+                    if(Object.keys(target_properties).length === 0) {
+                        document.getElementById('loadFormDiv').style.display = 'none';
+                    }
+                    else {
+                        document.getElementById('loadFormDiv').style.display = 'block';
+                    }
                 }
-                else {
-                    editor_elems[i].value = '';
+                if (i == 2) {
+                    target_properties = target.feature.properties.sgen;
+                    if(Object.keys(target_properties).length === 0) {
+                        document.getElementById('sgenFormDiv').style.display = 'none';
+                    }
+                    else {
+                        document.getElementById('sgenFormDiv').style.display = 'block';
+
+                    }
                 }
             }
-            if (editor_elems[i].nodeName == 'SELECT') {
-                selectedStdType = target.feature.properties['std_type']
-
-                for (let j = 0; j < editor_elems[i].options.length; j++) {
-                    if (editor_elems[i].options[j].text == selectedStdType) {
-                        editor_elems[i].selectedIndex = j;
-                        break;
+            //features can have a std_type input and other input fields related to that std_type. Std_type properties should only be editable via the std_type list
+            //for all features that correspond to the std_type, the properties are still added as read-only, while std_types are selectable from a dropdown menu
+            let selectedStdType;
+            for (let i = 0; i < editor_elems.length; i++) {
+                if (editor_elems[i].nodeName == 'INPUT') {
+                    if(target_properties[editor_elems[i].name] != null) {
+                        editor_elems[i].value = target_properties[editor_elems[i].name];
+                    }
+                    else {
+                        editor_elems[i].value = '';
                     }
                 }
-                let k = 1;
-                    for (idx in NetworkObject[feature + '_stdList'][selectedStdType]) {
-                        if(feature == 'trafo') {
-                            console.log(idx, editor_elems[i+k+1].name);
+                if (editor_elems[i].nodeName == 'SELECT') {
+                    selectedStdType = target.feature.properties['std_type']
+
+                    for (let j = 0; j < editor_elems[i].options.length; j++) {
+                        if (editor_elems[i].options[j].text == selectedStdType) {
+                            editor_elems[i].selectedIndex = j;
+                            break;
                         }
-                        if(NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name] != undefined) {
-                            editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name];
-                        }
-                        k += 2; // + 2 because we need to skip the label elements
                     }
-                i += k;
+                    let k = 1;
+                        for (idx in NetworkObject[feature + '_stdList'][selectedStdType]) {
+                            if(feature == 'trafo') {
+                                console.log(idx, editor_elems[i+k+1].name);
+                            }
+                            if(NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name] != undefined) {
+                                editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name];
+                            }
+                            k += 2; // + 2 because we need to skip the label elements
+                        }
+                    i += k;
+                }
             }
         }
     }
 }
 
 //onchange function for editor view. If a field is changed, its new value is written back to the relevant object
-function writeBackEditedFeature(target) {
-    let feature = target.parentElement.id.replace("Form", "");
+function writeBackEditedFeature(target, targetDiv) {
+    let feature = target.parentElement.id.replace("FormDiv", "");
+    let load_sgen_flag = 0;
+    if(feature == 'load' || feature == 'sgen') {
+        load_sgen_flag = (feature == 'load') * 1 +  (feature == 'sgen') * 2
+        feature = 'bus';
+    }
     let idxInFeatureList = document.getElementById(feature + "Select").selectedIndex
     let featureName = target.id
 
-    console.log(feature, idxInFeatureList, target.value);
+    console.log(feature, featureName, idxInFeatureList, target.value);
+
     if(!feature.includes("std")) {
-        NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.value;
-        console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName]);
+        if(load_sgen_flag == 0) {
+            NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.value;
+            console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName]);
+        }
+        else if (load_sgen_flag == 1) {
+            NetworkObject[feature + "List"][idxInFeatureList].feature.properties.load[featureName] = target.value;
+            console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties.load[featureName]);
+        }
+        else if (load_sgen_flag ==2) {
+            NetworkObject[feature + "List"][idxInFeatureList].feature.properties.sgen[featureName] = target.value;
+            console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties.sgen[featureName]);
+        }
     }
     else {
         let selectedElement = document.getElementById(feature + "Select")[idxInFeatureList].value;

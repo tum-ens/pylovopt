@@ -145,13 +145,15 @@ function WriteShapefiles() {
             populateLists('trafo');
             populateLists('ext_grid');
     
-            populateEditor('bus', bus_properties, null, null);
-            populateEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties);
-            populateEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties);
-            populateEditor('ext_grid', ext_grid_properties, null, null);
-            populateEditor('line_std_types', line_std_properties, null, null);
-            populateEditor('trafo_std_types', trafo_std_properties, null, null);
-            populateEditor('trafo3w_std_types', trafo3w_std_properties, null, null);
+            populateEditor('bus', bus_properties, null, null, null);
+            populateEditor('bus', load_features, null, null, 'load');
+            populateEditor('bus', sgen_features, null, null, 'sgen');
+            populateEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties, null);
+            populateEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties, null);
+            populateEditor('ext_grid', ext_grid_properties, null, null, null);
+            populateEditor('line_std_types', line_std_properties, null, null, null);
+            populateEditor('trafo_std_types', trafo_std_properties, null, null, null);
+            populateEditor('trafo3w_std_types', trafo3w_std_properties, null, null, null);
 
             tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
             for (i = 0; i < tabcontent.length; i++) {
