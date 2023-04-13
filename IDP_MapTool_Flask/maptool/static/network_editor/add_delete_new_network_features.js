@@ -115,7 +115,7 @@ let snappedFeatures = [];
 map.on('pm:drawstart', ({ workingLayer }) => {
     workingLayer.on('pm:snap', (e) => {
         if (e.shape == 'Line' && e.layerInteractedWith.feature != undefined) {
-            console.log(e);
+            //console.log(e);
             snappedFeature = e.layerInteractedWith.feature.properties.name;
             snapped = true;
         }

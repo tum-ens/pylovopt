@@ -2,16 +2,42 @@
 
 {% block head %}
   {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
 {% endblock %}
 
 {% block content %}
 <div class="feature-editor">
   <div class="feature-editor__featurelist-tab" id="bus">
-    <select class ="scroll-sync feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="resetStyle(NetworkObject['busList'][this.selectedIndex], 'bus')" multiple></select>
+    <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="resetStyle(NetworkObject['busList'][this.selectedIndex], 'bus')" multiple></select>
   </div>
   <div class="feature-editor__selected-feature-editor" style="display: inline-block">
-    <ul class="scroll-sync" id="demandList">
-    </ul>
+    <form>
+      <div class="feature-editor__selected-feature-editor__demand" id="electricity">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="electricitySelect">Electricity</button>
+        <div class="panel" id="demand_electricityPanel"></div>
+        <div class="feature-editor__selected-feature-editor__demand__graph" id="main"></div>
+      </div>
+      <div class="feature-editor__selected-feature-editor__demand" id="electricity-reactive">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="electricity-reactiveSelect">Electricity-Reactive</button>
+        <div class="panel" id="demand_electricity_reactivePanel"></div>
+        <div class="feature-editor__selected-feature-editor__demand__graph"></div>
+      </div>
+      <div class="feature-editor__selected-feature-editor__demand" id="movility">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="movilitySelect">Mobility</button>
+        <div class="panel" id="demand_mobilityPanel"></div>
+        <div class="feature-editor__selected-feature-editor__demand__graph"></div>
+      </div>
+      <div class="feature-editor__selected-feature-editor__demand" id="space_heat">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="space_heatSelect">Space Heat</button>
+        <div class="panel" id="demand_space_heatPanel"></div>
+        <div class="feature-editor__selected-feature-editor__demand__graph"></div>
+      </div>
+      <div class="feature-editor__selected-feature-editor__demand" id="water_heat">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="water_heatSelect">Water Heat</button>
+        <div class="panel" id="demand_water_heatPanel"></div>
+        <div class="feature-editor__selected-feature-editor__demand__graph"></div>
+      </div>
+    </form>
   </div>
 </div>
 

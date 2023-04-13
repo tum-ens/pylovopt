@@ -8,32 +8,32 @@
     <h1></h1>
     <div class="feature-editor">
       <div class="feature-editor__buttons-tab">
-        <button class="feature-editor__buttons-tab__tablinks" id="busListButton" onclick="openList(event, 'bus')"><span>Buses</span></button>
-        <button class="feature-editor__buttons-tab__tablinks" id="lineListButton" onclick="openList(event, 'line')"><span>Lines</span></button>
-        <button class="feature-editor__buttons-tab__tablinks" id="trafoListButton" onclick="openList(event, 'trafo')"><span>Trafos</span></button>
-        <button class="feature-editor__buttons-tab__tablinks" id="trafo3wListButton" onclick="openList(event, 'trafo3w')"><span>Trafos 3w</span></button>
-        <button class="feature-editor__buttons-tab__tablinks" id="ext_gridListButton" onclick="openList(event, 'ext_grid')"><span>Ext. Grid</span></button>
-        <button class="feature-editor__buttons-tab__tablinks" id="std_typesListButton" onclick="openList(event, 'std_types')"><span>Std Types</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="busListButton" onclick="openEditableNetworkList(event, 'bus')"><span>Buses</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="lineListButton" onclick="openEditableNetworkList(event, 'line')"><span>Lines</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="trafoListButton" onclick="openEditableNetworkList(event, 'trafo')"><span>Trafos</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="trafo3wListButton" onclick="openEditableNetworkList(event, 'trafo3w')"><span>Trafos 3w</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="ext_gridListButton" onclick="openEditableNetworkList(event, 'ext_grid')"><span>Ext. Grid</span></button>
+        <button class="feature-editor__buttons-tab__tablinks" id="std_typesListButton" onclick="openEditableNetworkList(event, 'std_types')"><span>Std Types</span></button>
       </div>
       <div class="feature-editor__featurelist-tab" id="bus">
         <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('bus')">Add Bus</button>
-        <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="fillSelectedFeatureEditor(this, 'bus')" multiple></select>
+        <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="fillSelectedEditableNetworkFeatureEditor(this, 'bus')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="line">
         <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('line')">Add Line</button>
-        <select class ="feature-editor__featurelist-tab__feature-select"  id="lineSelect" onchange="fillSelectedFeatureEditor(this, 'line')" multiple></select>
+        <select class ="feature-editor__featurelist-tab__feature-select"  id="lineSelect" onchange="fillSelectedEditableNetworkFeatureEditor(this, 'line')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="trafo">
         <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('trafo')">Add Trafo</button>
-        <select  class ="feature-editor__featurelist-tab__feature-select" id="trafoSelect" onchange="fillSelectedFeatureEditor(this, 'trafo')" multiple></select>
+        <select  class ="feature-editor__featurelist-tab__feature-select" id="trafoSelect" onchange="fillSelectedEditableNetworkFeatureEditor(this, 'trafo')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="trafo3w">
         <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('trafo3ws')">Add Trafo 3w</button>
-        <select class ="feature-editor__featurelist-tab__feature-select" id="trafo3wSelect" onchange="fillSelectedFeatureEditor(this, 'trafo3w')" multiple></select>
+        <select class ="feature-editor__featurelist-tab__feature-select" id="trafo3wSelect" onchange="fillSelectedEditableNetworkFeatureEditor(this, 'trafo3w')" multiple></select>
       </div>
       <div class="feature-editor__featurelist-tab" id="ext_grid">
         <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="addFeature('ext_grid')">Add Ext. Grid</button>
-        <select class ="feature-editor__featurelist-tab__feature-select" id="ext_gridSelect" onchange="fillSelectedFeatureEditor(this, 'ext_grid')" multiple></select>
+        <select class ="feature-editor__featurelist-tab__feature-select" id="ext_gridSelect" onchange="fillSelectedEditableNetworkFeatureEditor(this, 'ext_grid')" multiple></select>
       </div>  
       <div class="feature-editor__featurelist-tab" id="std_types">
         <select class ="feature-editor__featurelist-tab__stdtype-feature-select" id="line_std_typesSelect" onchange="fillStdTypeEditor(this, 'line_std') " multiple></select>
@@ -79,7 +79,9 @@
     </div>
 
     <div class="action-buttons">
-      <button class="button action-buttons__button" type="button" id="returnEditedNetButton" onclick="returnEditedNet()">Finish Editing</button>
+      <a href="/demand" >
+        <button class="button action-buttons__button" type="button" id="returnEditedNetButton" onclick="returnEditedNet()">Finish Editing</button>
+      </a>
     </div>
 
     {% include "network_editor/include/urbs_results.html" %}

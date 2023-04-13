@@ -24,7 +24,7 @@ function populateLists(listName) {
 //only called once on network generation
 //The feature editor window template for all feature types gets filled at runtime
 //input fields and labels depend entirely on the properties defined in the displayNetwork function
-function populateEditor(listName, selectedProperties, std_typeList, std_type_properties, secondaryFeatureName) {
+function populateEditableNetworkEditor(listName, selectedProperties, std_typeList, std_type_properties, secondaryFeatureName) {
     let editor_form = document.getElementById(listName + 'Form');
     let formDiv = document.createElement('DIV');
     let formDivId = listName + 'FormDiv';
@@ -50,7 +50,7 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
         if(selectedProperties[idx] == 'std_type') {
             let form = document.createElement("select");
             form.classList.add('feature-editor__selected-feature-editor__stdtype-feature-select')
-            form.setAttribute('onchange', 'writeBackEditedFeature(this, "' + listName + '_std_typesFormDiv")');
+            form.setAttribute('onchange', 'writeBackEditedNetworkFeature(this, "' + listName + '_std_typesFormDiv")');
             let ctr = 0;
             for(type_idx in std_typeList) {
                 let option = document.createElement("option");
@@ -79,7 +79,7 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
         else {
             let input = document.createElement("input");
             input.type="text";
-            input.setAttribute('onchange', 'writeBackEditedFeature(this, "' + formDivId + '")');
+            input.setAttribute('onchange', 'writeBackEditedNetworkFeature(this, "' + formDivId + '")');
             input.id = selectedProperties[idx];
             input.name = selectedProperties[idx];
             formDiv.appendChild(input);
@@ -89,9 +89,8 @@ function populateEditor(listName, selectedProperties, std_typeList, std_type_pro
     editor_form.appendChild(formDiv);
 }
 
-
 //gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
-function openList(e, listName) {
+function openEditableNetworkList(e, listName) {
     tabcontent = document.getElementsByClassName("feature-editor__featurelist-tab");
     for (i = 0; i < tabcontent.length; i++) {
       tabcontent[i].style.display = "none";
@@ -125,8 +124,7 @@ function openList(e, listName) {
 }
 
 //writes values of the currently selected feature into the input fields of the editor window
-//vestigial, should probably be folded into clickOnMarker entirely
-function fillSelectedFeatureEditor(sel, listName) {
+function fillSelectedEditableNetworkFeatureEditor(sel, listName) {
     let idx = parseInt(sel.selectedIndex);    
     let selectedObject = NetworkObject[listName + 'List'][idx];
     
@@ -230,7 +228,7 @@ function clickOnMarker(target, feature, drawModeOverride) {
                     let k = 1;
                         for (idx in NetworkObject[feature + '_stdList'][selectedStdType]) {
                             if(feature == 'trafo') {
-                                console.log(idx, editor_elems[i+k+1].name);
+                                //console.log(idx, editor_elems[i+k+1].name);
                             }
                             if(NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name] != undefined) {
                                 editor_elems[i+k+1].value = NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name];
@@ -245,7 +243,7 @@ function clickOnMarker(target, feature, drawModeOverride) {
 }
 
 //onchange function for editor view. If a field is changed, its new value is written back to the relevant object
-function writeBackEditedFeature(target, targetDiv) {
+function writeBackEditedNetworkFeature(target, targetDiv) {
     let feature = target.parentElement.id.replace("FormDiv", "");
     let load_sgen_flag = 0;
     if(feature == 'load' || feature == 'sgen') {
@@ -255,50 +253,30 @@ function writeBackEditedFeature(target, targetDiv) {
     let idxInFeatureList = document.getElementById(feature + "Select").selectedIndex
     let featureName = target.id
 
-    console.log(feature, featureName, idxInFeatureList, target.value);
+    //console.log(feature, featureName, idxInFeatureList, target.value);
 
+    // TODO: Fix Std-type wrriteback
     if(!feature.includes("std")) {
         if(load_sgen_flag == 0) {
             NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.value;
-            console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName]);
+            //console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName]);
         }
         else if (load_sgen_flag == 1) {
             NetworkObject[feature + "List"][idxInFeatureList].feature.properties.load[featureName] = target.value;
-            console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties.load[featureName]);
+            //console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties.load[featureName]);
         }
         else if (load_sgen_flag ==2) {
             NetworkObject[feature + "List"][idxInFeatureList].feature.properties.sgen[featureName] = target.value;
-            console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties.sgen[featureName]);
+            //console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties.sgen[featureName]);
         }
     }
     else {
         let selectedElement = document.getElementById(feature + "Select")[idxInFeatureList].value;
         feature = feature.replace("_types", "");
-        console.log(selectedElement);
+        //console.log(selectedElement);
         NetworkObject[feature + "List"][selectedElement][featureName] = target.value;
     }
 }
-
-function scrollSync(selector) {
-    let active = null;
-    document.querySelectorAll(selector).forEach(function(select) {
-        select.addEventListener("mouseenter", function(e) {
-        active = e.target;
-      });
-  
-      select.addEventListener("scroll", function(e) {
-        if (e.target !== active) return;
-  
-        document.querySelectorAll(selector).forEach(function(target) {
-          if (active === target) return;
-          
-          target.scrollTop = active.scrollTop;
-          target.scrollLeft = active.scrollLeft;
-        });
-      });
-    });
-  }
-
 
 //Purely for debug atm, we will want to keep feature information within the markers themselves
 //might be worth considering to display the editor window via the popup (visually too messy?)
@@ -309,4 +287,139 @@ function createPopup(feature, layer) {
         + "Name: " + feature.properties.name + "<br>" 
     );
     layer.bindPopup(popup);
+}
+
+//DEMAND STUFF
+
+function populateDemandEditor (demand_data, demandName) {
+    console.log(demandName)
+    let testDiv = document.getElementById(demandName + "Panel")
+
+    for (key in demand_data) {
+        let label = document.createElement('LABEL')
+        label.innerHTML = key;
+        testDiv.appendChild(label);
+    }
+}
+
+function fillSelectedFeatureDemandEditor() {
+
+}
+
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    /* Toggle between adding and removing the "active" class,
+    to highlight the button that controls the panel */
+    this.classList.toggle("active");
+
+    /* Toggle between hiding and showing the active panel */
+    var panel = this.nextElementSibling;
+    if (panel.style.display === "block") {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+    }
+  });
+}
+
+
+graphs = document.getElementsByClassName("feature-editor__selected-feature-editor__demand__graph");
+for (let i = 0; i < graphs.length; i++) {
+    var myChart = echarts.init(graphs[i]);
+    // Specify the configuration items and data for the chart
+    var option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: '#6a7985'
+            }
+          }
+        },
+        legend: {
+          data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: [
+          {
+            type: 'category',
+            boundaryGap: false,
+            data: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56]
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value'
+          }
+        ],
+        series: [
+          {
+            name: 'Email',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0.89,0.16,0.67,1.17,0.55,0.4,0.45,0.97,0.45,0.32,0.43,0.13,0.52,0.43,0.63,0.25,0.38,0.32,0.61,0.36,0.3,1.12,0.54,0.17,1.01,0.16,0.35,0.38,0.43,0.23,0.22,0.09,0.4,0.24,0.61,0.66,0.34,0.58,0.38,0.45,0.06,0.75,0.41,0.25,0.31,0.39,0.57,0.44,0.31,0.54,0.23,0.45,0.14,1.63,0.84,0.1,0.18]
+          },
+          {
+            name: 'Union Ads',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0.7,0.14,0.61,1.11,0.29,0.38,0.35,0.65,0.43,0.27,0.48,0.13,0.5,0.43,0.63,0.24,0.39,0.35,0.63,0.36,0.3,1.14,0.53,0.1,0.77,0.16,0.36,0.37,0.37,0.22,0.22,0.14,0.41,0.26,0.58,0.53,0.32,0.56,0.32,0.41,0.08,0.76,0.41,0.25,0.31,0.4,0.55,0.34,0.29,0.14,0.2,0.65,0.14,1.12,0.42,0.1,0.16]
+          },
+          {
+            name: 'Video Ads',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0.76,0.17,0.68,1.02,0.29,0.37,0.37,0.59,0.42,0.23,0.47,0.31,0.61,0.39,0.67,0.24,0.34,0.31,0.6,0.34,0.3,0.78,0.52,0.11,0.72,0.16,0.42,0.28,0.65,0.44,0.23,0.14,0.31,0.19,0.5,0.41,0.42,0.59,0.35,0.34,0.09,0.83,0.39,0.26,0.28,0.28,0.47,1.08,0.29,0.14,0.23,0.59,0.14,0.98,0.42,0.1,0.17]
+          },
+          {
+            name: 'Direct',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0.81,0.15,0.45,1.02,0.3,0.42,0.44,0.46,0.4,0.25,0.47,0.15,0.58,0.5,1.02,0.23,0.37,0.34,0.64,0.33,0.31,0.6,0.57,0.11,0.71,0.16,0.21,0.29,1.43,0.31,0.33,0.17,0.25,0.22,0.52,0.47,0.53,0.58,0.42,0.37,0.09,0.82,0.44,0.32,0.28,0.3,0.66,0.61,0.34,0.13,0.25,0.52,0.14,1,0.47,0.11,0.14]
+          },
+          {
+            name: 'Search Engine',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0.77,0.15,0.48,1.3,0.32,0.4,0.32,0.43,0.4,0.24,0.61,0.15,0.62,0.52,0.77,0.23,0.59,0.37,0.76,0.37,0.36,0.77,0.56,0.09,0.97,0.17,0.17,0.3,1.81,0.26,0.4,0.11,0.27,0.27,0.51,0.7,0.58,0.69,0.47,0.37,0.12,0.86,0.44,0.3,0.4,0.31,0.67,0.44,0.92,0.14,0.21,0.72,0.14,1.11,0.45,0.12,0.14]
+          }
+        ]
+      };
+
+    // Display the chart using the configuration items and data just specified.
+    myChart.setOption(option);
 }

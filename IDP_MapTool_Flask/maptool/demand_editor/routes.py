@@ -2,6 +2,8 @@ from maptool.demand_editor import bp
 from flask import Flask, render_template, request, session
 from syngrid.GridGenerator import GridGenerator
 import pandapower as pp
+import pandas as pd
+import os
 
 #When user submits postal code or area selection in gui we return the corresponding postal code area boundary
 @bp.route('/demand', methods=['GET', 'POST'])
@@ -30,3 +32,20 @@ def editableNetwork():
     if request.method == 'POST':
         #print(request.get_json())
         return 'Success', 200
+    
+@bp.route('/demand/demand_profiles', methods=['GET', 'POST'])
+def demandProfiles():
+    demand_electricity = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/demand/profiles/electricity.csv'), sep=',').T
+    demand_electricity_reactive = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/electricity-reactive.csv'), sep=',').T
+    demand_mobility = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/mobility.csv'), sep=',').T
+    demand_space_heat = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/space_heat.csv'), sep=',').T
+    demand_water_heat = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/water_heat.csv'), sep=',').T
+
+    demand_json = {"demand_electricity" : demand_electricity.to_json(),
+            "demand_electricity_reactive" : demand_electricity_reactive.to_json(),
+            "demand_mobility" : demand_mobility.to_json(), 
+            "demand_space_heat" : demand_space_heat.to_json(),
+            "demand_water_heat" : demand_water_heat.to_json()
+            }
+
+    return demand_json

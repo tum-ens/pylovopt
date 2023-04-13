@@ -1,16 +1,14 @@
 //-----------------------------CRUCIAL JS TODOS-----------------------------//
 // TODO: define, check for correct inputs for all features
 // TODO: Write back features of all markers to JSON and send back JSON-file to create functioning pandapower data
-// TODO: Add legend for each marker type
 // TODO: Add trafo3w features to network
 
 //-----------------------------TALK TODOS-----------------------------//
 // TODO: Ask if written documentation outside of code is necessary for project hand-in
 
 //-----------------------------OPTIONAL TODOS-----------------------------//
-// TODO: put geojson.to_map() ops into their own functions for line and circlemarker respectively to further clean up code and avoid repetition
 // TODO: Deselect marker when clicking elsewhere on the map?
-// TODO: Decide whether area selection needs different shape options or if we want to stick only with Polygon
+
 
 //variable that saves last selected path and resets its style when it's deselected
 let clicked;
@@ -99,7 +97,7 @@ let NetworkObject = {
 }
 
 //generates GeoJSON files to pass to the python section of our code, gets called on button press
-function WriteShapefiles() {  
+function GetPandapowerAndWriteGeoJSONNet() {  
     var layers = L.PM.Utils.findLayers(map);
     if(layers.length != 0) {
         var group = L.featureGroup();
@@ -109,7 +107,7 @@ function WriteShapefiles() {
         shapes = group.toGeoJSON();
     }
 
-    console.log('starting Fetch');  
+    //console.log('starting Fetch');  
     let fetchString = 'editableNetwork';
     let isEditableNetwork = true;
     document.getElementById("nav-item-networks").setAttribute('href', '/networks');
@@ -132,7 +130,7 @@ function WriteShapefiles() {
                 layer.remove();
         });
 
-        console.log('Begin displaying net:');
+        //console.log('Begin displaying net:');
         displayNet(ppdata, isEditableNetwork);
 
         populateLists('bus');
@@ -145,15 +143,15 @@ function WriteShapefiles() {
             populateLists('trafo');
             populateLists('ext_grid');
     
-            populateEditor('bus', bus_properties, null, null, null);
-            populateEditor('bus', load_features, null, null, 'load');
-            populateEditor('bus', sgen_features, null, null, 'sgen');
-            populateEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties, null);
-            populateEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties, null);
-            populateEditor('ext_grid', ext_grid_properties, null, null, null);
-            populateEditor('line_std_types', line_std_properties, null, null, null);
-            populateEditor('trafo_std_types', trafo_std_properties, null, null, null);
-            populateEditor('trafo3w_std_types', trafo3w_std_properties, null, null, null);
+            populateEditableNetworkEditor('bus', bus_properties, null, null, null);
+            populateEditableNetworkEditor('bus', load_features, null, null, 'load');
+            populateEditableNetworkEditor('bus', sgen_features, null, null, 'sgen');
+            populateEditableNetworkEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties, null);
+            populateEditableNetworkEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties, null);
+            populateEditableNetworkEditor('ext_grid', ext_grid_properties, null, null, null);
+            populateEditableNetworkEditor('line_std_types', line_std_properties, null, null, null);
+            populateEditableNetworkEditor('trafo_std_types', trafo_std_properties, null, null, null);
+            populateEditableNetworkEditor('trafo3w_std_types', trafo3w_std_properties, null, null, null);
 
             tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
             for (i = 0; i < tabcontent.length; i++) {
@@ -163,25 +161,26 @@ function WriteShapefiles() {
 
         if(window.location.pathname == '/demand') {
             document.getElementById('bus').style.display = 'inline-block';
-            let demandList = document.getElementById('demandList');
-            for (let i = 0; i < NetworkObject.busList.length; i++) {
-                let demandSelect = document.createElement('select');
-                for (let j = 0; j < 4; j++) {
-                    let option = document.createElement("option");
-                    option.text = NetworkObject.busList[i].feature.properties.index;
-                    demandSelect.add(option);
-                    demandSelect.className = "feature-editor__featurelist-tab__demand-select";
-                }
-        
-                let demandListElem = document.createElement('li');
-                if (i % 2 == 0) {
-                    demandSelect.style.backgroundColor = "#cfcfcf";
-                }
-                demandListElem.appendChild(demandSelect);
-                demandList.appendChild(demandListElem);
-            }
+            
+            fetch('demand/demand_profiles')
+            .then(function (response) {
+                return response.json();
+            }).then(function (demand_data) {
+                let demand_electricity = JSON.parse(demand_data['demand_electricity'])
+                let demand_electricity_reactive = JSON.parse(demand_data['demand_electricity_reactive'])
+                let demand_mobility = JSON.parse(demand_data['demand_mobility'])
+                let demand_space_heat = JSON.parse(demand_data['demand_space_heat'])
+                let demand_water_heat = JSON.parse(demand_data['demand_water_heat'])
 
-            scrollSync('.scroll-sync');
+
+                populateDemandEditor(demand_electricity, "demand_electricity");
+                populateDemandEditor(demand_electricity_reactive, "demand_electricity_reactive");
+                populateDemandEditor(demand_mobility, "demand_mobility");
+                populateDemandEditor(demand_space_heat, "demand_space_heat");
+                populateDemandEditor(demand_water_heat, "demand_water_heat");
+
+            });
+
         }
     });
 }
@@ -249,7 +248,6 @@ function fillStdTypeEditor(sel, listName) {
     }
 }
 
-
 function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature) {
     let newGeoJson
     if (isLines) {
@@ -285,7 +283,7 @@ function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature)
                     });
                 }else if(featureName == 'bus') {
                     if (Object.keys(feature.properties.load).length) {
-                        console.log(Object.keys(feature.properties.load).length);
+                        //console.log(Object.keys(feature.properties.load).length);
                         marker.setStyle(NetworkObject.busStyles[1]);
                         marker.on('click', function(e) {
                             resetStyle(e.target, 'bus');
@@ -303,21 +301,21 @@ function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature)
 function displayNet(ppdata, isEditableNetwork) {
     let line_geoJSON = createFeatures(true, ppdata, 'line', (isEditableNetwork) ? line_properties : null, null, null);
     addGeoJSONtoMap(true, line_geoJSON, 'line', isEditableNetwork);
-    console.log("added all lines");
+    //console.log("added all lines");
 
     let ext_grid_geoJSON = createFeatures(false, ppdata, 'ext_grid', (isEditableNetwork) ? ext_grid_properties : null, null, null);
     addGeoJSONtoMap(false, ext_grid_geoJSON, 'ext_grid', isEditableNetwork);
-    console.log('added all external grids');
+    //console.log('added all external grids');
 
     let bus_geoJSON = createFeatures(false, ppdata, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]);
 
     addGeoJSONtoMap(false, bus_geoJSON, 'bus', isEditableNetwork);
 
-    console.log('added all buses');
+    //console.log('added all buses');
 
     let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', (isEditableNetwork) ? trafo_properties : null, null, null);
     addGeoJSONtoMap(true, trafo_geoJSON, 'trafo', isEditableNetwork);
-    console.log('added all trafos');
+    //console.log('added all trafos');
 }
 
 //function generates GeoJSON for a given feature (i.e. bus, line, trafo, ext_grid)
@@ -471,8 +469,8 @@ function extractPropertiesFromNet(input, pointIndex, properties) {
 }
 
 window.addEventListener("load", (event) => {
-    console.log(window.location.pathname);
+    //console.log(window.location.pathname);
     if(window.location.pathname == '/networks' || window.location.pathname == '/demand') {
-        WriteShapefiles();
+        GetPandapowerAndWriteGeoJSONNet();
     }
   });

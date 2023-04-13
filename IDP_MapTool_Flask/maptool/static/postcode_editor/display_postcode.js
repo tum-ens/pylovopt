@@ -31,7 +31,7 @@ function selectVersionOfPostalCodeNetwork() {
             return response.json();
         }).then(function (versionData) {
             document.getElementById("popupForm").style.display = "block"
-            console.log(versionData);
+            //console.log(versionData);
 
             let versionRadioButtonsDiv = document.getElementById("versionRadioButtons");
             for (version in versionData) {
@@ -95,7 +95,7 @@ function chooseVersionOfPlzNetwork() {
             }
         }
 
-        console.log(version)
+        //console.log(version)
         fetch("http://127.0.0.1:5000/postcode/plz/version", {
             method: 'POST',
             headers: {
@@ -126,7 +126,7 @@ function getPostalCodeArea(plz_type) {
             }).then(function (postcodeData) {
                 let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: '#003359', dashArray: '5'}}).addTo(map);
                 map.fitBounds(postcodeGeoJSON.getBounds());
-                console.log('added plz area');
+                //console.log('added plz area');
                 
                 console.log('starting Postcode nets fetch');
                 fetch('/postcode/nets')
@@ -157,7 +157,7 @@ function getPostalCodeArea(plz_type) {
             }).then(function (response) {
                 return(response.json());
             }).then(function (building_data) {
-                console.log(group);
+                //console.log(group);
                 group.remove();
                 var layers = L.PM.Utils.findLayers(map);
                 layers.forEach((layer) =>{
@@ -325,7 +325,7 @@ function createBuildingPopup(feature, layer) {
     var button = L.DomUtil.create('button', 'button cancel', container);
     button.innerText = 'delete Building';
     button.onclick = function() {
-        console.log(layer);
+        //console.log(layer);
         map.removeLayer(layer);
     }
 
