@@ -37,7 +37,7 @@ if (window.location.pathname == '/networks') {
 }
 
 //We remove all preexisting options execpt quad, circle and polygon (might only use polygon for ease tbh)
-if (window.location.pathname == '/postcode') {
+if (window.location.pathname == '/') {
     map.pm.addControls({  
         position: 'topleft',  
         drawPolyline: false,  
@@ -49,7 +49,7 @@ if (window.location.pathname == '/postcode') {
 }
 
 // We only ever want to have one shape at the same time for area selection
-if (window.location.pathname == '/postcode') {
+if (window.location.pathname == '/') {
 map.on('pm:drawstart', ({ workingLayer }) => {
     var layers = L.PM.Utils.findLayers(map);
     layers.forEach((layer) =>{
