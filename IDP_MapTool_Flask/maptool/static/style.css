@@ -334,7 +334,7 @@ form {
 .feature-editor__selected-feature-editor__stdtype-feature-select{
   width: 100%;
   position: relative;
-  top: 3%;
+  top: 2rem;
 }
 
 input[type=text] {
@@ -541,5 +541,14 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 0 18px;
   background-color: white;
   display: none;
-  overflow: hidden;
+  overflow: scroll;
+  max-height: 20rem;
+}
+
+.panel label {
+  display: flex;
+  align-items: center;
+}
+.panel input[type=checkbox]{
+  flex: none;
 }

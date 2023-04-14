@@ -96,6 +96,20 @@ let NetworkObject = {
         }]     
 }
 
+let DemandObject = {
+    "demand_electricity" : {},
+    "demand_electricity_reactive" : {},
+    "demand_mobility" : {},
+    "demand_space_heat" : {},
+    "demand_water_heat" : {},
+}
+
+let demand_electricity;
+let demand_electricity_reactive;
+let demand_mobility;
+let demand_space_heat;
+let demand_water_heat;
+
 //generates GeoJSON files to pass to the python section of our code, gets called on button press
 function GetPandapowerAndWriteGeoJSONNet() {  
     var layers = L.PM.Utils.findLayers(map);
@@ -166,18 +180,18 @@ function GetPandapowerAndWriteGeoJSONNet() {
             .then(function (response) {
                 return response.json();
             }).then(function (demand_data) {
-                let demand_electricity = JSON.parse(demand_data['demand_electricity'])
-                let demand_electricity_reactive = JSON.parse(demand_data['demand_electricity_reactive'])
-                let demand_mobility = JSON.parse(demand_data['demand_mobility'])
-                let demand_space_heat = JSON.parse(demand_data['demand_space_heat'])
-                let demand_water_heat = JSON.parse(demand_data['demand_water_heat'])
+                DemandObject.demand_electricity = JSON.parse(demand_data['demand_electricity']);
+                DemandObject.demand_electricity_reactive = JSON.parse(demand_data['demand_electricity_reactive']);
+                DemandObject.demand_mobility = JSON.parse(demand_data['demand_mobility']);
+                DemandObject.demand_space_heat = JSON.parse(demand_data['demand_space_heat']);
+                DemandObject.demand_water_heat = JSON.parse(demand_data['demand_water_heat']);
 
 
-                populateDemandEditor(demand_electricity, "demand_electricity");
-                populateDemandEditor(demand_electricity_reactive, "demand_electricity_reactive");
-                populateDemandEditor(demand_mobility, "demand_mobility");
-                populateDemandEditor(demand_space_heat, "demand_space_heat");
-                populateDemandEditor(demand_water_heat, "demand_water_heat");
+                populateDemandEditor(DemandObject.demand_electricity, "demand_electricity", 0);
+                populateDemandEditor(DemandObject.demand_electricity_reactive, "demand_electricity_reactive", 1);
+                populateDemandEditor(DemandObject.demand_mobility, "demand_mobility", 2);
+                populateDemandEditor(DemandObject.demand_space_heat, "demand_space_heat", 3);
+                populateDemandEditor(DemandObject.demand_water_heat, "demand_water_heat", 4);
 
             });
 

@@ -291,19 +291,62 @@ function createPopup(feature, layer) {
 
 //DEMAND STUFF
 
-function populateDemandEditor (demand_data, demandName) {
-    console.log(demandName)
+function populateDemandEditor (demand_data, demandName, demandIndex) {
     let testDiv = document.getElementById(demandName + "Panel")
-
     for (key in demand_data) {
+
+        if(key > 100) {
+          break;
+        }
+
+        let checkbox = document.createElement('INPUT');
+        checkbox.setAttribute("type", "checkbox");
+        checkbox.setAttribute("name", "checkbox_" + key);
+        checkbox.setAttribute("onclick", "check_uncheck_demand(this, '" + demandName + "', " + key + ", '" + demandIndex + "')");
+        
         let label = document.createElement('LABEL')
-        label.innerHTML = key;
+        label.appendChild(checkbox);
+        label.insertAdjacentHTML("beforeend", key)
+        label.for = "checkbox_" + key;
+
         testDiv.appendChild(label);
     }
 }
 
 function fillSelectedFeatureDemandEditor() {
 
+}
+
+function check_uncheck_demand(checkbox, demand_type, key, demandIndex) {
+  if (checkbox.checked) {
+    let data = DemandObject[demand_type][key];
+    delete data['t'];
+
+    let newgraph = {
+      name: '' + key,
+      type: 'line',
+      stack: 'Total',
+      areaStyle: {},
+      emphasis: {
+        focus: 'series'
+      },
+      data: Object.values(data)
+    };
+    let option = charts[demandIndex].getOption();
+    option.series.push(newgraph);
+    option.legend[0].data.push(newgraph.name);
+    charts[demandIndex].setOption(option);
+  }
+  else {
+    let option = charts[demandIndex].getOption();
+    let index = option.series.findIndex(data => data.name === 'Test' + checkbox.name);
+    option.series.splice(index, 1);
+
+    index = option.legend[0].data.findIndex(name => name === 'Test' + checkbox.name);
+    option.legend[0].data.splice(index, 1);
+
+    charts[demandIndex].setOption(option, true);
+  }
 }
 
 var acc = document.getElementsByClassName("accordion");
@@ -326,7 +369,25 @@ for (i = 0; i < acc.length; i++) {
 }
 
 
-graphs = document.getElementsByClassName("feature-editor__selected-feature-editor__demand__graph");
+function addData(chart, label, data) {
+  chart.data.labels.push(label);
+  chart.data.datasets.forEach((dataset) => {
+      dataset.data.push(data);
+  });
+  chart.update();
+}
+
+function removeData(chart) {
+  chart.data.labels.pop();
+  chart.data.datasets.forEach((dataset) => {
+      dataset.data.pop();
+  });
+  chart.update();
+}
+
+let charts = [];
+
+let graphs = document.getElementsByClassName("feature-editor__selected-feature-editor__demand__graph");
 for (let i = 0; i < graphs.length; i++) {
     var myChart = echarts.init(graphs[i]);
     // Specify the configuration items and data for the chart
@@ -341,7 +402,7 @@ for (let i = 0; i < graphs.length; i++) {
           }
         },
         legend: {
-          data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+          data: []
         },
         toolbox: {
           feature: {
@@ -366,60 +427,10 @@ for (let i = 0; i < graphs.length; i++) {
             type: 'value'
           }
         ],
-        series: [
-          {
-            name: 'Email',
-            type: 'line',
-            stack: 'Total',
-            areaStyle: {},
-            emphasis: {
-              focus: 'series'
-            },
-            data: [0.89,0.16,0.67,1.17,0.55,0.4,0.45,0.97,0.45,0.32,0.43,0.13,0.52,0.43,0.63,0.25,0.38,0.32,0.61,0.36,0.3,1.12,0.54,0.17,1.01,0.16,0.35,0.38,0.43,0.23,0.22,0.09,0.4,0.24,0.61,0.66,0.34,0.58,0.38,0.45,0.06,0.75,0.41,0.25,0.31,0.39,0.57,0.44,0.31,0.54,0.23,0.45,0.14,1.63,0.84,0.1,0.18]
-          },
-          {
-            name: 'Union Ads',
-            type: 'line',
-            stack: 'Total',
-            areaStyle: {},
-            emphasis: {
-              focus: 'series'
-            },
-            data: [0.7,0.14,0.61,1.11,0.29,0.38,0.35,0.65,0.43,0.27,0.48,0.13,0.5,0.43,0.63,0.24,0.39,0.35,0.63,0.36,0.3,1.14,0.53,0.1,0.77,0.16,0.36,0.37,0.37,0.22,0.22,0.14,0.41,0.26,0.58,0.53,0.32,0.56,0.32,0.41,0.08,0.76,0.41,0.25,0.31,0.4,0.55,0.34,0.29,0.14,0.2,0.65,0.14,1.12,0.42,0.1,0.16]
-          },
-          {
-            name: 'Video Ads',
-            type: 'line',
-            stack: 'Total',
-            areaStyle: {},
-            emphasis: {
-              focus: 'series'
-            },
-            data: [0.76,0.17,0.68,1.02,0.29,0.37,0.37,0.59,0.42,0.23,0.47,0.31,0.61,0.39,0.67,0.24,0.34,0.31,0.6,0.34,0.3,0.78,0.52,0.11,0.72,0.16,0.42,0.28,0.65,0.44,0.23,0.14,0.31,0.19,0.5,0.41,0.42,0.59,0.35,0.34,0.09,0.83,0.39,0.26,0.28,0.28,0.47,1.08,0.29,0.14,0.23,0.59,0.14,0.98,0.42,0.1,0.17]
-          },
-          {
-            name: 'Direct',
-            type: 'line',
-            stack: 'Total',
-            areaStyle: {},
-            emphasis: {
-              focus: 'series'
-            },
-            data: [0.81,0.15,0.45,1.02,0.3,0.42,0.44,0.46,0.4,0.25,0.47,0.15,0.58,0.5,1.02,0.23,0.37,0.34,0.64,0.33,0.31,0.6,0.57,0.11,0.71,0.16,0.21,0.29,1.43,0.31,0.33,0.17,0.25,0.22,0.52,0.47,0.53,0.58,0.42,0.37,0.09,0.82,0.44,0.32,0.28,0.3,0.66,0.61,0.34,0.13,0.25,0.52,0.14,1,0.47,0.11,0.14]
-          },
-          {
-            name: 'Search Engine',
-            type: 'line',
-            stack: 'Total',
-            areaStyle: {},
-            emphasis: {
-              focus: 'series'
-            },
-            data: [0.77,0.15,0.48,1.3,0.32,0.4,0.32,0.43,0.4,0.24,0.61,0.15,0.62,0.52,0.77,0.23,0.59,0.37,0.76,0.37,0.36,0.77,0.56,0.09,0.97,0.17,0.17,0.3,1.81,0.26,0.4,0.11,0.27,0.27,0.51,0.7,0.58,0.69,0.47,0.37,0.12,0.86,0.44,0.3,0.4,0.31,0.67,0.44,0.92,0.14,0.21,0.72,0.14,1.11,0.45,0.12,0.14]
-          }
-        ]
+        series: []
       };
 
     // Display the chart using the configuration items and data just specified.
     myChart.setOption(option);
+    charts.push(myChart);
 }
