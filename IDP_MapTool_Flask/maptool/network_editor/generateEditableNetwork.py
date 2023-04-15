@@ -112,4 +112,37 @@
 # import pandas as pd
 
 
-# def createFeatures (isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures):
+
+import pandapower as pp
+import pandapower.networks as nw
+from pandapower.plotting.plotly.mapbox_plot import geo_data_to_latlong
+testnet = nw.mv_oberrhein()
+geo_data_to_latlong(testnet, projection='epsg:31467')
+
+net = pp.to_json(testnet)
+
+def createFeatures (isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures):
+    input_data = ppdata[featureName]
+    input_indices = input_data.index
+    input_columns = input_data.columns
+
+    input_geoCoords = {}
+    input_geoIndices = {}
+
+    if featureName == 'bus' or featureName == 'line':
+        input_geoCoords = ppdata[featureName + '_geodata']
+        input_geoIndices = input_geoCoords.index
+    else:
+        input_geoCoords = ppdata.bus_geodata
+        input_geoIndices = input_geoCoords.index
+
+        idx = [0,0]
+        temp = []
+
+        if featureName == 'ext_grid' :
+            print("heyo")
+
+createFeatures(False, testnet, 'line', '', '', '')
+createFeatures(False, testnet, 'bus', '', '', '')
+createFeatures(False, testnet, 'trafo', '', '', '')
+createFeatures(False, testnet, 'ext_grid', '', '', '')
