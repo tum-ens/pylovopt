@@ -10,6 +10,9 @@ from flask import Flask, render_template, request, session
 
 from pandapower2urbs import construct_model_components as pp2u
 
+from .generateEditableNetwork import createGeoJSONofNetwork
+import json
+
 #once the Select Network button is pressed, we return the editable network view 
 @bp.route('/networks', methods=['GET', 'POST'])
 def networks():
@@ -25,13 +28,16 @@ def editableNetwork():
         pg = gg.pgr
         testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
         print(testnet)
-
         #--------------------------------PURELY FOR DEBUG--------------------------------#
         #from maptool import net as testnet
         #from .generateEditableNetwork import createFeatures
         #createFeatures(False, pp.from_json(testnet), 'bus',0,0,0)
         #--------------------------------PURELY FOR DEBUG--------------------------------#
-        return pp.to_json(testnet)
+        #return pp.to_json(testnet)
+        
+        json_net = createGeoJSONofNetwork(testnet)
+        json_net = json.dumps(json_net, default=str, indent=6)
+        return json_net
 
     if request.method == 'POST':
         #print(request.get_json())

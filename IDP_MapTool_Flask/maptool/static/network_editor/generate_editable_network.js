@@ -139,18 +139,19 @@ function GetPandapowerAndWriteGeoJSONNet() {
     .then(function (response) {
         return response.json();
     }).then(function (ppdata) {
+        
         var layers = L.PM.Utils.findLayers(map);
         layers.forEach((layer) =>{
                 layer.remove();
         });
 
-        //console.log('Begin displaying net:');
-        displayNet(ppdata, isEditableNetwork);
+        displayNetNew(ppdata, isEditableNetwork);
+
 
         populateLists('bus');
 
         if(window.location.pathname == '/networks' ) {
-            extractStdTypes(ppdata);
+            extractStdTypesNew(JSON.parse(ppdata["std_types"]));
             fillStdTypeList();
 
             populateLists('line');
@@ -199,12 +200,26 @@ function GetPandapowerAndWriteGeoJSONNet() {
     });
 }
 
-function extractStdTypes(ppdata) {
-    let input = ppdata['_object']['std_types'];
-    NetworkObject.line_stdList= input['line'];
-    NetworkObject.trafo_stdList = input['trafo'];
-    NetworkObject.trafo3w_stdList = input['trafo3w'];
+function extractStdTypesNew(ppdata) {
+    NetworkObject.line_stdList= ppdata['line'];
+    NetworkObject.trafo_stdList = ppdata['trafo'];
+    NetworkObject.trafo3w_stdList = ppdata['trafo3w'];
 }
+
+function displayNetNew(ppdata, isEditableNetwork) {
+    addGeoJSONtoMap(true, ppdata['line'], 'line', isEditableNetwork);
+    //console.log("added all lines");
+
+    addGeoJSONtoMap(false, ppdata['ext_grid'], 'ext_grid', isEditableNetwork);
+    //console.log('added all external grids');
+
+    addGeoJSONtoMap(false, ppdata['bus'], 'bus', isEditableNetwork);
+    //console.log('added all buses');
+
+    addGeoJSONtoMap(true, ppdata['trafo'], 'trafo', isEditableNetwork);
+    //console.log('added all trafos');
+}
+
 
 function fillStdTypeList() {
     let lists = [NetworkObject.line_stdList, NetworkObject.trafo_stdList, NetworkObject.trafo3w_stdList];
@@ -310,176 +325,6 @@ function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature)
         }).addTo(map);
     }
     map.fitBounds(newGeoJson.getBounds());
-}
-
-function displayNet(ppdata, isEditableNetwork) {
-    let line_geoJSON = createFeatures(true, ppdata, 'line', (isEditableNetwork) ? line_properties : null, null, null);
-    addGeoJSONtoMap(true, line_geoJSON, 'line', isEditableNetwork);
-    //console.log("added all lines");
-
-    let ext_grid_geoJSON = createFeatures(false, ppdata, 'ext_grid', (isEditableNetwork) ? ext_grid_properties : null, null, null);
-    addGeoJSONtoMap(false, ext_grid_geoJSON, 'ext_grid', isEditableNetwork);
-    //console.log('added all external grids');
-
-    let bus_geoJSON = createFeatures(false, ppdata, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]);
-
-    addGeoJSONtoMap(false, bus_geoJSON, 'bus', isEditableNetwork);
-
-    //console.log('added all buses');
-
-    let trafo_geoJSON = createFeatures(true, ppdata, 'trafo', (isEditableNetwork) ? trafo_properties : null, null, null);
-    addGeoJSONtoMap(true, trafo_geoJSON, 'trafo', isEditableNetwork);
-    //console.log('added all trafos');
-}
-
-//function generates GeoJSON for a given feature (i.e. bus, line, trafo, ext_grid)
-function createFeatures(isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures) {
-    let input_geoJSON = {"type" : "FeatureCollection", "features": []};     
-    
-    let input = ppdata['_object'][featureName];
-    let input_data = JSON.parse(input['_object'])['data'];
-    let input_indices = JSON.parse(input['_object'])['index'];
-    let input_columns = JSON.parse(input['_object'])['columns'];
-    
-    let input_geodata = {};
-    let input_geoCoords = {};
-    let input_geoIndices = {};
-
-    if(featureName == 'bus' || featureName == 'line') {
-        input_geodata = ppdata['_object'][featureName + '_geodata'];
-        input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
-        input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
-    }
-    //(ext_grid and trafo geolocation depend on geolocation of buses)
-    else {
-        let input_columns = JSON.parse(input['_object'])['columns'];
-        let idx = [0, 0];
-        let temp = [];
-        let temp_indices = [];
-
-        input_geodata = ppdata['_object']['bus_geodata'];
-        input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
-        input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
-
-        if(featureName == 'ext_grid') {
-            idx[0] = input_columns.indexOf('bus', 0);
-            for (entry in input_data) {
-                 for (geo_entry in input_geoIndices) {
-                     if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
-                         temp.push(input_geoCoords[geo_entry]);
-                         temp_indices.push(entry);
-                         break;
-                     }
-
-                 }
-             }
-        }
-        else if (featureName == 'trafo') {
-            idx[0] = input_columns.indexOf('hv_bus', 0);
-            idx[1] = input_columns.indexOf('lv_bus', 0);
-            tempLine = [];
-           
-            for (entry in input_data) {
-                tempLine = [];
-                 for (let geo_entry = 0; geo_entry < input_geoIndices.length; geo_entry++) {
-                     if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
-                        let x1 = [input_geoCoords[geo_entry][0], input_geoCoords[geo_entry][1]];
-                        tempLine.push(x1);
-                        temp_indices.push(entry);
-
-                        for (let second_entry = 0; second_entry < input_geoIndices.length; second_entry++) {
-                            if (input_data[entry][idx[1]] == input_geoIndices[second_entry]) {
-                                let x2 = [input_geoCoords[second_entry][0], input_geoCoords[second_entry][1]]
-                                tempLine.push(x2);
-                                break;
-                            }
-                        }
-                        temp.push([tempLine]);
-                        break;
-                     }
-                 }
-             }
-        }
-        input_geoCoords = temp;
-        input_geoIndices = temp_indices;
-    }
-    let currentFeatureProperties = {};
-
-    for (point in input_geoCoords) {
-        currentFeatureProperties = {};
-
-        let inputCoordinates = [];
-        if(isLines) {
-            for (i in input_geoCoords[point]) {
-                inputCoordinates.push(input_geoCoords[point][i]);
-            }
-        }
-        else {
-            inputCoordinates = [input_geoCoords[point][0], input_geoCoords[point][1]];
-        }
-
-        //corresponding index value associated with the bus
-        let pointIndex = input_geoIndices[point];
-        let pointNameIndex = 0;
-        if (input_indices.indexOf(pointIndex, 0) != -1) {
-            pointNameIndex = input_indices.indexOf(pointIndex, 0)
-        } else {
-            pointNameIndex = pointIndex;
-        }
-
-        if(featureProperties != null) {
-            currentFeatureProperties.index = pointIndex;
-            for (property in featureProperties) {
-                if(input_columns.indexOf(featureProperties[property], 0) == -1) {
-                    currentFeatureProperties[featureProperties[property]] = null
-                }
-                else {
-                    currentFeatureProperties[featureProperties[property]] = input_data[pointNameIndex][input_columns.indexOf(featureProperties[property], 0)];
-                }
-            }
-        }
-
-        //we add load, switch etc as subproperties on one of our main features
-        if(propertyGroupNames != null && propertyGroupFeatures != null) {
-            for (let property = 0; property < propertyGroupNames.length; property++) {
-                let propertyGroup = ppdata['_object'][propertyGroupNames[property]];
-                let extractedProperties = extractPropertiesFromNet(propertyGroup, pointIndex, propertyGroupFeatures[property])
-                currentFeatureProperties[propertyGroupNames[property]] = extractedProperties;
-            }
-        }
-
-        let feature = { "type": "Feature", 
-                        "geometry": {"type": (isLines) ? "LineString" : "Point", "coordinates": (isLines) ? inputCoordinates[0] : inputCoordinates}, 
-                        "properties": currentFeatureProperties
-                    };
-        input_geoJSON.features.push(feature);
-    }
-    return input_geoJSON;
-}
-
-function extractPropertiesFromNet(input, pointIndex, properties) {
-    if (typeof(input) == undefined) {
-        return {};
-    }
-
-    let input_data = JSON.parse(input['_object'])['data'];
-    let input_indices = JSON.parse(input['_object'])['index'];
-    let input_columns = JSON.parse(input['_object'])['columns'];
-    let idx = input_columns.indexOf('bus', 0);
-
-    let output = {};
-
-    for (entry in input_data) {
-        if (input_data[entry][idx] == pointIndex) {
-            output.index = input_indices[entry];
-            for (property in properties) {
-                output[properties[property]] = (input_columns.indexOf(properties[property], 0) == -1) ? null : input_data[entry][input_columns.indexOf(properties[property], 0)];
-            }
-            break;
-        }
-    }
-
-    return output;
 }
 
 window.addEventListener("load", (event) => {

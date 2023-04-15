@@ -181,7 +181,6 @@ function getPostalCodeArea(plz_type) {
                         }
                     }).addTo(map);
                 }
-
             }).catch((err) => console.error(err));
         }
     }
