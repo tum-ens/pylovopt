@@ -1,148 +1,117 @@
-# //function generates GeoJSON for a given feature (i.e. bus, line, trafo, ext_grid)
-# function createFeatures(isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures) {
-#     let input_geoJSON = {"type" : "FeatureCollection", "features": []};     
+import pandas as pd
+import json
+
+line_std_properties = ["r_ohm_per_km", "x_ohm_per_km", "max_i_ka", "c_nf_per_km", "q_mm2", "type", "alpha"]
+trafo_std_properties = ["sn_mva", "vn_hv_kv", "vn_lv_kv", "vk_percent", "vkr_percent", "pfe_kw", "i0_percent", "shift_degree", "tap_side", "tap_neutral", "tap_min", "tap_max", "tap_step_percent", "tap_step_degree", "tap_phase_shifter"]
+trafo3w_std_properties = ["sn_hv_mva","sn_mv_mva","sn_lv_mva","vn_hv_kv", "vn_mv_kv","vn_lv_kv","vk_hv_percent", "vk_mv_percent","vk_lv_percent","vkr_hv_percent","vkr_mv_percent","vkr_lv_percent","pfe_kw","i0_percent","shift_mv_degree","shift_lv_degree","tap_side","tap_neutral","tap_min","tap_max","tap_step_percent"]
+
+line_properties = ["name","from_bus", "to_bus","length_km", "r0_ohm_per_km", "x0_ohm_per_km", "c0_nf_per_km","df","g_us_per_km", "g0_us_per_km","parallel","max_loading_percent","temperature_degree_celsius", "tdpf","wind_speed_m_per_s", "wind_angle_degree", "conductor_outer_diameter_m", "air_temperature_degree_celsius","reference_temperature_degree_celsius", "solar_radiation_w_per_sq_m", "solar_absorptivity", "emissivity", "r_theta_kelvin_per_mw", "mc_joule_per_m_k", "std_type"]
+
+ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable", "in_service"]
+
+bus_properties =  ["name","vn_kv","type","in_service", "max_vm_pu","min_vm_pu",]    
+load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable']
+sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable']
+switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka']
+
+trafo_properties = ["name", "hv_bus", "lv_bus", "vk0_percent", "vkr0_percent", "mag0_percent", "mag0_rx", "si0_hv_partial", "tap_pos", "in_service", "max_loading_percent", "parallel", "df", "tap_dependent_impedance", "vk_percent_characteristic", "vkr_percent_characteristic", "xn_ohm", "std_type"]
+
+def extractPropertiesFromNet(input, index, properties):
+    if input.empty:
+        return {}
     
-#     let input = ppdata['_object'][featureName];
-#     let input_data = JSON.parse(input['_object'])['data'];
-#     let input_indices = JSON.parse(input['_object'])['index'];
-#     let input_columns = JSON.parse(input['_object'])['columns'];
+    output = {}
+    input = input.fillna('')
+
+    for entry in input:
+        output[entry] = input.T.loc[entry].iloc[0]
     
-#     let input_geodata = {};
-#     let input_geoCoords = {};
-#     let input_geoIndices = {};
-
-#     if(featureName == 'bus' || featureName == 'line') {
-#         input_geodata = ppdata['_object'][featureName + '_geodata'];
-#         input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
-#         input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
-#     }
-#     //(ext_grid and trafo geolocation depend on geolocation of buses)
-#     else {
-#         let input_columns = JSON.parse(input['_object'])['columns'];
-#         let idx = [0, 0];
-#         let temp = [];
-
-#         input_geodata = ppdata['_object']['bus_geodata'];
-#         input_geoCoords = JSON.parse(input_geodata['_object'])['data'];
-#         input_geoIndices = JSON.parse(input_geodata['_object'])['index'];
-
-#         if(featureName == 'ext_grid') {
-#             idx[0] = input_columns.indexOf('bus', 0);
-#             for (entry in input_data) {
-#                  for (geo_entry in input_geoIndices) {
-#                      if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
-#                          temp.push(input_geoCoords[geo_entry]);
-#                          break;
-#                      }
-     
-#                  }
-#              }
-#         }
-#         else if (featureName == 'trafo') {
-#             idx[0] = input_columns.indexOf('hv_bus', 0);
-#             idx[1] = input_columns.indexOf('lv_bus', 0);
-#             tempLine = [];
-           
-#             for (entry in input_data) {
-#                 tempLine = [];
-#                  for (let geo_entry = 0; geo_entry < input_geoIndices.length; geo_entry++) {
-#                      if (input_data[entry][idx[0]] == input_geoIndices[geo_entry]) {
-#                         let x1 = [input_geoCoords[geo_entry][0], input_geoCoords[geo_entry][1]];
-#                         tempLine.push(x1);
-
-#                         for (let second_entry = 0; second_entry < input_geoIndices.length; second_entry++) {
-#                             if (input_data[entry][idx[1]] == input_geoIndices[second_entry]) {
-#                                 let x2 = [input_geoCoords[second_entry][0], input_geoCoords[second_entry][1]]
-#                                 tempLine.push(x2);
-#                                 break;
-#                             }
-#                         }
-#                         temp.push([tempLine]);
-#                         break;
-#                      }
-#                  }
-#              }
-#         }
-#         input_geoCoords = temp;
-#     }
-#     let currentFeatureProperties = {};
-
-#     for (point in input_geoCoords) {
-#         currentFeatureProperties = {};
-
-#         let inputCoordinates = [];
-#         if(isLines) {
-#             for (i in input_geoCoords[point]) {
-#                 inputCoordinates.push(input_geoCoords[point][i]);
-#             }
-#         }
-#         else {
-#             inputCoordinates = [input_geoCoords[point][0], input_geoCoords[point][1]];
-#         }
-
-#         //corresponding index value associated with the bus
-#         let pointIndex = input_geoIndices[point];
-#         let pointNameIndex = (input_indices.indexOf(pointIndex, 0) != -1) ? input_indices.indexOf(pointIndex, 0) : pointIndex;
-
-#         if(featureProperties != null) {
-#             currentFeatureProperties.index = pointIndex;
-#             for (property in featureProperties) {
-#                 currentFeatureProperties[featureProperties[property]] = (input_columns.indexOf(featureProperties[property], 0) == -1) ? null : input_data[pointNameIndex][input_columns.indexOf(featureProperties[property], 0)];
-#             }
-#         }
-
-#         //we add load, switch etc as subproperties on one of our main features
-#         if(propertyGroupNames != null && propertyGroupFeatures != null) {
-#             for (let property = 0; property < propertyGroupNames.length; property++) {
-#                 let propertyGroup = ppdata['_object'][propertyGroupNames[property]];
-#                 let extractedProperties = extractPropertiesFromNet(propertyGroup, pointIndex, propertyGroupFeatures[property])
-#                 currentFeatureProperties[propertyGroupNames[property]] = extractedProperties;
-#             }
-#         }
-
-#         let feature = { "type": "Feature", 
-#                         "geometry": {"type": (isLines) ? "LineString" : "Point", "coordinates": (isLines) ? inputCoordinates[0] : inputCoordinates}, 
-#                         "properties": currentFeatureProperties
-#                     };
-#         input_geoJSON.features.push(feature);
-#     }
-#     return input_geoJSON;
-# }
-
-# import pandas as pd
-
-
-
-import pandapower as pp
-import pandapower.networks as nw
-from pandapower.plotting.plotly.mapbox_plot import geo_data_to_latlong
-testnet = nw.mv_oberrhein()
-geo_data_to_latlong(testnet, projection='epsg:31467')
-
-net = pp.to_json(testnet)
+    return output
 
 def createFeatures (isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures):
     input_data = ppdata[featureName]
-    input_indices = input_data.index
-    input_columns = input_data.columns
-
-    input_geoCoords = {}
-    input_geoIndices = {}
+    input_data = input_data.fillna('')
+    input_geoCoords = pd.DataFrame()
 
     if featureName == 'bus' or featureName == 'line':
         input_geoCoords = ppdata[featureName + '_geodata']
-        input_geoIndices = input_geoCoords.index
+        if featureName == 'bus':
+            input_geoCoords = input_geoCoords.drop(['coords'], axis=1)
+
     else:
         input_geoCoords = ppdata.bus_geodata
-        input_geoIndices = input_geoCoords.index
-
-        idx = [0,0]
-        temp = []
+        temp = pd.DataFrame()
 
         if featureName == 'ext_grid' :
-            print("heyo")
+            for bus in input_data['bus']:
+                #print(input_geoCoords.T[bus].to_frame().T)
+                ext_geocoords = input_geoCoords.T[bus].to_frame().T
+                temp = pd.concat([temp, ext_geocoords], ignore_index=True)
+            temp = temp.drop(['coords'], axis=1)
 
-createFeatures(False, testnet, 'line', '', '', '')
-createFeatures(False, testnet, 'bus', '', '', '')
-createFeatures(False, testnet, 'trafo', '', '', '')
-createFeatures(False, testnet, 'ext_grid', '', '', '')
+        elif featureName == 'trafo':
+            i = 0
+            for hv_bus, lv_bus in zip(input_data['hv_bus'], input_data['lv_bus']):
+                hv_geocoords = input_geoCoords.T[hv_bus]
+                lv_geocoords = input_geoCoords.T[lv_bus]
+                tempLine = pd.Series(data={'hv_bus' : [hv_geocoords.x, hv_geocoords.y], 'lv_bus' : [lv_geocoords.x, lv_geocoords.y]}).to_frame().T
+                temp = pd.concat([temp, tempLine], ignore_index=True)
+                # hv_geocoords = input_geoCoords.T[hv_bus].to_frame().T
+                # lv_geocoords = input_geoCoords.T[lv_bus].to_frame().T
+                # hv_geocoords = hv_geocoords.rename(columns={'x' : 'x' + str(i), 'y' : 'y' + str(i)})
+                # lv_geocoords = lv_geocoords.rename(columns={'x' : 'x' + str(i), 'y' : 'y' + str(i)})
+                # temp = pd.concat([temp, pd.concat([hv_geocoords, lv_geocoords], ignore_index=True)], axis=1)
+                #i += 1
+            #temp = temp.drop(['coords'], axis=1)
+        input_geoCoords = temp
+        #return input_geoCoords
+
+    input_geoJSON = {"type" : "FeatureCollection", "features": []}
+
+    for point in input_geoCoords.T:
+        currentFeatureProperties = {}
+        index = 0
+        if featureProperties:
+            index = point if (featureName == 'bus' or featureName == 'line') else input_data.index[point]
+            currentFeatureProperties["index"] = index
+            
+            for property in featureProperties:
+                if property in input_data:
+                    currentFeatureProperties[property] = input_data.loc[index][property]
+                else:
+                    currentFeatureProperties[property] = ""
+
+        if propertyGroupNames and propertyGroupFeatures:
+            for property in propertyGroupNames:
+                if property in ppdata:
+                    try:
+                        propertyGroup = ppdata[property].loc[ppdata[property].bus == index]
+                    except KeyError:
+                        propertyGroup = pd.DataFrame()
+                extractedProperties = extractPropertiesFromNet(propertyGroup, index, propertyGroupFeatures[propertyGroupNames.index(property)])
+                currentFeatureProperties[property] = extractedProperties
+        #return 0
+        inputCoordinates = input_geoCoords.loc[point].tolist() 
+        if featureName == 'line':
+            inputCoordinates = inputCoordinates[0]   
+        feature = { "type": "Feature", 
+                        "geometry": {"type": "LineString" if isLines else "Point", 
+                                     "coordinates": inputCoordinates}, 
+                        "properties": currentFeatureProperties
+                    }
+        input_geoJSON["features"].append(feature)
+    return input_geoJSON
+
+def extractStdTypes(ppdata):
+    return json.dumps(ppdata.std_types)
+
+
+def createGeoJSONofNetwork(net, bus, trafo, line, ext_grid, std_types):
+    output = {}
+    output['bus'] = createFeatures(False, net, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]) if bus else {}
+    output['trafo'] = createFeatures(True, net, 'trafo', trafo_properties, '', '') if trafo else {}
+    output['line'] = createFeatures(True, net, 'line', line_properties, '', '') if line else {}
+    output['ext_grid'] = createFeatures(False, net, 'ext_grid', ext_grid_properties, '', '') if ext_grid else {}
+    output['std_types'] = extractStdTypes(net) if std_types else {}
+
+    return output

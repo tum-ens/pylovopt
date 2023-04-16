@@ -4,6 +4,9 @@ from syngrid.GridGenerator import GridGenerator
 import pandapower as pp
 import pandas as pd
 import os
+from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
+import json
+
 
 #When user submits postal code or area selection in gui we return the corresponding postal code area boundary
 @bp.route('/demand', methods=['GET', 'POST'])
@@ -27,7 +30,10 @@ def editableNetwork():
         #from .generateEditableNetwork import createFeatures
         #createFeatures(False, pp.from_json(testnet), 'bus',0,0,0)
         #--------------------------------PURELY FOR DEBUG--------------------------------#
-        return pp.to_json(testnet)
+        #return pp.to_json(testnet)
+        json_net = createGeoJSONofNetwork(testnet, True, True, True, True, True)
+        json_net = json.dumps(json_net, default=str, indent=6)
+        return json_net
 
     if request.method == 'POST':
         #print(request.get_json())
