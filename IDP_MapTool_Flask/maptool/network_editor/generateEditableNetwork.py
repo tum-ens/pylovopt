@@ -106,12 +106,12 @@ def extractStdTypes(ppdata):
     return json.dumps(ppdata.std_types)
 
 
-def createGeoJSONofNetwork(net):
+def createGeoJSONofNetwork(net, bus, trafo, line, ext_grid, std_types):
     output = {}
-    output['bus'] = createFeatures(False, net, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features])
-    output['trafo'] = createFeatures(True, net, 'trafo', trafo_properties, '', '')
-    output['line'] = createFeatures(True, net, 'line', line_properties, '', '')
-    output['ext_grid'] = createFeatures(False, net, 'ext_grid', ext_grid_properties, '', '')
-    output['std_types'] = extractStdTypes(net)
+    output['bus'] = createFeatures(False, net, 'bus', bus_properties, ['load', 'sgen', 'switch'], [load_features, sgen_features, switch_features]) if bus else {}
+    output['trafo'] = createFeatures(True, net, 'trafo', trafo_properties, '', '') if trafo else {}
+    output['line'] = createFeatures(True, net, 'line', line_properties, '', '') if line else {}
+    output['ext_grid'] = createFeatures(False, net, 'ext_grid', ext_grid_properties, '', '') if ext_grid else {}
+    output['std_types'] = extractStdTypes(net) if std_types else {}
 
     return output

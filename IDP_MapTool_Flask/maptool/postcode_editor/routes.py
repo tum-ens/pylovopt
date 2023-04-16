@@ -2,6 +2,8 @@ from maptool.postcode_editor import bp
 from flask import request, session
 from syngrid.GridGenerator import GridGenerator
 import pandapower as pp
+from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
+import json
 
 #When user submits postal code or area selection in gui we return the corresponding postal code area boundary
 @bp.route('/postcode', methods=['GET', 'POST'])
@@ -71,6 +73,11 @@ def postcodeNets():
         netList = []
 
         for kcid, bcid, grid in nets:
-            netList.append([kcid, bcid, pp.to_json(grid)]) 
+            grid_json_string = json.dumps(grid)
+            net = pp.from_json_string(grid_json_string)
+            net_json = json.dumps(createGeoJSONofNetwork(net, False, False, True, False, False), default=str, indent=6)
+            netList.append([kcid, bcid, net_json])
+            print("done ", kcid, bcid)
 
+        print("returning")
         return netList

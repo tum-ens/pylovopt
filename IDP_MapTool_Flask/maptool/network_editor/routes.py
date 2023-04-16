@@ -10,7 +10,7 @@ from flask import Flask, render_template, request, session
 
 from pandapower2urbs import construct_model_components as pp2u
 
-from .generateEditableNetwork import createGeoJSONofNetwork
+from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
 import json
 
 #once the Select Network button is pressed, we return the editable network view 
@@ -35,7 +35,7 @@ def editableNetwork():
         #--------------------------------PURELY FOR DEBUG--------------------------------#
         #return pp.to_json(testnet)
         
-        json_net = createGeoJSONofNetwork(testnet)
+        json_net = createGeoJSONofNetwork(testnet, True, True, True, True, True)
         json_net = json.dumps(json_net, default=str, indent=6)
         return json_net
 

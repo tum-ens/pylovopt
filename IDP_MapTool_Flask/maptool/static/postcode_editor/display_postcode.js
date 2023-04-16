@@ -133,8 +133,9 @@ function getPostalCodeArea(plz_type) {
                 .then(function (response) {
                     return response.json();
                 }).then(function (postcodeNets) {
+                    console.log(JSON.parse(postcodeNets[0][2])["line"])
                     for(let i = 0; i < postcodeNets.length; i++) {
-                        displayPreviewNet(postcodeNets[i][0], postcodeNets[i][1], JSON.parse(postcodeNets[i][2]));
+                        displayPreviewNet(postcodeNets[i][0], postcodeNets[i][1], JSON.parse(postcodeNets[i][2])["line"]);
                     }
                     console.log('added all nets in plz area');
                     populateNetList('network', netList)
@@ -188,9 +189,7 @@ function getPostalCodeArea(plz_type) {
 
 //we only display the lines of all networks for performance reasons, showing buses adds too many nodes
 //Possible solution for adding buses might be looking into canvas renderers for leaflet
-function displayPreviewNet(kcid, bcid, ppdata) {
-    let line_geoJSON = createFeatures(true, ppdata, 'line', null, null, null);
-    
+function displayPreviewNet(kcid, bcid, line_geoJSON) {
     let linePreviewLayer = L.geoJSON(line_geoJSON, {
         style: NetworkObject.lineStyles[1], 
     }).addTo(map);
