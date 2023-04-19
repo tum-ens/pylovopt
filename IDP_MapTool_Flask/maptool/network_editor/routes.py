@@ -46,6 +46,6 @@ def editableNetwork():
 @bp.route('/networks/urbs_results', methods=['GET', 'POST'])
 def urbs_results():
     if request.method == 'POST':
-        print(request)
+        print(request.get_json())
         #pp2u.convertPandapower2Urbs()
         return 'Success', 200

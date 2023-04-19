@@ -239,28 +239,14 @@ function fillStdTypeEditor(sel, listName) {
     let idx = sel.options[sel.selectedIndex].value;
     
     let selectedObject = null; 
-    if(sel.id == 'line_std_typesSelect') {
-        //console.log(debugIdx, busList[idx].feature.properties.index);
-        selectedObject = NetworkObject.line_stdList[idx];
-        document.getElementById('line_std_typesForm').style.display = 'inline-block';
-        document.getElementById('trafo_std_typesForm').style.display = 'none';
-        document.getElementById('trafo3w_std_typesForm').style.display = 'none';
-    }
-    if(sel.id == 'trafo_std_typesSelect') {
-        //console.log(debugIdx, lineList[idx].feature.properties.index);
-        selectedObject = NetworkObject.trafo_stdList[idx];
-        document.getElementById('line_std_typesForm').style.display = 'none';
-        document.getElementById('trafo_std_typesForm').style.display = 'inline-block';
-        document.getElementById('trafo3w_std_typesForm').style.display = 'none';
-    }
-    if(sel.id == 'trafo3w_std_typesSelect') {
-        //console.log(debugIdx, trafoList[idx].feature.properties.index);
-        selectedObject = NetworkObject.trafo3w_stdList[idx];
-        document.getElementById('line_std_typesForm').style.display = 'none';
-        document.getElementById('trafo_std_typesForm').style.display = 'none';
-        document.getElementById('trafo3w_std_typesForm').style.display = 'inline-block';
-    }
-    
+    document.getElementById('line_std_typesForm').style.display = (sel.id == 'line_std_typesSelect') ? 'inline-block' : 'none';
+    document.getElementById('trafo_std_typesForm').style.display = (sel.id == 'trafo_std_typesSelect') ? 'inline-block' : 'none';
+    document.getElementById('trafo3w_std_typesForm').style.display = (sel.id == 'trafo3w_std_typesSelect') ? 'inline-block' : 'none';
+
+    selectedObject = NetworkObject[listName + 'List'][idx];
+
+    //console.log(document.getElementById('line_std_typesForm').style.display, document.getElementById('trafo_std_typesForm').style.display, document.getElementById('trafo3w_std_typesForm').style.display)
+  
     let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
     for (i = 0; i < editorcontent.length; i++) {
         editorcontent[i].style.display = "none";
@@ -268,7 +254,7 @@ function fillStdTypeEditor(sel, listName) {
 
     document.getElementById('std_typesEditor').style.display = 'inline-block';
     
-    let editor_form = document.getElementById(listName + '_typesForm');
+    let editor_form = document.getElementById(listName + '_typesFormDiv');
     let editor_elems = editor_form.children;
     for (let i = 0; i < editor_elems.length; i++) {
         if (editor_elems[i].nodeName == 'INPUT') {

@@ -49,6 +49,7 @@ function populateEditableNetworkEditor(listName, selectedProperties, std_typeLis
         
         if(selectedProperties[idx] == 'std_type') {
             let form = document.createElement("select");
+            form.id = 'std_type'
             form.classList.add('feature-editor__selected-feature-editor__stdtype-feature-select')
             form.setAttribute('onchange', 'writeBackEditedNetworkFeature(this, "' + listName + '_std_typesFormDiv")');
             let ctr = 0;
@@ -110,14 +111,11 @@ function openEditableNetworkList(e, listName) {
     document.getElementById(listName).style.display = "inline-block";
     e.currentTarget.className += " active";
 
+    let editor = document.getElementById(listName + "Editor")
     //if a list element had been selected previously and the tab had been closed without another feature editor being opened elsewhere, we reopen the editor window of the 
     //currently selected feature
-    if(listName == 'std_types') {
-
-    }
-    else {
+    if(listName != 'std_types') {
         if (document.getElementById(listName + 'Select').selectedIndex != -1) {
-            let editor = document.getElementById(listName + "Editor")
             editor.style.display = "inline-block";
         }
     }
@@ -253,11 +251,14 @@ function writeBackEditedNetworkFeature(target, targetDiv) {
     let idxInFeatureList = document.getElementById(feature + "Select").selectedIndex
     let featureName = target.id
 
-    //console.log(feature, featureName, idxInFeatureList, target.value);
-
     // TODO: Fix Std-type wrriteback
     if(!feature.includes("std")) {
-        if(load_sgen_flag == 0) {
+        if (target.nodeName == 'SELECT') {
+            //console.log(target.options[target.selectedIndex].text, featureName)
+            NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.options[target.selectedIndex].text
+            updateStdTypeFeaturesInEditor(target)
+        }
+        else if(load_sgen_flag == 0) {
             NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.value;
             //console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName]);
         }
@@ -273,9 +274,12 @@ function writeBackEditedNetworkFeature(target, targetDiv) {
     else {
         let selectedElement = document.getElementById(feature + "Select")[idxInFeatureList].value;
         feature = feature.replace("_types", "");
-        //console.log(selectedElement);
         NetworkObject[feature + "List"][selectedElement][featureName] = target.value;
     }
+}
+
+function updateStdTypeFeaturesInEditor(target) {
+
 }
 
 //Purely for debug atm, we will want to keep feature information within the markers themselves
