@@ -14,6 +14,7 @@ def postcode():
         gg = GridGenerator(plz=request.get_json())
         pg = gg.pgr
         versions = pg.getAllVersionsofPLZ(request.get_json())
+
         return versions
 
 @bp.route('/postcode/plz/version', methods=['GET', 'POST'])
@@ -23,12 +24,11 @@ def postcodePlzVersion():
         session['plz_version'] = plz_version
         
         # if version does not exist yet for plz, generate nets
-        # TODO: Check if version already exists
-        #gg = GridGenerator(plz=session['plz']['value'])
-        #pg = gg.pgr
-        #versions = pg.getAllVersionsofPLZ(request.get_json())
-        #gg.generate_grid()
-        return {'Success': 200}
+        # TODO: if version does not exist yet for plz, generate nets
+        # gg = GridGenerator(plz=session['plz']['value'], version_id=plz_version)
+        # pg = gg.pgr
+        # gg.generate_grid()
+        return 'Success', 200
 
 @bp.route('/postcode/plz', methods=['GET', 'POST'])
 def postcodePlz():
@@ -50,7 +50,7 @@ def postcodeArea():
     if request.method == 'POST':
         shape = str(request.get_json()['features'][0]['geometry'])
 
-        gg = GridGenerator(plz='99999', geom_shape=shape)
+        gg = GridGenerator(plz='199999', geom_shape=shape)
         res_buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile('res', shape)
         oth_buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile('oth', shape)
         #gg.generate_grid_from_geom()

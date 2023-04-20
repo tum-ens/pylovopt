@@ -2,6 +2,8 @@ let previousSelectedPreviewLayer;
 let netList = [];
 let res_building_geojson;
 let oth_building_geojson;
+let versions;
+
 
 let res_style = {
     fillColor: "#0065BD",
@@ -30,10 +32,15 @@ function selectVersionOfPostalCodeNetwork() {
         }).then(function (response) {
             return response.json();
         }).then(function (versionData) {
-            document.getElementById("popupForm").style.display = "block"
+            versions = versionData;
+            document.getElementById("popupForm").style.display = "block";
             //console.log(versionData);
 
             let versionRadioButtonsDiv = document.getElementById("versionRadioButtons");
+            while (versionRadioButtonsDiv.firstChild) {
+                versionRadioButtonsDiv.removeChild(versionRadioButtonsDiv.lastChild);
+            }
+            
             for (version in versionData) {
                 let versionRadioButtonDiv = document.createElement("div");
                 versionRadioButtonDiv.classList.add("form_popup__version-select__radio-button");
@@ -83,14 +90,21 @@ function chooseVersionOfPlzNetwork() {
     let versionElement = document.querySelector('input[name="versionRadioButton"]:checked')
     if(versionElement) {
         let version = versionElement.value;
-
+        console.log(versions)
         if(version == "0.0") {
             let newVersionInput = document.getElementById("newVersionTextInput");
             if (newVersionInput.value) {
+                console.log(newVersionInput.value)
+                for (idx in versions) {
+                    if (versions[idx][0] == String(newVersionInput.value)) {
+                        document.getElementById("newVersionTextInput").style.outline = "red 5px solid";
+                        return
+                    }
+                }
                 version = newVersionInput.value;
             }
             else {
-                //TODO: flash input field red
+                document.getElementById("newVersionTextInput").style.outline = "red 5px solid";
                 return
             }
         }
@@ -102,8 +116,8 @@ function chooseVersionOfPlzNetwork() {
                 'Content-type': 'application/json'},
             body: JSON.stringify(version)
         }).then(function (response) {
-            return response.json();
-        }).then(function (version) {
+            console.log(response)
+        }).then(function () {
             getPostalCodeArea('plz-number');
             closeForm();
         }).catch((err) => console.error(err));

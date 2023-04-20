@@ -24,16 +24,10 @@ def editableNetwork():
     if request.method == 'GET':
         plz = session.get('plz')['value']
         kcid_bcid = session.get('kcid_bcid')['value']
-        gg = GridGenerator(plz=plz)
+        plz_version = session['plz_version']
+        gg = GridGenerator(plz=plz, version_id=plz_version)
         pg = gg.pgr
         testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
-        print(testnet)
-        #--------------------------------PURELY FOR DEBUG--------------------------------#
-        #from maptool import net as testnet
-        #from .generateEditableNetwork import createFeatures
-        #createFeatures(False, pp.from_json(testnet), 'bus',0,0,0)
-        #--------------------------------PURELY FOR DEBUG--------------------------------#
-        #return pp.to_json(testnet)
         
         json_net = createGeoJSONofNetwork(testnet, True, True, True, True, True)
         json_net = json.dumps(json_net, default=str, indent=6)
