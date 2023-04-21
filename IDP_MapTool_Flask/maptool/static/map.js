@@ -48,16 +48,6 @@ if (window.location.pathname == '/') {
     });  
 }
 
-// We only ever want to have one shape at the same time for area selection
-if (window.location.pathname == '/') {
-map.on('pm:drawstart', ({ workingLayer }) => {
-    var layers = L.PM.Utils.findLayers(map);
-    layers.forEach((layer) =>{
-            layer.remove();
-        });
-    });
-}
-
 //on clicking on an element, we display information of the selected node in our sidebar for editing
 //TODO: disable opening a new popup if unsaved changes are displayed in sidebar or save changes automatically 
 map.on('popupopen', function(e) {
@@ -65,3 +55,16 @@ map.on('popupopen', function(e) {
     //var marker = e.popup._source;
     //console.log(marker.features.properties);
   });
+
+  document.onkeydown = function(evt) {
+    evt = evt || window.event;
+    var isEscape = false;
+    if ("key" in evt) {
+        isEscape = (evt.key === "Escape" || evt.key === "Esc");
+    } else {
+        isEscape = (evt.keyCode === 27);
+    }
+    if (isEscape) {
+        map.pm.disableDraw();
+    }
+};

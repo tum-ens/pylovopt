@@ -21,6 +21,21 @@ let oth_style = {
     fillOpacity: 0.7
 }
 
+// We only ever want to have one shape at the same time for area selection
+map.on('pm:drawend', (e) => {
+    console.log(e)
+    var layers = L.PM.Utils.findLayers(map);
+    layers.forEach((layer) =>{
+        if(layer != e.layer) {
+            layer.remove();
+        }
+        });
+    btn = document.getElementById("selectPLZAreaButton");
+    btn.innerText="Select Area";
+    btn.setAttribute('onclick',"getPostalCodeArea(this, 'plz-area')")
+    });
+
+
 
 function selectVersionOfPostalCodeNetwork() {
     let plz = document.getElementById("PLZ").value;
@@ -33,7 +48,7 @@ function selectVersionOfPostalCodeNetwork() {
             return response.json();
         }).then(function (versionData) {
             versions = versionData;
-            document.getElementById("popupForm").style.display = "block";
+            document.getElementById("plzVersionPopupForm").style.display = "block";
             //console.log(versionData);
 
             let versionRadioButtonsDiv = document.getElementById("versionRadioButtons");
@@ -118,8 +133,8 @@ function chooseVersionOfPlzNetwork() {
         }).then(function (response) {
             console.log(response)
         }).then(function () {
-            getPostalCodeArea('plz-number');
-            closeForm();
+            getPostalCodeArea(null, 'plz-number');
+            closeForm("plzVersionPopupForm");
         }).catch((err) => console.error(err));
     } 
     else {
@@ -127,7 +142,7 @@ function chooseVersionOfPlzNetwork() {
     }
 }
 
-function getPostalCodeArea(plz_type) {
+function getPostalCodeArea(btn, plz_type) {
     if (plz_type == 'plz-number') {
         let plz = document.getElementById("PLZ").value;
         fetch("http://127.0.0.1:5000/postcode/plz", {
@@ -141,7 +156,6 @@ function getPostalCodeArea(plz_type) {
                 let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: '#003359', dashArray: '5'}}).addTo(map);
                 map.fitBounds(postcodeGeoJSON.getBounds());
                 //console.log('added plz area');
-                
                 console.log('starting Postcode nets fetch');
                 fetch('/postcode/nets')
                 .then(function (response) {
@@ -196,10 +210,44 @@ function getPostalCodeArea(plz_type) {
                         }
                     }).addTo(map);
                 }
+                if(building_data.res_buildings.features != null || building_data.oth_buildings.features != null) {
+                    btn.innerText="Generate Network";
+                    btn.setAttribute('onclick','openAreaPopup()')
+                }
             }).catch((err) => console.error(err));
         }
     }
 }
+
+function openAreaPopup() {
+    let formDiv = document.getElementById("plzAreaPopupForm");
+    formDiv.style.display = "block";
+    console.log(formDiv.children);
+    const form = formDiv.children[0];
+    form.addEventListener("change",() => {
+        document.getElementById('submitBtn').disabled = !form.checkValidity()
+        console.log("changed", form.checkValidity())
+    });
+}
+
+function returnSelectedBuildings() {
+    let newID = document.getElementById("newNetIDInput").value;
+    let newVersion = document.getElementById("newNetVersionInput").value;
+
+    console.log(newID, newVersion);
+    
+    fetch("http://127.0.0.1:5000/postcode/area/new-net-id", {
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/json'},
+        body: JSON.stringify({ID: newID, version: newVersion})
+    }).then(function (response) {
+        return(response.json());
+    }).catch((err) => console.error(err));
+
+    closeForm("plzAreaPopupForm");
+}
+
 
 //we only display the lines of all networks for performance reasons, showing buses adds too many nodes
 //Possible solution for adding buses might be looking into canvas renderers for leaflet
@@ -287,8 +335,6 @@ function sendBackSelectedNetworkKcidBcid() {
         }).catch((err) => console.error(err));
 }
 
-
-
 function highlightBuildingFeature(e) {
     var layer = e.target;
     let color = '#a14d12'
@@ -348,6 +394,6 @@ function createBuildingPopup(feature, layer) {
     layer.bindPopup(popup);
 }
 
-function closeForm() {
-    document.getElementById("popupForm").style.display = 'none';
+function closeForm(id) {
+    document.getElementById(id).style.display = 'none';
 }

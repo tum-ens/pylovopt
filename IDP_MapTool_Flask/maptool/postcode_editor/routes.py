@@ -23,11 +23,14 @@ def postcodePlzVersion():
         plz_version = request.get_json()
         session['plz_version'] = plz_version
         
-        # if version does not exist yet for plz, generate nets
         # TODO: if version does not exist yet for plz, generate nets
-        # gg = GridGenerator(plz=session['plz']['value'], version_id=plz_version)
-        # pg = gg.pgr
-        # gg.generate_grid()
+        gg = GridGenerator(plz=session['plz']['value'], version_id=plz_version)
+        try:
+            gg.generate_grid()
+        except ValueError as ve:
+            print(ve)
+            return 'Failure', -100
+        
         return 'Success', 200
 
 @bp.route('/postcode/plz', methods=['GET', 'POST'])
@@ -49,13 +52,35 @@ def postcodePlz():
 def postcodeArea():
     if request.method == 'POST':
         shape = str(request.get_json()['features'][0]['geometry'])
-
+        session["new_area_shape"] = shape
         gg = GridGenerator(plz='199999', geom_shape=shape)
         res_buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile('res', shape)
         oth_buildings = gg.pgr.test__getBuildingGeoJSONFromShapefile('oth', shape)
         #gg.generate_grid_from_geom()
         return {"res_buildings" : res_buildings, "oth_buildings" : oth_buildings}
-    
+
+
+@bp.route('/postcode/area/new-net-id', methods=['GET', 'POST'])
+def postcodeAreaNewId():
+    if request.method =='POST':
+        print(request.get_json())
+        plz = request.get_json()['ID']
+        version = request.get_json()['version']
+        shape = session["new_area_shape"]
+        gg = GridGenerator(plz=str(plz), geom_shape=shape, version_id=str(version))
+        try:
+            gg.generate_grid_from_geom()
+        except ValueError as ve:
+            print(ve)
+            return 'Failure', -100
+        return 'Success', 200
+
+@bp.route('/postcode/area/buildings', methods=['GET', 'POST'])
+def postcodeAreaBuildings():
+    if request.method =='POST':
+        print("method")
+        return 'Success', 200
+
 #called once the user has selected one of the preview nets in a plz code area. The JS code returns the kcid and bcid of the network
 @bp.route('/postcode/nets', methods=['GET', 'POST'])
 def postcodeNets():

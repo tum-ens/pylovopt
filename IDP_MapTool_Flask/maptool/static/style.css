@@ -397,7 +397,7 @@ input[type=text]:focus + label {
   cursor: pointer;
   position: fixed;
 }
-.loginPopup {
+.optionsPopup {
   position: relative;
   text-align: center;
   width: 100%;
@@ -418,7 +418,7 @@ input[type=text]:focus + label {
 }
 
 .form-popup__version-select {
-  outline: #000000;
+  padding-bottom: 2rem;
 }
 
 .form-popup__version-select label{
@@ -461,6 +461,9 @@ input[type=text]:focus + label {
   opacity: 1;
 }
 
+.formContainer .btn:disabled {
+  background-color: #585858;
+}
 
 /* || Generic Buttons --------------------------*/
 .action-buttons {
