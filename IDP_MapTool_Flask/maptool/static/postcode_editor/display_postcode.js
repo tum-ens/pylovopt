@@ -22,7 +22,7 @@ let oth_style = {
 }
 
 // We only ever want to have one shape at the same time for area selection
-map.on('pm:drawend', (e) => {
+map.on('pm:create', (e) => {
     console.log(e)
     var layers = L.PM.Utils.findLayers(map);
     layers.forEach((layer) =>{
@@ -242,7 +242,10 @@ function returnSelectedBuildings() {
             'Content-type': 'application/json'},
         body: JSON.stringify({ID: newID, version: newVersion})
     }).then(function (response) {
-        return(response.json());
+        if(response.status == 400) {
+            alert("Version " + newVersion +  " already exists for ID " + newID);
+        }
+        return response;
     }).catch((err) => console.error(err));
 
     closeForm("plzAreaPopupForm");

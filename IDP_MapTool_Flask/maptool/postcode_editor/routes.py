@@ -1,5 +1,5 @@
 from maptool.postcode_editor import bp
-from flask import request, session
+from flask import request, session, Response
 from syngrid.GridGenerator import GridGenerator
 import pandapower as pp
 from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
@@ -72,7 +72,7 @@ def postcodeAreaNewId():
             gg.generate_grid_from_geom()
         except ValueError as ve:
             print(ve)
-            return 'Failure', -100
+            return Response(status=400)
         return 'Success', 200
 
 @bp.route('/postcode/area/buildings', methods=['GET', 'POST'])
