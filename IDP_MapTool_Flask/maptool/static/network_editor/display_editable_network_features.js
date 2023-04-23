@@ -335,6 +335,7 @@ function createPopup(feature, layer) {
 }
 
 //DEMAND STUFF
+let charts = [];
 
 function populateDemandEditor (demand_data, demandName, demandIndex) {
     let testDiv = document.getElementById(demandName + "Panel")
@@ -353,7 +354,7 @@ function populateDemandEditor (demand_data, demandName, demandIndex) {
     }
 }
 
-// TODO: write code to fill demand editor for selected bus
+// TODO: change marker onclick to fillSelectedFeatureEditor
 function fillSelectedFeatureDemandEditor(sel) {
     document.getElementsByClassName("feature-editor__selected-feature-editor")[0].style.display='inline-block';
     resetStyle(NetworkObject['busList'][sel.selectedIndex], 'bus')
@@ -365,9 +366,14 @@ function fillSelectedFeatureDemandEditor(sel) {
             for (let i = 0;  i < checkboxDiv.children.length; i++) {
                 if (chars[i] == '1') {
                     checkboxDiv.children[i].firstChild.checked = true;
+                    check_uncheck_demand(checkboxDiv.children[i].firstChild, demandTable, i, demandIndex);
                 }
                 else {
+                    let wasTrue = checkboxDiv.children[i].firstChild.checked;
                     checkboxDiv.children[i].firstChild.checked = false;
+                    if(wasTrue) {
+                        check_uncheck_demand(checkboxDiv.children[i].firstChild, demandTable, i, demandIndex);
+                    }
                 }
             }
             demandIndex++
@@ -432,24 +438,6 @@ for (i = 0; i < acc.length; i++) {
     }
   });
 }
-
-function addData(chart, label, data) {
-  chart.data.labels.push(label);
-  chart.data.datasets.forEach((dataset) => {
-      dataset.data.push(data);
-  });
-  chart.update();
-}
-
-function removeData(chart) {
-  chart.data.labels.pop();
-  chart.data.datasets.forEach((dataset) => {
-      dataset.data.pop();
-  });
-  chart.update();
-}
-
-let charts = [];
 
 let graphs = document.getElementsByClassName("feature-editor__selected-feature-editor__demand__graph");
 for (let i = 0; i < graphs.length; i++) {
