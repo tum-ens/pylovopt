@@ -23,7 +23,6 @@ def postcodePlzVersion():
         plz_version = request.get_json()
         session['plz_version'] = plz_version
         
-        # TODO: if version does not exist yet for plz, generate nets
         gg = GridGenerator(plz=session['plz']['value'], version_id=plz_version)
         try:
             gg.generate_grid()

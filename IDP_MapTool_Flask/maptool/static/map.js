@@ -49,7 +49,6 @@ if (window.location.pathname == '/') {
 }
 
 //on clicking on an element, we display information of the selected node in our sidebar for editing
-//TODO: disable opening a new popup if unsaved changes are displayed in sidebar or save changes automatically 
 map.on('popupopen', function(e) {
     //map.closePopup();
     //var marker = e.popup._source;

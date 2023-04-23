@@ -161,6 +161,7 @@ function GetPandapowerAndWriteGeoJSONNet() {
             populateEditableNetworkEditor('bus', bus_properties, null, null, null);
             populateEditableNetworkEditor('bus', load_features, null, null, 'load');
             populateEditableNetworkEditor('bus', sgen_features, null, null, 'sgen');
+            populateEditableNetworkEditor('bus', switch_features, null, null, 'switch');
             populateEditableNetworkEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties, null);
             populateEditableNetworkEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties, null);
             populateEditableNetworkEditor('ext_grid', ext_grid_properties, null, null, null);

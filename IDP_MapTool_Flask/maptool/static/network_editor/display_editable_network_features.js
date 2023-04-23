@@ -21,6 +21,22 @@ function populateLists(listName) {
     }
 }
 
+function insertAfter(referenceNode, newNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
+function insertAddFeatureButton(target, featureName) {
+    target_properties = target.feature.properties[featureName];
+    if(Object.keys(target_properties).length === 0) {
+        let featureFormDiv = document.getElementById(featureName + 'FormDiv');
+        let addFeatureButton = document.createElement('BUTTON');
+        addFeatureButton.innerHTML = 'Create ' + featureName;       
+        addFeatureButton.setAttribute('onclick', "addNewSecondaryFeature(" + featureName + ")");
+        insertAfter(featureFormDiv, addFeatureButton)
+    }
+}
+
+
 //only called once on network generation
 //The feature editor window template for all feature types gets filled at runtime
 //input fields and labels depend entirely on the properties defined in the displayNetwork function
@@ -29,18 +45,6 @@ function populateEditableNetworkEditor(listName, selectedProperties, std_typeLis
     let formDiv = document.createElement('DIV');
     let formDivId = listName + 'FormDiv';
     formDiv.classList.add('feature-editor__selected-feature-editor__div');
-    if (secondaryFeatureName != null) {
-        formDivId = secondaryFeatureName + 'FormDiv';
-        formDiv.style.display = 'None'
-
-        let label = document.createElement("label");
-        label.innerHTML = secondaryFeatureName.toUpperCase();
-        label.classList.add('secondary-feature-label');
-
-        formDiv.appendChild(label);
-    }
-
-    formDiv.id = formDivId;
 
     for (idx in selectedProperties) {
         let label = document.createElement("label");
@@ -87,7 +91,36 @@ function populateEditableNetworkEditor(listName, selectedProperties, std_typeLis
             formDiv.appendChild(label);
         }
     }
+    
     editor_form.appendChild(formDiv);
+
+    if (secondaryFeatureName != null) {
+        formDivId = secondaryFeatureName + 'FormDiv';
+        formDiv.style.display = 'block'    
+        let label = document.createElement("label");
+        label.innerHTML = secondaryFeatureName.toUpperCase();
+        label.classList.add('secondary-feature-label');
+        formDiv.insertBefore(label, formDiv.firstChild);
+
+        let addFeatureButton = document.createElement('BUTTON');
+        addFeatureButton.innerHTML = 'Create ' + secondaryFeatureName;
+        addFeatureButton.type = 'button';
+        addFeatureButton.id = secondaryFeatureName + 'AddButton';
+        addFeatureButton.classList.add('button', 'feature-editor__selected-feature-editor__delete-button');
+        addFeatureButton.setAttribute('onclick', "addSecondaryFeature('" + listName + "', '" + secondaryFeatureName + "')");
+        insertAfter(formDiv, addFeatureButton)
+    }
+
+    formDiv.id = formDivId;
+}
+
+function addSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
+    let idxInFeatureList = document.getElementById(primaryFeatureName + "Select").selectedIndex;
+    let primaryFeatureIndex = NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties.index;
+    console.log(NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties);
+    NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties[secondaryFeatureName].name = '' + secondaryFeatureName + ' ' + primaryFeatureIndex;
+    document.getElementById(secondaryFeatureName + 'FormDiv').style.display = 'block';
+    document.getElementById(secondaryFeatureName + 'AddButton').style.display = 'none';
 }
 
 //gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
@@ -176,32 +209,48 @@ function clickOnMarker(target, feature, drawModeOverride) {
         let editor_divs = editor_form.children;
 
         for (let i = 0; i < editor_divs.length; i++) {
-            let editor_elems = editor_form.children[i].children;
             let target_properties = target.feature.properties
             
             //At the moment we know that only busses have more than one div and we know that load is the second, sgen the third div 
-            //TODO: Change this to work regardless of network structure
             if(feature == 'bus') {
+                console.log(i);
                 if (i == 1) {
                     target_properties = target.feature.properties.load;
                     if(Object.keys(target_properties).length === 0) {
                         document.getElementById('loadFormDiv').style.display = 'none';
+                        document.getElementById('loadAddButton').style.display = 'inline-block';
                     }
                     else {
                         document.getElementById('loadFormDiv').style.display = 'block';
+                        document.getElementById('loadAddButton').style.display = 'none';
                     }
                 }
-                if (i == 2) {
+                if (i == 3) {
                     target_properties = target.feature.properties.sgen;
                     if(Object.keys(target_properties).length === 0) {
                         document.getElementById('sgenFormDiv').style.display = 'none';
+                        document.getElementById('sgenAddButton').style.display = 'inline-block';
                     }
                     else {
                         document.getElementById('sgenFormDiv').style.display = 'block';
-
+                        document.getElementById('sgenAddButton').style.display = 'none';
+                    }
+                }
+                if (i == 5) {
+                    target_properties = target.feature.properties.switch;
+                    if(Object.keys(target_properties).length === 0) {
+                        document.getElementById('switchFormDiv').style.display = 'none';
+                        document.getElementById('switchAddButton').style.display = 'inline-block';
+                    }
+                    else {
+                        document.getElementById('switchFormDiv').style.display = 'block';
+                        document.getElementById('switchAddButton').style.display = 'none';
                     }
                 }
             }
+
+            let editor_elems = editor_form.children[i].children;
+
             //features can have a std_type input and other input fields related to that std_type. Std_type properties should only be editable via the std_type list
             //for all features that correspond to the std_type, the properties are still added as read-only, while std_types are selectable from a dropdown menu
             let selectedStdType;
@@ -243,32 +292,27 @@ function clickOnMarker(target, feature, drawModeOverride) {
 //onchange function for editor view. If a field is changed, its new value is written back to the relevant object
 function writeBackEditedNetworkFeature(target, targetDiv) {
     let feature = target.parentElement.id.replace("FormDiv", "");
-    let load_sgen_flag = 0;
-    if(feature == 'load' || feature == 'sgen') {
-        load_sgen_flag = (feature == 'load') * 1 +  (feature == 'sgen') * 2
+    let secondary_feature = '';
+    if(feature == 'load' || feature == 'sgen' || feature == 'switch') {
+        secondary_feature = feature;
         feature = 'bus';
     }
     let idxInFeatureList = document.getElementById(feature + "Select").selectedIndex
     let featureName = target.id
 
-    // TODO: Fix Std-type wrriteback
     if(!feature.includes("std")) {
         if (target.nodeName == 'SELECT') {
             //console.log(target.options[target.selectedIndex].text, featureName)
             NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.options[target.selectedIndex].text
             updateStdTypeFeaturesInEditor(target)
         }
-        else if(load_sgen_flag == 0) {
+        else if(secondary_feature == '') {
             NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.value;
             //console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName]);
         }
-        else if (load_sgen_flag == 1) {
-            NetworkObject[feature + "List"][idxInFeatureList].feature.properties.load[featureName] = target.value;
+        else if (secondary_feature != '') {
+            NetworkObject[feature + "List"][idxInFeatureList].feature.properties[secondary_feature][featureName] = target.value;
             //console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties.load[featureName]);
-        }
-        else if (load_sgen_flag ==2) {
-            NetworkObject[feature + "List"][idxInFeatureList].feature.properties.sgen[featureName] = target.value;
-            //console.log(NetworkObject[feature + "List"][idxInFeatureList].feature.properties.sgen[featureName]);
         }
     }
     else {
