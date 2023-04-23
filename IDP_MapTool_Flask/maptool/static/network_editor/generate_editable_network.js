@@ -1,10 +1,10 @@
 //-----------------------------CRUCIAL JS TODOS-----------------------------//
 // TODO: define, check for correct inputs for all features
-// TODO: Write back features of all markers to JSON and send back JSON-file to create functioning pandapower data
+// TODO: Send back JSON-file to create functioning pandapower data
 // TODO: Add trafo3w features to network
 
 //-----------------------------TALK TODOS-----------------------------//
-// TODO: Ask if written documentation outside of code is necessary for project hand-in
+// TODO: Create documentation
 
 //-----------------------------OPTIONAL TODOS-----------------------------//
 // TODO: Deselect marker when clicking elsewhere on the map?
@@ -102,13 +102,8 @@ let DemandObject = {
     "demand_mobility" : {},
     "demand_space_heat" : {},
     "demand_water_heat" : {},
+    "bus_demands" : []
 }
-
-let demand_electricity;
-let demand_electricity_reactive;
-let demand_mobility;
-let demand_space_heat;
-let demand_water_heat;
 
 //generates GeoJSON files to pass to the python section of our code, gets called on button press
 function GetPandapowerAndWriteGeoJSONNet() {  
@@ -147,9 +142,8 @@ function GetPandapowerAndWriteGeoJSONNet() {
 
         displayNetNew(ppdata, isEditableNetwork);
 
-
         populateLists('bus');
-
+        
         if(window.location.pathname == '/networks' ) {
             extractStdTypesNew(JSON.parse(ppdata["std_types"]));
             fillStdTypeList();
@@ -177,7 +171,7 @@ function GetPandapowerAndWriteGeoJSONNet() {
 
         if(window.location.pathname == '/demand') {
             document.getElementById('bus').style.display = 'inline-block';
-            
+            document.getElementById('busSelect').selectedIndex = 0;
             fetch('demand/demand_profiles')
             .then(function (response) {
                 return response.json();
@@ -187,16 +181,22 @@ function GetPandapowerAndWriteGeoJSONNet() {
                 DemandObject.demand_mobility = JSON.parse(demand_data['demand_mobility']);
                 DemandObject.demand_space_heat = JSON.parse(demand_data['demand_space_heat']);
                 DemandObject.demand_water_heat = JSON.parse(demand_data['demand_water_heat']);
+                
+                let i = 0;
+                for (demandTable in DemandObject) { 
+                    if(demandTable != 'bus_demands') {
+                        delete DemandObject[demandTable]['t'];
+                        populateDemandEditor(DemandObject[demandTable], demandTable, i);
+                        i++;
+                    }
+                }
 
-
-                populateDemandEditor(DemandObject.demand_electricity, "demand_electricity", 0);
-                populateDemandEditor(DemandObject.demand_electricity_reactive, "demand_electricity_reactive", 1);
-                populateDemandEditor(DemandObject.demand_mobility, "demand_mobility", 2);
-                populateDemandEditor(DemandObject.demand_space_heat, "demand_space_heat", 3);
-                populateDemandEditor(DemandObject.demand_water_heat, "demand_water_heat", 4);
-
-            });
-
+                let listLength = NetworkObject['busList'].length;
+                DemandObject.bus_demands = new Array(listLength);
+                for (let i = 0; i < listLength; i++) {
+                    DemandObject.bus_demands[i] = new Array(5).fill('0'.repeat(Object.keys(DemandObject.demand_electricity).length));
+                }
+            })
         }
     });
 }
@@ -245,8 +245,6 @@ function fillStdTypeEditor(sel, listName) {
     document.getElementById('trafo3w_std_typesForm').style.display = (sel.id == 'trafo3w_std_typesSelect') ? 'inline-block' : 'none';
 
     selectedObject = NetworkObject[listName + 'List'][idx];
-
-    //console.log(document.getElementById('line_std_typesForm').style.display, document.getElementById('trafo_std_typesForm').style.display, document.getElementById('trafo3w_std_typesForm').style.display)
   
     let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
     for (i = 0; i < editorcontent.length; i++) {
@@ -299,7 +297,6 @@ function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature)
                     });
                 }else if(featureName == 'bus') {
                     if (Object.keys(feature.properties.load).length) {
-                        //console.log(Object.keys(feature.properties.load).length);
                         marker.setStyle(NetworkObject.busStyles[1]);
                         marker.on('click', function(e) {
                             resetStyle(e.target, 'bus');
@@ -315,7 +312,6 @@ function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature)
 }
 
 window.addEventListener("load", (event) => {
-    //console.log(window.location.pathname);
     if(window.location.pathname == '/networks' || window.location.pathname == '/demand') {
         GetPandapowerAndWriteGeoJSONNet();
     }

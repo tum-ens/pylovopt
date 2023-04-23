@@ -12,11 +12,9 @@ function populateLists(listName) {
     list = list.sort(function (a, b) {
         return parseInt(a.feature.properties.index) - parseInt(b.feature.properties.index);
     })
-    //x.size = (list.length > 24) ? 24 : list.length;
     for (idx in list) {
         var option = document.createElement("option");
         option.text = list[idx].feature.properties.index;
-        //option.value = idx;
         x.add(option);
     }
 }
@@ -213,7 +211,6 @@ function clickOnMarker(target, feature, drawModeOverride) {
             
             //At the moment we know that only busses have more than one div and we know that load is the second, sgen the third div 
             if(feature == 'bus') {
-                console.log(i);
                 if (i == 1) {
                     target_properties = target.feature.properties.load;
                     if(Object.keys(target_properties).length === 0) {
@@ -342,11 +339,6 @@ function createPopup(feature, layer) {
 function populateDemandEditor (demand_data, demandName, demandIndex) {
     let testDiv = document.getElementById(demandName + "Panel")
     for (key in demand_data) {
-
-        if(key > 100) {
-          break;
-        }
-
         let checkbox = document.createElement('INPUT');
         checkbox.setAttribute("type", "checkbox");
         checkbox.setAttribute("name", "checkbox_" + key);
@@ -361,40 +353,65 @@ function populateDemandEditor (demand_data, demandName, demandIndex) {
     }
 }
 
-function fillSelectedFeatureDemandEditor() {
-
+// TODO: write code to fill demand editor for selected bus
+function fillSelectedFeatureDemandEditor(sel) {
+    document.getElementsByClassName("feature-editor__selected-feature-editor")[0].style.display='inline-block';
+    resetStyle(NetworkObject['busList'][sel.selectedIndex], 'bus')
+    let demandIndex = 0;
+    for (demandTable in DemandObject) {
+        if(demandTable != 'bus_demands') {
+            let checkboxDiv = document.getElementById(demandTable + "Panel");
+            let chars = DemandObject.bus_demands[sel.selectedIndex][demandIndex]
+            for (let i = 0;  i < checkboxDiv.children.length; i++) {
+                if (chars[i] == '1') {
+                    checkboxDiv.children[i].firstChild.checked = true;
+                }
+                else {
+                    checkboxDiv.children[i].firstChild.checked = false;
+                }
+            }
+            demandIndex++
+        }
+    }
+    
 }
 
 function check_uncheck_demand(checkbox, demand_type, key, demandIndex) {
-  if (checkbox.checked) {
-    let data = DemandObject[demand_type][key];
-    delete data['t'];
+    let listElem = document.getElementById('busSelect').selectedIndex;
+    let chars = DemandObject.bus_demands[listElem][demandIndex].split('')
+    if (checkbox.checked) {
+        let data = DemandObject[demand_type][key];
 
-    let newgraph = {
-      name: '' + key,
-      type: 'line',
-      stack: 'Total',
-      areaStyle: {},
-      emphasis: {
-        focus: 'series'
-      },
-      data: Object.values(data)
-    };
-    let option = charts[demandIndex].getOption();
-    option.series.push(newgraph);
-    option.legend[0].data.push(newgraph.name);
-    charts[demandIndex].setOption(option);
-  }
-  else {
-    let option = charts[demandIndex].getOption();
-    let index = option.series.findIndex(data => data.name === 'Test' + checkbox.name);
-    option.series.splice(index, 1);
+        let newgraph = {
+        name: '' + key,
+        type: 'line',
+        stack: 'Total',
+        areaStyle: {},
+        emphasis: {
+            focus: 'series'
+        },
+        data: Object.values(data)
+        };
+        let option = charts[demandIndex].getOption();
+        option.series.push(newgraph);
+        option.legend[0].data.push(newgraph.name);
+        charts[demandIndex].setOption(option);
 
-    index = option.legend[0].data.findIndex(name => name === 'Test' + checkbox.name);
-    option.legend[0].data.splice(index, 1);
+        chars[key] = '1';
 
-    charts[demandIndex].setOption(option, true);
-  }
+    }
+    else {
+        let option = charts[demandIndex].getOption();
+        let index = option.series.findIndex(data => data.name === 'Test' + checkbox.name);
+        option.series.splice(index, 1);
+
+        index = option.legend[0].data.findIndex(name => name === 'Test' + checkbox.name);
+        option.legend[0].data.splice(index, 1);
+
+        charts[demandIndex].setOption(option, true);
+        chars[key] = '0';
+    }
+    DemandObject.bus_demands[listElem][demandIndex] = chars.join('');
 }
 
 var acc = document.getElementsByClassName("accordion");
@@ -415,7 +432,6 @@ for (i = 0; i < acc.length; i++) {
     }
   });
 }
-
 
 function addData(chart, label, data) {
   chart.data.labels.push(label);
@@ -467,8 +483,8 @@ for (let i = 0; i < graphs.length; i++) {
           {
             type: 'category',
             boundaryGap: false,
-            data: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56]
-          }
+            data: Array.from(Array(8760).keys())
+        }
         ],
         yAxis: [
           {

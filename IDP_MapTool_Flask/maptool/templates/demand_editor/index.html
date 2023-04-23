@@ -8,7 +8,7 @@
 {% block content %}
 <div class="feature-editor">
   <div class="feature-editor__featurelist-tab" id="bus">
-    <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="resetStyle(NetworkObject['busList'][this.selectedIndex], 'bus')" multiple></select>
+    <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect"  onchange="fillSelectedFeatureDemandEditor(this)" multiple></select>
   </div>
   <div class="feature-editor__selected-feature-editor" style="display: inline-block">
     <form>

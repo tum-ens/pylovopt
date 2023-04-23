@@ -21,7 +21,8 @@ def editableNetwork():
     if request.method == 'GET':
         plz = session.get('plz')['value']
         kcid_bcid = session.get('kcid_bcid')['value']
-        gg = GridGenerator(plz=plz)
+        plz_version = session['plz_version']
+        gg = GridGenerator(plz=plz, version_id=plz_version)
         pg = gg.pgr
         testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
 
@@ -41,11 +42,11 @@ def editableNetwork():
     
 @bp.route('/demand/demand_profiles', methods=['GET', 'POST'])
 def demandProfiles():
-    demand_electricity = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/demand/profiles/electricity.csv'), sep=',').T
-    demand_electricity_reactive = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/electricity-reactive.csv'), sep=',').T
-    demand_mobility = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/mobility.csv'), sep=',').T
-    demand_space_heat = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/space_heat.csv'), sep=',').T
-    demand_water_heat = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/water_heat.csv'), sep=',').T
+    demand_electricity = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/demand/profiles/electricity.csv'), sep=',')
+    demand_electricity_reactive = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/electricity-reactive.csv'), sep=',')
+    demand_mobility = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/mobility.csv'), sep=',')
+    demand_space_heat = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/space_heat.csv'), sep=',')
+    demand_water_heat = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/water_heat.csv'), sep=',')
 
     demand_json = {"demand_electricity" : demand_electricity.to_json(),
             "demand_electricity_reactive" : demand_electricity_reactive.to_json(),
