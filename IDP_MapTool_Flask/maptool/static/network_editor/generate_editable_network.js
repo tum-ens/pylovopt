@@ -21,7 +21,7 @@ let line_properties = ["name","from_bus", "to_bus","length_km", "r0_ohm_per_km",
 
 let ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable"];
 
-let bus_properties =  ["name","vn_kv","type","in_service", "max_vm_pu","min_vm_pu",]    
+let bus_properties =  ["name","vn_kv","type", "zone", "in_service", "max_vm_pu","min_vm_pu",]    
 let load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable'];
 let sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable'];
 let switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka'];  

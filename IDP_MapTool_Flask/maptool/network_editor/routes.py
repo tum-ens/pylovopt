@@ -11,6 +11,7 @@ from flask import Flask, render_template, request, session
 from pandapower2urbs import construct_model_components as pp2u
 
 from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
+from maptool.network_editor.recreatePandapowerNetwork import recreatePandapowerNetwork
 import json
 
 #once the Select Network button is pressed, we return the editable network view 
@@ -27,9 +28,10 @@ def editableNetwork():
         plz_version = session['plz_version']
         gg = GridGenerator(plz=plz, version_id=plz_version)
         pg = gg.pgr
-        testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
-        
-        json_net = createGeoJSONofNetwork(testnet, True, True, True, True, True)
+        net_features = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
+        pp.to_excel(net_features, "example1.xlsx")
+        print(net_features)
+        json_net = createGeoJSONofNetwork(net_features, True, True, True, True, True)
         json_net = json.dumps(json_net, default=str, indent=6)
         return json_net
 
@@ -40,6 +42,8 @@ def editableNetwork():
 @bp.route('/networks/urbs_results', methods=['GET', 'POST'])
 def urbs_results():
     if request.method == 'POST':
-        print(request.get_json())
+        net = recreatePandapowerNetwork(request.get_json())
+        pp.to_excel(net, "example2.xlsx")
+        print(net)
         #pp2u.convertPandapower2Urbs()
         return 'Success', 200
