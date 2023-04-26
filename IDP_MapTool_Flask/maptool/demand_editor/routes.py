@@ -56,3 +56,13 @@ def demandProfiles():
             }
 
     return demand_json
+
+@bp.route('/demand/urbs_setup', methods=['GET', 'POST'])
+def formatUrbsSetup():
+    if request.method == 'POST':
+        # print(request.get_json())
+        # f = open('demand_ouput_test.json', 'w')
+        # json.dump(request.get_json(), f)
+        # f.close()
+        # TODO: extract demand info, save json in session and generate csv file
+        return 'Success', 200

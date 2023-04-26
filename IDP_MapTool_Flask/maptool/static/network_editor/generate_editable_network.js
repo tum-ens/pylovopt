@@ -221,47 +221,6 @@ function displayNetNew(ppdata, isEditableNetwork) {
     //console.log('added all trafos');
 }
 
-
-function fillStdTypeList() {
-    let lists = [NetworkObject.line_stdList, NetworkObject.trafo_stdList, NetworkObject.trafo3w_stdList];
-
-    let st_type_selects = document.getElementsByClassName('feature-editor__featurelist-tab__stdtype-feature-select');
-    for (let i = 0; i < st_type_selects.length; i++) {
-        for (idx in lists[i]) {
-            var option = document.createElement("option");
-            option.text = idx;
-            option.value = idx;
-            st_type_selects[i].add(option);
-        }
-    }
-}
-
-function fillStdTypeEditor(sel, listName) {
-    let idx = sel.options[sel.selectedIndex].value;
-    
-    let selectedObject = null; 
-    document.getElementById('line_std_typesForm').style.display = (sel.id == 'line_std_typesSelect') ? 'inline-block' : 'none';
-    document.getElementById('trafo_std_typesForm').style.display = (sel.id == 'trafo_std_typesSelect') ? 'inline-block' : 'none';
-    document.getElementById('trafo3w_std_typesForm').style.display = (sel.id == 'trafo3w_std_typesSelect') ? 'inline-block' : 'none';
-
-    selectedObject = NetworkObject[listName + 'List'][idx];
-  
-    let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
-    for (i = 0; i < editorcontent.length; i++) {
-        editorcontent[i].style.display = "none";
-    }
-
-    document.getElementById('std_typesEditor').style.display = 'inline-block';
-    
-    let editor_form = document.getElementById(listName + '_typesFormDiv');
-    let editor_elems = editor_form.children;
-    for (let i = 0; i < editor_elems.length; i++) {
-        if (editor_elems[i].nodeName == 'INPUT') {
-            editor_elems[i].value = (selectedObject[editor_elems[i].name]);
-        }
-    }
-}
-
 function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature) {
     let newGeoJson
     if (isLines) {

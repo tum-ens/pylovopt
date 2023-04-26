@@ -29,7 +29,7 @@ def editableNetwork():
         gg = GridGenerator(plz=plz, version_id=plz_version)
         pg = gg.pgr
         net_features = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
-        pp.to_excel(net_features, "example1.xlsx")
+        #pp.to_excel(net_features, "example1.xlsx")
         print(net_features)
         json_net = createGeoJSONofNetwork(net_features, True, True, True, True, True)
         json_net = json.dumps(json_net, default=str, indent=6)
@@ -43,7 +43,7 @@ def editableNetwork():
 def urbs_results():
     if request.method == 'POST':
         net = recreatePandapowerNetwork(request.get_json())
-        pp.to_excel(net, "example2.xlsx")
+        #pp.to_excel(net, "example2.xlsx")
         print(net)
         #pp2u.convertPandapower2Urbs()
         return 'Success', 200

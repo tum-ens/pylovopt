@@ -41,7 +41,12 @@
   </div>
 </div>
 
+<div class="action-buttons">
+  <button class="button action-buttons__button" type="button" id="returnUrbsSetupButton" onclick="returnUrbsSetup()">Finish Urbs Setup</button>
+</div>
+
 
 <script defer src="{{url_for('static', filename='/network_editor/display_editable_network_features.js')}}"></script>
 <script defer src="{{url_for('static', filename='/network_editor/generate_editable_network.js')}}"></script>
+<script defer src="{{url_for('static', filename='/demand_editor/return_urbs_setup.js')}}"></script>
 {% endblock %}
