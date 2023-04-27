@@ -19,7 +19,7 @@ def createFeatureFromGeoJSONProperties(featureProperties, featureListElement):
 
     return new_feature_data
 
-f = open('maptool\\z_pandapower_network_features\\properties_final.json')
+f = open('maptool\\z_feature_jsons\\pandapower_network_features\\properties_final.json')
 data = json.load(f)
 
 line_std_properties = data['std_type']['line']

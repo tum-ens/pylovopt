@@ -8,14 +8,18 @@
 {% block content %}
 <div class="feature-editor">
   <div class="feature-editor__buttons-tab">
-    <button class="feature-editor__buttons-tab__tablinks" id="demandButton" onclick="openUrbsEditorList(event, 'demand')"><span>D</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="buysellpriceButton" onclick="openUrbsEditorList(event, 'buysellprice')"><span>BSP</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="transmissionButton" onclick="openUrbsEditorList(event, 'transmission')"><span>T</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="globalButton" onclick="openUrbsEditorList(event, 'global')"><span>G</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="processesButton" onclick="openUrbsEditorList(event, 'processes')"><span>P</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="storageButton" onclick="openUrbsEditorList(event, 'storage')"><span>St</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="supimButton" onclick="openUrbsEditorList(event, 'supim')"><span>Sup</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="timevareffButton" onclick="openUrbsEditorList(event, 'timevareff')"><span>TVE</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="buildingsButton" title="Buildings" onclick="openUrbsEditorList(event, 'buildings')"><span>B</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="demandButton" title="Demand" onclick="openUrbsEditorList(event, 'demand')"><span>D</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="buysellpriceButton" title="Buy-Sell Price" onclick="openUrbsEditorList(event, 'buysellprice')"><span>BSP</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="transmissionButton" title="Transmission" onclick="openUrbsEditorList(event, 'transmission')"><span>T</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="globalButton" title="Global" onclick="openUrbsEditorList(event, 'global')"><span>G</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="processesButton" title="Processes" onclick="openUrbsEditorList(event, 'processes')"><span>P</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="storageButton" title="Storage" onclick="openUrbsEditorList(event, 'storage')"><span>St</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="supimButton" title="Supim" onclick="openUrbsEditorList(event, 'supim')"><span>Sup</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="timevareffButton" title="Timevareff" onclick="openUrbsEditorList(event, 'timevareff')"><span>TVE</span></button>
+  </div>
+  <div class="feature-editor__featurelist-tab" id="buildings">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="buildingsSelect"  onchange="fillSelectedEditor(this, 'buildings')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="demand">
     <select class ="feature-editor__featurelist-tab__feature-select" id="demandSelect"  onchange="fillSelectedEditor(this, 'demand')" multiple></select>
@@ -40,6 +44,11 @@
   </div>
   <div class="feature-editor__featurelist-tab" id="timevareff">
     <select class ="feature-editor__featurelist-tab__feature-select" id="timevareffSelect"  onchange="fillSelectedEditor(this, 'timevareff')" multiple></select>
+  </div>
+
+  <div class="feature-editor__selected-feature-editor" id="buildingsEditor">
+    <form id="buildingsForm">
+    </form>
   </div>
   <div class="feature-editor__selected-feature-editor" id="demandEditor" style="display: inline-block">
     <form>
@@ -80,8 +89,10 @@
 
 
 <script defer src="{{url_for('static', filename='/network_editor/generate_editable_network.js')}}"></script>
-<script defer src="{{url_for('static', filename='/demand_editor/return_urbs_setup.js')}}"></script>
-<script defer src="{{url_for('static', filename='/demand_editor/generate_urbs_setup_editor.js')}}"></script>
-<script defer src="{{url_for('static', filename='/demand_editor/display_demand_editor.js')}}"></script>
+<script defer src="{{url_for('static', filename='/urbs_editor/return_urbs_setup.js')}}"></script>
+<script defer src="{{url_for('static', filename='/urbs_editor/generate_urbs_setup_editor.js')}}"></script>
+<script defer src="{{url_for('static', filename='/urbs_editor/demand_editor.js')}}"></script>
+<script defer src="{{url_for('static', filename='/urbs_editor/buildings_editor.js')}}"></script>
+
 
 {% endblock %}

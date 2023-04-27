@@ -1,4 +1,4 @@
-from maptool.demand_editor import bp
+from maptool.urbs_editor import bp
 from flask import Flask, render_template, request, session
 from syngrid.GridGenerator import GridGenerator
 import pandapower as pp
@@ -9,12 +9,19 @@ import json
 
 
 #When user submits postal code or area selection in gui we return the corresponding postal code area boundary
-@bp.route('/demand', methods=['GET', 'POST'])
-def demand():
+@bp.route('/urbs', methods=['GET', 'POST'])
+def urbs_setup():
     print("test")
-    return render_template('demand_editor/index.html')
+    return render_template('urbs_editor/index.html')
 
-@bp.route('/demand/editableNetwork', methods=['GET', 'POST'])
+@bp.route('/urbs/urbs_setup_properties', methods=['GET', 'POST'])
+def urbs_setup_properties():
+    if request.method == 'GET':
+        f = open('maptool\\z_feature_jsons\\urbs_setup_features\\urbs_setup_features.json', 'r')
+        urbs_setup_props = json.load(f)
+        return urbs_setup_props
+
+@bp.route('/urbs/editableNetwork', methods=['GET', 'POST'])
 def editableNetwork():
     #on opening of the network view the js code requests full information of the previously selected network
     #we return the network with previously chosen and session-dependant plz, kcid and bcid with all features
@@ -40,7 +47,7 @@ def editableNetwork():
         #print(request.get_json())
         return 'Success', 200
     
-@bp.route('/demand/demand_profiles', methods=['GET', 'POST'])
+@bp.route('/urbs/demand_profiles', methods=['GET', 'POST'])
 def demandProfiles():
     demand_electricity = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/demand/profiles/electricity.csv'), sep=',')
     demand_electricity_reactive = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/demand/profiles/electricity-reactive.csv'), sep=',')
@@ -57,7 +64,7 @@ def demandProfiles():
 
     return demand_json
 
-@bp.route('/demand/urbs_setup', methods=['GET', 'POST'])
+@bp.route('/urbs/urbs_setup', methods=['GET', 'POST'])
 def formatUrbsSetup():
     if request.method == 'POST':
         # print(request.get_json())

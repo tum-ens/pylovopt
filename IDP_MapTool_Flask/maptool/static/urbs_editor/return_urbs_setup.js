@@ -12,7 +12,7 @@ function returnUrbsSetup_DemandConf() {
         demand_json[NetworkObject.busList[idx].feature.properties.name] = DemandObject.bus_demands[idx]
     }
 
-    postData("http://127.0.0.1:5000/demand/urbs_setup", demand_json)
+    postData("http://127.0.0.1:5000/urbs/urbs_setup", demand_json)
 }
 
 function returnUrbsSetup_BuySellPrice() {

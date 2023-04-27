@@ -24,7 +24,6 @@ function fillSelectedFeatureDemandEditor(target) {
     }
 }
 
-//DEMAND STUFF
 let charts = [];
 
 function populateDemandEditor (demand_data, demandName, demandIndex) {

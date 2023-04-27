@@ -1,3 +1,8 @@
+let BuildingsObject = {
+    "buildingsList": [],
+    "busWithLoadList": []
+}
+
 let DemandObject = {
     "demand_electricity" : {},
     "demand_electricity_reactive" : {},
@@ -7,20 +12,19 @@ let DemandObject = {
     "bus_demands" : []
 }
 
+let UrbsPropertiesJSON = {}
 
-function SetupUrbsEditor() {  
-    var layers = L.PM.Utils.findLayers(map);
-    if(layers.length != 0) {
-        var group = L.featureGroup();
-        layers.forEach((layer)=>{
-            group.addLayer(layer);
+function GetUrbsSetupProperties () {
+    fetch('urbs/urbs_setup_properties')
+        .then(function (response) {
+            return response.json();
+        }).then(function (urbs_setup_properties) { 
+            UrbsPropertiesJSON = urbs_setup_properties;
         });
-        shapes = group.toGeoJSON();
-    }
+}
 
-    //console.log('starting Fetch');  
-    let fetchString = '/demand/editableNetwork';
-    isEditableNetwork = false;
+function SetupUrbsEditor() {    
+    let fetchString = '/urbs/editableNetwork';
 
     fetch(fetchString)
     .then(function (response) {
@@ -34,7 +38,10 @@ function SetupUrbsEditor() {
 
         displayUrbsEditorNet(ppdata);
 
-        populateUrbsEditorLists('demand', 'bus');
+        populateUrbsEditorLists('demand', 'busWithLoad');
+        populateUrbsEditorLists('buildings', 'buildings');
+
+        populateBuildingsEditor();
 
         tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
         for (i = 0; i < tabcontent.length; i++) {
@@ -44,7 +51,7 @@ function SetupUrbsEditor() {
         document.getElementById('demand').style.display = 'inline-block';
         document.getElementById('demandSelect').selectedIndex = 0;
         
-        fetch('demand/demand_profiles')
+        fetch('urbs/demand_profiles')
         .then(function (response) {
             return response.json();
         }).then(function (demand_data) {
@@ -63,7 +70,7 @@ function SetupUrbsEditor() {
                 }
             }
 
-            let listLength = NetworkObject['busList'].length;
+            let listLength = BuildingsObject['busWithLoadList'].length;
             DemandObject.bus_demands = new Array(listLength);
             for (let i = 0; i < listLength; i++) {
                 DemandObject.bus_demands[i] = new Array(5).fill('0'.repeat(Object.keys(DemandObject.demand_electricity).length));
@@ -78,16 +85,9 @@ function SetupUrbsEditor() {
 
 function displayUrbsEditorNet(ppdata) {
     addGeoJSONtoUrbsEditorMap(true, ppdata['line'], 'line');
-    //console.log("added all lines");
-
     addGeoJSONtoUrbsEditorMap(false, ppdata['ext_grid'], 'ext_grid');
-    //console.log('added all external grids');
-
     addGeoJSONtoUrbsEditorMap(false, ppdata['bus'], 'bus');
-    //console.log('added all buses');
-
     addGeoJSONtoUrbsEditorMap(true, ppdata['trafo'], 'trafo');
-    //console.log('added all trafos');
 }
 
 function addGeoJSONtoUrbsEditorMap(isLines, input_geoJSON, featureName) {
@@ -95,9 +95,6 @@ function addGeoJSONtoUrbsEditorMap(isLines, input_geoJSON, featureName) {
     if (isLines) {
         newGeoJson = L.geoJSON(input_geoJSON, {
             snapIgnore:true,
-            onEachFeature: function(feature, layer) {
-                NetworkObject[featureName + 'List'].push(layer);
-            },
             style: NetworkObject.nonEditableStyles[0]
         }).addTo(map);
     }
@@ -106,11 +103,9 @@ function addGeoJSONtoUrbsEditorMap(isLines, input_geoJSON, featureName) {
             onEachFeature: function(feature, layer) {
                 if (featureName == 'bus') {
                     if (Object.keys(feature.properties.load).length > 0) {
-                        NetworkObject[featureName + 'List'].push(layer);
+                        BuildingsObject['busWithLoadList'].push(layer);
                     }
-                }
-                else {
-                    NetworkObject[featureName + 'List'].push(layer);
+                    BuildingsObject['buildingsList'].push(layer);
                 }
             },
             pointToLayer: function (feature, latlng) {
@@ -131,9 +126,9 @@ function addGeoJSONtoUrbsEditorMap(isLines, input_geoJSON, featureName) {
 }
 
 
-function populateUrbsEditorLists(listName, networkListName) {
-    var x = document.getElementById(listName + "Select");
-    let networkList = NetworkObject[networkListName + 'List'];
+function populateUrbsEditorLists(htmlListName, networkListName) {
+    var x = document.getElementById(htmlListName + "Select");
+    let networkList = BuildingsObject[networkListName + 'List'];
     networkList = networkList.sort(function (a, b) {
         return parseInt(a.feature.properties.index) - parseInt(b.feature.properties.index);
     })
@@ -185,21 +180,31 @@ function resetLoadBusStyle(target) {
     target.setStyle(NetworkObject['busStyles'][0]);
     clicked = target;
 
-    let featureList = NetworkObject['busList'];
+    let featureList = BuildingsObject['busWithLoadList'];
     let selectedList = document.getElementById("demandSelect");
     let newIndex = featureList.findIndex((entry) => entry === target);
     selectedList.selectedIndex = newIndex;
 }
 
 function fillSelectedEditor(sel, featureName) {
-    document.getElementsByClassName("feature-editor__selected-feature-editor")[0].style.display='inline-block';
+    let urbsSetupEditors = document.getElementsByClassName("feature-editor__selected-feature-editor");
+    for (let i = 0; i < urbsSetupEditors.length; i++) {
+        urbsSetupEditors[1].style.display='none';
+    }
+
     if(featureName == 'demand') {
-        fillSelectedFeatureDemandEditor(NetworkObject['busList'][sel.selectedIndex])
+        fillSelectedFeatureDemandEditor(BuildingsObject['busWithLoadList'][sel.selectedIndex])
+        document.getElementById('demandEditor').style.display='inline-block';
+    }
+    if(featureName == 'buildings') {
+        fillSelectedFeatureDemandEditor(BuildingsObject['busWithLoadList'][sel.selectedIndex])
+        document.getElementById('buildingsEditor').style.display='inline-block';
     }
 }
 
 window.addEventListener("load", (event) => {
-    if(window.location.pathname == '/demand') {
+    if(window.location.pathname == '/urbs') {
+        GetUrbsSetupProperties();
         SetupUrbsEditor();
     }
   });

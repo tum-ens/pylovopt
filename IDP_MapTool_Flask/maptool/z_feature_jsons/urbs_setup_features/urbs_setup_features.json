@@ -1,0 +1,41 @@
+{
+    "_buildings" : 
+    {
+        "from_database": 
+        {
+            "footprint_area": "float",
+            "free_walls" : "float",
+            "lat": "float",
+            "lon": "float",
+            "floors": "float",
+            "dwellings": "int"
+        },
+        "from_user_input": 
+        {
+            "PV_cap_kW": "float",
+            "use":  "float",
+            "dist_to_heat_source": "float",
+            "year_class": "float",
+            "size_class": "float",
+            "storey_area": "float",
+            "area_corr_factor": "float",
+            "heated_area": "float",
+            "window_area": "float",
+            "dwelling_size": "float",
+            "occupants": "int",
+            "ref_level_roof": "int",
+            "ref_level_wall": "int",
+            "ref_level_floor": "int",
+            "ref_level_window": "int",
+            "U": "float",
+            "V": "float",
+            "C": "float",
+            "Tau": "float",
+            "Tset": "int",
+            "act_start": "int",
+            "act_end": "int",
+            "hw_demand_day": "float",
+            "hw_tank_cap": "float"
+        }
+    }
+}
