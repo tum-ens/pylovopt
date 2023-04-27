@@ -96,15 +96,6 @@ let NetworkObject = {
         }]     
 }
 
-let DemandObject = {
-    "demand_electricity" : {},
-    "demand_electricity_reactive" : {},
-    "demand_mobility" : {},
-    "demand_space_heat" : {},
-    "demand_water_heat" : {},
-    "bus_demands" : []
-}
-
 //generates GeoJSON files to pass to the python section of our code, gets called on button press
 function GetPandapowerAndWriteGeoJSONNet() {  
     var layers = L.PM.Utils.findLayers(map);
@@ -118,18 +109,13 @@ function GetPandapowerAndWriteGeoJSONNet() {
 
     //console.log('starting Fetch');  
     let fetchString = 'editableNetwork';
-    let isEditableNetwork = true;
     document.getElementById("nav-item-networks").setAttribute('href', '/networks');
 
     if(window.location.pathname == '/networks') {
         fetchString = '/networks/editableNetwork';
         document.getElementById("nav-item-networks").setAttribute('href', '#scroll-to-top');
-
     }
-    if(window.location.pathname == '/demand') {
-        fetchString = '/demand/editableNetwork';
-        isEditableNetwork = false;
-    }    
+  
     fetch(fetchString)
     .then(function (response) {
         return response.json();
@@ -140,64 +126,33 @@ function GetPandapowerAndWriteGeoJSONNet() {
                 layer.remove();
         });
 
-        displayNetNew(ppdata, isEditableNetwork);
+        displayNetNew(ppdata);
 
         populateLists('bus');
+
+        tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "inline-flex";
+        }
         
-        if(window.location.pathname == '/networks' ) {
-            extractStdTypesNew(JSON.parse(ppdata["std_types"]));
-            fillStdTypeList();
+        extractStdTypesNew(JSON.parse(ppdata["std_types"]));
+        fillStdTypeList();
 
-            populateLists('line');
-            populateLists('trafo');
-            populateLists('ext_grid');
-    
-            populateEditableNetworkEditor('bus', bus_properties, null, null, null);
-            populateEditableNetworkEditor('bus', load_features, null, null, 'load');
-            populateEditableNetworkEditor('bus', sgen_features, null, null, 'sgen');
-            populateEditableNetworkEditor('bus', switch_features, null, null, 'switch');
-            populateEditableNetworkEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties, null);
-            populateEditableNetworkEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties, null);
-            populateEditableNetworkEditor('ext_grid', ext_grid_properties, null, null, null);
-            populateEditableNetworkEditor('line_std_types', line_std_properties, null, null, null);
-            populateEditableNetworkEditor('trafo_std_types', trafo_std_properties, null, null, null);
-            populateEditableNetworkEditor('trafo3w_std_types', trafo3w_std_properties, null, null, null);
+        populateLists('line');
+        populateLists('trafo');
+        populateLists('ext_grid');
 
-            tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "inline-flex";
-            }
-        }
-
-        if(window.location.pathname == '/demand') {
-            document.getElementById('bus').style.display = 'inline-block';
-            document.getElementById('busSelect').selectedIndex = 0;
-            fetch('demand/demand_profiles')
-            .then(function (response) {
-                return response.json();
-            }).then(function (demand_data) {
-                DemandObject.demand_electricity = JSON.parse(demand_data['demand_electricity']);
-                DemandObject.demand_electricity_reactive = JSON.parse(demand_data['demand_electricity_reactive']);
-                DemandObject.demand_mobility = JSON.parse(demand_data['demand_mobility']);
-                DemandObject.demand_space_heat = JSON.parse(demand_data['demand_space_heat']);
-                DemandObject.demand_water_heat = JSON.parse(demand_data['demand_water_heat']);
-                
-                let i = 0;
-                for (demandTable in DemandObject) { 
-                    if(demandTable != 'bus_demands') {
-                        delete DemandObject[demandTable]['t'];
-                        populateDemandEditor(DemandObject[demandTable], demandTable, i);
-                        i++;
-                    }
-                }
-
-                let listLength = NetworkObject['busList'].length;
-                DemandObject.bus_demands = new Array(listLength);
-                for (let i = 0; i < listLength; i++) {
-                    DemandObject.bus_demands[i] = new Array(5).fill('0'.repeat(Object.keys(DemandObject.demand_electricity).length));
-                }
-            })
-        }
+        populateEditableNetworkEditor('bus', bus_properties, null, null, null);
+        populateEditableNetworkEditor('bus', load_features, null, null, 'load');
+        populateEditableNetworkEditor('bus', sgen_features, null, null, 'sgen');
+        populateEditableNetworkEditor('bus', switch_features, null, null, 'switch');
+        populateEditableNetworkEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties, null);
+        populateEditableNetworkEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties, null);
+        populateEditableNetworkEditor('ext_grid', ext_grid_properties, null, null, null);
+        populateEditableNetworkEditor('line_std_types', line_std_properties, null, null, null);
+        populateEditableNetworkEditor('trafo_std_types', trafo_std_properties, null, null, null);
+        populateEditableNetworkEditor('trafo3w_std_types', trafo3w_std_properties, null, null, null);
+        
     });
 }
 
@@ -207,62 +162,46 @@ function extractStdTypesNew(ppdata) {
     NetworkObject.trafo3w_stdList = ppdata['trafo3w'];
 }
 
-function displayNetNew(ppdata, isEditableNetwork) {
-    addGeoJSONtoMap(true, ppdata['line'], 'line', isEditableNetwork);
+function displayNetNew(ppdata) {
+    addGeoJSONtoMap(true, ppdata['line'], 'line');
     //console.log("added all lines");
 
-    addGeoJSONtoMap(false, ppdata['ext_grid'], 'ext_grid', isEditableNetwork);
+    addGeoJSONtoMap(false, ppdata['ext_grid'], 'ext_grid');
     //console.log('added all external grids');
 
-    addGeoJSONtoMap(false, ppdata['bus'], 'bus', isEditableNetwork);
+    addGeoJSONtoMap(false, ppdata['bus'], 'bus');
     //console.log('added all buses');
 
-    addGeoJSONtoMap(true, ppdata['trafo'], 'trafo', isEditableNetwork);
+    addGeoJSONtoMap(true, ppdata['trafo'], 'trafo');
     //console.log('added all trafos');
 }
 
-function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature) {
+function addGeoJSONtoMap(isLines, input_geoJSON, featureName) {
     let newGeoJson
     if (isLines) {
         newGeoJson = L.geoJSON(input_geoJSON, {
             snapIgnore:true,
             onEachFeature: function(feature, layer) {
-                if(isEditableFeature) {
-                    createPopup(feature, layer);
-                }
+                createPopup(feature, layer);
                 NetworkObject[featureName + 'List'].push(layer);
-                if(isEditableFeature) {
-                    layer.on('click', function(e) {
-                        clickOnMarker(e.target, featureName, 0);
-                    })
-                }
+                layer.on('click', function(e) {
+                    clickOnMarker(e.target, featureName, 0);
+                })
             },
-            style: (isEditableFeature) ? NetworkObject[featureName + 'Styles'][1] : NetworkObject.nonEditableStyles[0]
+            style: NetworkObject[featureName + 'Styles'][1]
         }).addTo(map);
     }
     else {
         newGeoJson = L.geoJSON(input_geoJSON, {
             onEachFeature: function(feature, layer) {
-                if(isEditableFeature) {
-                    createPopup(feature, layer);
-                }
+                createPopup(feature, layer);
                 NetworkObject[featureName + 'List'].push(layer);
             },
             pointToLayer: function (feature, latlng) {
-                var marker = L.circleMarker(latlng, (isEditableFeature) ? NetworkObject[featureName + 'Styles'][1] : NetworkObject.nonEditableStyles[0]);
-                if(isEditableFeature) {
-                    marker.on('click', function(e) {
-                        clickOnMarker(e.target, featureName, 0);
-                    });
-                }else if(featureName == 'bus') {
-                    if (Object.keys(feature.properties.load).length) {
-                        marker.setStyle(NetworkObject.busStyles[1]);
-                        marker.on('click', function(e) {
-                            resetStyle(e.target, 'bus');
-                        });
-                    }
-                }
-
+                var marker = L.circleMarker(latlng, NetworkObject[featureName + 'Styles'][1]);
+                marker.on('click', function(e) {
+                    clickOnMarker(e.target, featureName, 0);
+                });
                 return marker;
             }
         }).addTo(map);
@@ -271,7 +210,7 @@ function addGeoJSONtoMap(isLines, input_geoJSON, featureName, isEditableFeature)
 }
 
 window.addEventListener("load", (event) => {
-    if(window.location.pathname == '/networks' || window.location.pathname == '/demand') {
+    if(window.location.pathname == '/networks') {
         GetPandapowerAndWriteGeoJSONNet();
     }
   });

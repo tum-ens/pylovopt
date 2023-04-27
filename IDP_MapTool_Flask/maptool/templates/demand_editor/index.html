@@ -7,10 +7,41 @@
 
 {% block content %}
 <div class="feature-editor">
-  <div class="feature-editor__featurelist-tab" id="bus">
-    <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect"  onchange="fillSelectedFeatureDemandEditor(this)" multiple></select>
+  <div class="feature-editor__buttons-tab">
+    <button class="feature-editor__buttons-tab__tablinks" id="demandButton" onclick="openUrbsEditorList(event, 'demand')"><span>D</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="buysellpriceButton" onclick="openUrbsEditorList(event, 'buysellprice')"><span>BSP</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="transmissionButton" onclick="openUrbsEditorList(event, 'transmission')"><span>T</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="globalButton" onclick="openUrbsEditorList(event, 'global')"><span>G</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="processesButton" onclick="openUrbsEditorList(event, 'processes')"><span>P</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="storageButton" onclick="openUrbsEditorList(event, 'storage')"><span>St</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="supimButton" onclick="openUrbsEditorList(event, 'supim')"><span>Sup</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="timevareffButton" onclick="openUrbsEditorList(event, 'timevareff')"><span>TVE</span></button>
   </div>
-  <div class="feature-editor__selected-feature-editor" style="display: inline-block">
+  <div class="feature-editor__featurelist-tab" id="demand">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="demandSelect"  onchange="fillSelectedEditor(this, 'demand')" multiple></select>
+  </div>
+  <div class="feature-editor__featurelist-tab" id="buysellprice">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="buysellpriceSelect"  onchange="fillSelectedEditor(this, 'buysellprice')" multiple></select>
+  </div>
+  <div class="feature-editor__featurelist-tab" id="transmission">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="transmissionSelect"  onchange="fillSelectedEditor(this, 'transmission')" multiple></select>
+  </div>
+  <div class="feature-editor__featurelist-tab" id="global">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="globalSelect"  onchange="fillSelectedEditor(this, 'global')" multiple></select>
+  </div>
+  <div class="feature-editor__featurelist-tab" id="processes">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="processesSelect"  onchange="fillSelectedEditor(this, 'processes')" multiple></select>
+  </div>
+  <div class="feature-editor__featurelist-tab" id="storage">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="storageSelect"  onchange="fillSelectedEditor(this, 'storage')" multiple></select>
+  </div>
+  <div class="feature-editor__featurelist-tab" id="supim">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="supimSelect"  onchange="fillSelectedEditor(this, 'supim')" multiple></select>
+  </div>
+  <div class="feature-editor__featurelist-tab" id="timevareff">
+    <select class ="feature-editor__featurelist-tab__feature-select" id="timevareffSelect"  onchange="fillSelectedEditor(this, 'timevareff')" multiple></select>
+  </div>
+  <div class="feature-editor__selected-feature-editor" id="demandEditor" style="display: inline-block">
     <form>
       <div class="feature-editor__selected-feature-editor__demand" id="electricity">
         <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="electricitySelect">Electricity</button>
@@ -39,6 +70,8 @@
       </div>
     </form>
   </div>
+  <div class="feature-editor__selected-feature-editor" id="buysellpriceEditor">
+  </div>
 </div>
 
 <div class="action-buttons">
@@ -46,7 +79,9 @@
 </div>
 
 
-<script defer src="{{url_for('static', filename='/network_editor/display_editable_network_features.js')}}"></script>
 <script defer src="{{url_for('static', filename='/network_editor/generate_editable_network.js')}}"></script>
 <script defer src="{{url_for('static', filename='/demand_editor/return_urbs_setup.js')}}"></script>
+<script defer src="{{url_for('static', filename='/demand_editor/generate_urbs_setup_editor.js')}}"></script>
+<script defer src="{{url_for('static', filename='/demand_editor/display_demand_editor.js')}}"></script>
+
 {% endblock %}
