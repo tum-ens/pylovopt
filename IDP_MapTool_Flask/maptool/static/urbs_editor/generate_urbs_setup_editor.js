@@ -197,7 +197,7 @@ function fillSelectedEditor(sel, featureName) {
         document.getElementById('demandEditor').style.display='inline-block';
     }
     if(featureName == 'buildings') {
-        fillSelectedFeatureDemandEditor(BuildingsObject['busWithLoadList'][sel.selectedIndex])
+        fillSelectedFeatureBuildingEditor(BuildingsObject['buildingsList'][sel.selectedIndex])
         document.getElementById('buildingsEditor').style.display='inline-block';
     }
 }

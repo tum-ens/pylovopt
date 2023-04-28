@@ -28,7 +28,6 @@ function populateBuildingsEditor() {
     form.appendChild(formDiv)
 }
 
-function fillSelectedFeatureDemandEditor(target) {
+function fillSelectedFeatureBuildingEditor(target) {
     resetLoadBusStyle(target)
-
 }

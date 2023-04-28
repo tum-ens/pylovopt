@@ -64,12 +64,50 @@ def demandProfiles():
 
     return demand_json
 
-@bp.route('/urbs/urbs_setup', methods=['GET', 'POST'])
-def formatUrbsSetup():
+@bp.route('/urbs/demand_setup', methods=['GET', 'POST'])
+def formatDemandSetup():
     if request.method == 'POST':
         # print(request.get_json())
         # f = open('demand_ouput_test.json', 'w')
         # json.dump(request.get_json(), f)
         # f.close()
         # TODO: extract demand info, save json in session and generate csv file
+        return 'Success', 200
+    
+
+
+@bp.route('/urbs/buildings_setup', methods=['GET', 'POST'])
+def formatBuildingsSetup():
+    
+    # TODO: Create csvs from data
+    
+    if request.method == 'POST':
+        plz = session.get('plz')['value']
+        kcid_bcid = session.get('kcid_bcid')['value']
+        plz_version = session['plz_version']
+        gg = GridGenerator(plz=plz, version_id=plz_version)
+        pg = gg.pgr
+        testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
+        bus_geodata = testnet['bus_geodata'].drop('coords', axis=1)
+
+        buildings_osm_id_list = []
+        
+        for idx, coords in bus_geodata.iterrows():
+            buildings_osm_id = pg.test__getBuildingOfBus(plz, coords['x'], coords['y'])
+            
+            if buildings_osm_id:
+                buildings_osm_id_list.append(buildings_osm_id)
+
+
+        buildings_data_aggregator = []
+        for osm_id in buildings_osm_id_list:
+            additional_data = pg.test_getAdditionalBuildingData(osm_id)
+            buildings_data_aggregator.append(additional_data)
+
+        buildings_data = pd.DataFrame(buildings_data_aggregator,columns=['area', 'type', 'peak_load_in_kw', 'free_walls_res','free_walls_oth', 'floors', 'houses_per_building'])
+
+        # print(request.get_json())
+        # f = open('buildings_ouput_test.json', 'w')
+        # json.dump(request.get_json(), f)
+        # f.close()
         return 'Success', 200

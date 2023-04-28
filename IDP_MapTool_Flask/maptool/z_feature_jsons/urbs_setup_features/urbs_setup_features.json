@@ -37,5 +37,39 @@
             "hw_demand_day": "float",
             "hw_tank_cap": "float"
         }
+    },
+    "transmission": 
+    {
+        "cable_data": 
+        {
+            "id" : "string",
+            "material_cost": "int",
+            "digging_cost": "int",
+            "loading_limit": "int",
+            "wacc": "float",
+            "deprecation": "float"
+        },
+        "trafo_data": 
+        {
+            "id":"string",
+            "inv-cost":"float",
+            "fix-cost":"float",
+            "var-cost":"float",
+            "cap":"int",
+            "wacc":"float",
+            "deprecation":"int"
+        },
+        "voltage_limits": 
+        {
+            "v_min": "float",
+            "v_max": "float"
+        }
+
+    },
+    "buysellprice": 
+    {
+        "electricity_import": "list",
+        "electricity_hp_import": "list",
+        "electricity_feed_in": "list"
     }
 }

@@ -1,4 +1,5 @@
 function returnUrbsSetup() {
+    returnUrbsSetup_Buildings();
     returnUrbsSetup_DemandConf();
     returnUrbsSetup_BuySellPrice();
     returnUrbsSetup_Transmissions();
@@ -7,28 +8,33 @@ function returnUrbsSetup() {
 }
 
 function returnUrbsSetup_DemandConf() {
-    let demand_json = {}
+    let demand_json = {};
     for(idx in NetworkObject.busList) {
-        demand_json[NetworkObject.busList[idx].feature.properties.name] = DemandObject.bus_demands[idx]
+        demand_json[NetworkObject.busList[idx].feature.properties.name] = DemandObject.bus_demands[idx];
     }
 
-    postData("http://127.0.0.1:5000/urbs/urbs_setup", demand_json)
+    postData("http://127.0.0.1:5000/urbs/demand_setup", demand_json);
+}
+
+function returnUrbsSetup_Buildings() {
+    let buildings_json = {};
+    postData("http://127.0.0.1:5000/urbs/buildings_setup", buildings_json);
 }
 
 function returnUrbsSetup_BuySellPrice() {
-    //postData("http://127.0.0.1:5000/demand/urbs_setup", jsonData)
+    //postData("http://127.0.0.1:5000/urbs/urbs_setup", jsonData);
 }
 
 function returnUrbsSetup_Transmissions() {
-    //postData("http://127.0.0.1:5000/demand/urbs_setup", jsonData)
+    //postData("http://127.0.0.1:5000/urbs/urbs_setup", jsonData);
 }
 
 function returnUrbsSetup_Processes() {
-    //postData("http://127.0.0.1:5000/demand/urbs_setup", jsonData)
+    //postData("http://127.0.0.1:5000/urbs/urbs_setup", jsonData);
 }
 
 function returnUrbsSetup_Storage() {
-    //postData("http://127.0.0.1:5000/demand/urbs_setup", jsonData)
+    //postData("http://127.0.0.1:5000/urbs/urbs_setup", jsonData);
 }
 
 function postData(url, jsonData) {
