@@ -17,7 +17,7 @@ function returnUrbsSetup_DemandConf() {
 }
 
 function returnUrbsSetup_Buildings() {
-    let buildings_json = {};
+    let buildings_json = JSON.stringify(BuildingsObject.buildingsPropertiesList);
     postData("http://127.0.0.1:5000/urbs/buildings_setup", buildings_json);
 }
 

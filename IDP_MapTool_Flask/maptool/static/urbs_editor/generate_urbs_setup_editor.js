@@ -1,6 +1,6 @@
 let BuildingsObject = {
-    "buildingsList": [],
-    "busWithLoadList": []
+    "busWithLoadList": [],
+    "buildingsPropertiesList": []
 }
 
 let DemandObject = {
@@ -39,8 +39,9 @@ function SetupUrbsEditor() {
         displayUrbsEditorNet(ppdata);
 
         populateUrbsEditorLists('demand', 'busWithLoad');
-        populateUrbsEditorLists('buildings', 'buildings');
+        populateUrbsEditorLists('buildings', 'busWithLoad');
 
+        prepareBuildingsObject();
         populateBuildingsEditor();
 
         tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
@@ -105,7 +106,6 @@ function addGeoJSONtoUrbsEditorMap(isLines, input_geoJSON, featureName) {
                     if (Object.keys(feature.properties.load).length > 0) {
                         BuildingsObject['busWithLoadList'].push(layer);
                     }
-                    BuildingsObject['buildingsList'].push(layer);
                 }
             },
             pointToLayer: function (feature, latlng) {
@@ -197,7 +197,7 @@ function fillSelectedEditor(sel, featureName) {
         document.getElementById('demandEditor').style.display='inline-block';
     }
     if(featureName == 'buildings') {
-        fillSelectedFeatureBuildingEditor(BuildingsObject['buildingsList'][sel.selectedIndex])
+        fillSelectedFeatureBuildingEditor(BuildingsObject['busWithLoadList'][sel.selectedIndex])
         document.getElementById('buildingsEditor').style.display='inline-block';
     }
 }

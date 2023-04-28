@@ -82,18 +82,20 @@ def formatBuildingsSetup():
     # TODO: Create csvs from data
     
     if request.method == 'POST':
+        buildings_user_data = json.loads(request.get_json())
+
         plz = session.get('plz')['value']
         kcid_bcid = session.get('kcid_bcid')['value']
         plz_version = session['plz_version']
         gg = GridGenerator(plz=plz, version_id=plz_version)
         pg = gg.pgr
         testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
-        bus_geodata = testnet['bus_geodata'].drop('coords', axis=1)
 
         buildings_osm_id_list = []
+
         
-        for idx, coords in bus_geodata.iterrows():
-            buildings_osm_id = pg.test__getBuildingOfBus(plz, coords['x'], coords['y'])
+        for entry in buildings_user_data:
+            buildings_osm_id = pg.test__getBuildingOfBus(plz, entry['x'], entry['y'])
             
             if buildings_osm_id:
                 buildings_osm_id_list.append(buildings_osm_id)
@@ -105,9 +107,9 @@ def formatBuildingsSetup():
             buildings_data_aggregator.append(additional_data)
 
         buildings_data = pd.DataFrame(buildings_data_aggregator,columns=['area', 'type', 'peak_load_in_kw', 'free_walls_res','free_walls_oth', 'floors', 'houses_per_building'])
-
-        # print(request.get_json())
+        buildings_data = buildings_data.join(pd.DataFrame.from_dict(buildings_user_data))
+        print(buildings_data.columns)
         # f = open('buildings_ouput_test.json', 'w')
-        # json.dump(request.get_json(), f)
+        # json.dump(buildings_data.to_json(orient="split"), f, indent=6)
         # f.close()
         return 'Success', 200
