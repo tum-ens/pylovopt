@@ -81,6 +81,18 @@
   </div>
   <div class="feature-editor__selected-feature-editor" id="buysellpriceEditor">
   </div>
+  <div class="feature-editor__selected-feature-editor" id="transmission_cable_dataEditor">
+    <form id="transmission_cable_dataForm">
+    </form>
+  </div>
+  <div class="feature-editor__selected-feature-editor" id="transmission_trafo_dataEditor">
+    <form id="transmission_trafo_dataForm">
+    </form>
+  </div>
+  <div class="feature-editor__selected-feature-editor" id="transmission_voltage_limitsEditor">
+    <form id="transmission_voltage_limitsForm">
+    </form>
+  </div>
 </div>
 
 <div class="action-buttons">
@@ -93,6 +105,7 @@
 <script defer src="{{url_for('static', filename='/urbs_editor/generate_urbs_setup_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/demand_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/buildings_editor.js')}}"></script>
-
+<script defer src="{{url_for('static', filename='/urbs_editor/buysellprice_editor.js')}}"></script>
+<script defer src="{{url_for('static', filename='/urbs_editor/transmission_editor.js')}}"></script>
 
 {% endblock %}

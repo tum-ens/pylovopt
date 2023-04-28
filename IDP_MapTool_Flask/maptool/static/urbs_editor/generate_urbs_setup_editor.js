@@ -38,11 +38,17 @@ function SetupUrbsEditor() {
 
         displayUrbsEditorNet(ppdata);
 
-        populateUrbsEditorLists('demand', 'busWithLoad');
-        populateUrbsEditorLists('buildings', 'busWithLoad');
+        populateUrbsEditorLoadBusLists('demand', 'busWithLoad');
+        populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
+        populateTransmissionEditorList();
 
         prepareBuildingsObject();
-        populateBuildingsEditor();
+        populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input']);
+        populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data']);
+        populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data']);
+        populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits']);
+
+
 
         tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
         for (i = 0; i < tabcontent.length; i++) {
@@ -125,8 +131,7 @@ function addGeoJSONtoUrbsEditorMap(isLines, input_geoJSON, featureName) {
     map.fitBounds(newGeoJson.getBounds());
 }
 
-
-function populateUrbsEditorLists(htmlListName, networkListName) {
+function populateUrbsEditorLoadBusLists(htmlListName, networkListName) {
     var x = document.getElementById(htmlListName + "Select");
     let networkList = BuildingsObject[networkListName + 'List'];
     networkList = networkList.sort(function (a, b) {
@@ -137,6 +142,36 @@ function populateUrbsEditorLists(htmlListName, networkListName) {
         option.text = networkList[idx].feature.properties.index;
         x.add(option);
     }
+}
+
+
+function populateUrbsEditor(feature, propertiesToAdd) {
+    let form = document.getElementById(feature + 'Form');
+    let formDiv = document.createElement('DIV');
+    formDiv.classList.add('feature-editor__selected-feature-editor__div');
+    for (property in propertiesToAdd) {
+        let input = document.createElement("input");
+        
+        if(propertiesToAdd[property] == 'boolean') {
+            input.type="checkbox";
+        }
+        else if(propertiesToAdd[property] == 'float' || propertiesToAdd[property] == 'int') {
+            input.type="number";
+        }
+        else {
+            input.type="text";
+        }
+
+        input.id = property;
+        input.name = property;
+
+        let label = document.createElement("label");
+        label.htmlFor = property;
+        label.innerHTML = property;
+        formDiv.appendChild(input)
+        formDiv.appendChild(label)
+    }
+    form.appendChild(formDiv)
 }
 
 //gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
@@ -164,6 +199,11 @@ function openUrbsEditorList(e, listName) {
     //if a list element had been selected previously and the tab had been closed without another feature editor being opened elsewhere, we reopen the editor window of the 
     //currently selected feature
     if (document.getElementById(listName + 'Select').selectedIndex != -1) {
+        
+        if(listName == 'transmission') {
+            let currentList = document.getElementById(listName+ 'Select')
+            editor = document.getElementById(listName + '_' +  currentList.value + "Editor")
+        }
         editor.style.display = "inline-block";
     }
 }
@@ -199,6 +239,15 @@ function fillSelectedEditor(sel, featureName) {
     if(featureName == 'buildings') {
         fillSelectedFeatureBuildingEditor(BuildingsObject['busWithLoadList'][sel.selectedIndex])
         document.getElementById('buildingsEditor').style.display='inline-block';
+    }
+    if(featureName == 'transmission') {
+        trans_editor = sel.value
+        fillSelectedFeatureTransEditor()
+        document.getElementById('transmission_cable_dataEditor').style.display='none';
+        document.getElementById('transmission_trafo_dataEditor').style.display='none';
+        document.getElementById('transmission_voltage_limitsEditor').style.display='none';
+
+        document.getElementById('transmission_' + trans_editor + 'Editor').style.display='inline-block';
     }
 }
 
