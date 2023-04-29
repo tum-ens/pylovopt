@@ -156,6 +156,10 @@ font-weight: 500;
   pointer-events: none;
 }
 
+.urbs-editor {
+  right: 3%;
+}
+
 /* || Body Element for Feature Editor Tab Selection --------------------------*/
 .feature-editor__buttons-tab{
   position: absolute;
@@ -167,6 +171,10 @@ font-weight: 500;
   width: 5%;
   opacity: 1;
   pointer-events: all;
+}
+
+.feature-editor__second-column {
+  right: -4.5%;
 }
 
 .feature-editor__buttons-tab button {

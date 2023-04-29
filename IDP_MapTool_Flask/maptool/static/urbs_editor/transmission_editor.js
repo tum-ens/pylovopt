@@ -9,7 +9,6 @@ var maptool_urbs_trans = function() {
             transmissionEditorList.add(option);
         }
     }
-    
 
     return {
         populateTransmissionEditorList: populateTransmissionEditorList,

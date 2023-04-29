@@ -6,7 +6,12 @@
 {% endblock %}
 
 {% block content %}
-<div class="feature-editor">
+<div class="feature-editor urbs-editor">
+  <div class="feature-editor__buttons-tab feature-editor__second-column">
+    <button class="feature-editor__buttons-tab__tablinks" id="storageButton" title="Storage" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'storage')"><span>St</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="supimButton" title="Supim" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'supim')"><span>Sup</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="timevareffButton" title="Timevareff" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'timevareff')"><span>TVE</span></button>
+  </div>
   <div class="feature-editor__buttons-tab">
     <button class="feature-editor__buttons-tab__tablinks" id="buildingsButton" title="Buildings" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'buildings')"><span>B</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="demandButton" title="Demand" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'demand')"><span>D</span></button>
@@ -15,10 +20,7 @@
     <button class="feature-editor__buttons-tab__tablinks" id="globalButton" title="Global" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'global')"><span>G</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="commodityButton" title="Commodity" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'commodity')"><span>C</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="processesButton" title="Processes" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'processes')"><span>P</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="storageButton" title="Storage" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'storage')"><span>St</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="supimButton" title="Supim" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'supim')"><span>Sup</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="timevareffButton" title="Timevareff" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'timevareff')"><span>TVE</span></button>
-  </div>
+</div>
   <div class="feature-editor__featurelist-tab" id="buildings">
     <select class ="feature-editor__featurelist-tab__feature-select" id="buildingsSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'buildings')" multiple></select>
   </div>
@@ -38,9 +40,10 @@
     <select class ="feature-editor__featurelist-tab__feature-select" id="commoditySelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'processes')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="processes">
-    <select class ="feature-editor__featurelist-tab__feature-select" id="pro_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'processes')" multiple></select>
-    <select class ="feature-editor__featurelist-tab__feature-select" id="pro_confSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'processes')" multiple></select>
-    <select class ="feature-editor__featurelist-tab__feature-select" id="pro_com_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'processes')" multiple></select>
+    <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="pro_propSelectButton">Process Properties</button>
+    <select class ="panel feature-editor__featurelist-tab__feature-select" id="pro_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_prop')" multiple></select>
+    <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="pro_com_propSelectButton">Process Commodities</button>
+    <select class ="panel feature-editor__featurelist-tab__feature-select" id="pro_com_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_com_prop')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="storage">
     <select class ="feature-editor__featurelist-tab__feature-select" id="storageSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'storage')" multiple></select>
@@ -99,6 +102,14 @@
     <form id="transmission_voltage_limitsForm">
     </form>
   </div>
+  <div class="feature-editor__selected-feature-editor" id="pro_propEditor">
+    <form id="pro_propForm">
+    </form>
+  </div>
+  <div class="feature-editor__selected-feature-editor" id="pro_com_propEditor">
+    <form id="pro_com_propForm">
+    </form>
+  </div>
 </div>
 
 <div class="action-buttons">
@@ -112,5 +123,5 @@
 <script defer src="{{url_for('static', filename='/urbs_editor/buildings_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/buysellprice_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/transmission_editor.js')}}"></script>
-
+<script defer src="{{url_for('static', filename='/urbs_editor/process_editor.js')}}"></script>
 {% endblock %}

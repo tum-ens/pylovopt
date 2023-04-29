@@ -1,6 +1,6 @@
 var maptool_urbs_setup = function() {
-    let UrbsPropertiesJSON = {}
-    let clicked 
+    let UrbsPropertiesJSON = {};
+    let clicked;
 
     function GetUrbsSetupProperties () {
         fetch('urbs/urbs_setup_properties')
@@ -30,13 +30,18 @@ var maptool_urbs_setup = function() {
             populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
             maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
+            maptool_urbs_process.populateProcessEditorList('pro_prop', ['import, import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
+            maptool_urbs_process.populateProcessEditorList('pro_com_prop', ['import, import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input']);
             populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data']);
             populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data']);
             populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits']);
-    
-    
-    
+            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'])
+            populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop'])
+
+            
+            maptool_urbs_demand.fetchDemandProfiles();
+
             tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
             for (i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.display = "inline-flex";
@@ -45,31 +50,6 @@ var maptool_urbs_setup = function() {
             document.getElementById('demand').style.display = 'inline-block';
             document.getElementById('demandSelect').selectedIndex = 0;
             
-            fetch('urbs/demand_profiles')
-            .then(function (response) {
-                return response.json();
-            }).then(function (demand_data) {
-                maptool_urbs_demand.DemandObject.demand_electricity = JSON.parse(demand_data['demand_electricity']);
-                maptool_urbs_demand.DemandObject.demand_electricity_reactive = JSON.parse(demand_data['demand_electricity_reactive']);
-                maptool_urbs_demand.DemandObject.demand_mobility = JSON.parse(demand_data['demand_mobility']);
-                maptool_urbs_demand.DemandObject.demand_space_heat = JSON.parse(demand_data['demand_space_heat']);
-                maptool_urbs_demand.DemandObject.demand_water_heat = JSON.parse(demand_data['demand_water_heat']);
-                
-                let i = 0;
-                for (demandTable in maptool_urbs_demand.DemandObject) { 
-                    if(demandTable != 'bus_demands') {
-                        delete maptool_urbs_demand.DemandObject[demandTable]['t'];
-                        maptool_urbs_demand.populateDemandEditor(maptool_urbs_demand.DemandObject[demandTable], demandTable, i);
-                        i++;
-                    }
-                }
-    
-                let listLength = maptool_urbs_buildings.BuildingsObject['busWithLoadList'].length;
-                maptool_urbs_demand.DemandObject.bus_demands = new Array(listLength);
-                for (let i = 0; i < listLength; i++) {
-                    maptool_urbs_demand.DemandObject.bus_demands[i] = new Array(5).fill('0'.repeat(Object.keys(maptool_urbs_demand.DemandObject.demand_electricity).length));
-                }
-            })
             for (i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.padding = "30px 15px";
             }
@@ -185,13 +165,15 @@ var maptool_urbs_setup = function() {
         let editor = document.getElementById(listName + "Editor")
         //if a list element had been selected previously and the tab had been closed without another feature editor being opened elsewhere, we reopen the editor window of the 
         //currently selected feature
-        if (document.getElementById(listName + 'Select').selectedIndex != -1) {
+        if(listName != 'processes') {
+            if (document.getElementById(listName + 'Select').selectedIndex != -1) {
             
-            if(listName == 'transmission') {
-                let currentList = document.getElementById(listName+ 'Select')
-                editor = document.getElementById(listName + '_' +  currentList.value + "Editor")
+                if(listName == 'transmission') {
+                    let currentList = document.getElementById(listName+ 'Select')
+                    editor = document.getElementById(listName + '_' +  currentList.value + "Editor")
+                }
+                editor.style.display = "inline-block";
             }
-            editor.style.display = "inline-block";
         }
     }
     
@@ -229,12 +211,14 @@ var maptool_urbs_setup = function() {
         }
         if(featureName == 'transmission') {
             trans_editor = sel.value
-            fillSelectedFeatureTransEditor()
             document.getElementById('transmission_cable_dataEditor').style.display='none';
             document.getElementById('transmission_trafo_dataEditor').style.display='none';
             document.getElementById('transmission_voltage_limitsEditor').style.display='none';
     
             document.getElementById('transmission_' + trans_editor + 'Editor').style.display='inline-block';
+        }
+        if(featureName == 'pro_prop' || featureName == 'pro_com_prop') {
+            document.getElementById(featureName + 'Editor').style.display='inline-block';
         }
     }
     

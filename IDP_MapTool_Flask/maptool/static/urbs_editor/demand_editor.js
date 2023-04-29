@@ -7,6 +7,35 @@ var maptool_urbs_demand = function () {
     "demand_water_heat" : {},
     "bus_demands" : []
   }
+
+  function fetchDemandProfiles() {
+    fetch('urbs/demand_profiles')
+    .then(function (response) {
+        return response.json();
+    }).then(function (demand_data) {
+        DemandObject.demand_electricity = JSON.parse(demand_data['demand_electricity']);
+        DemandObject.demand_electricity_reactive = JSON.parse(demand_data['demand_electricity_reactive']);
+        DemandObject.demand_mobility = JSON.parse(demand_data['demand_mobility']);
+        DemandObject.demand_space_heat = JSON.parse(demand_data['demand_space_heat']);
+        DemandObject.demand_water_heat = JSON.parse(demand_data['demand_water_heat']);
+        
+        let i = 0;
+        for (demandTable in DemandObject) { 
+            if(demandTable != 'bus_demands') {
+                delete maptool_urbs_demand.DemandObject[demandTable]['t'];
+                populateDemandEditor(DemandObject[demandTable], demandTable, i);
+                i++;
+            }
+        }
+
+        let listLength = maptool_urbs_buildings.BuildingsObject['busWithLoadList'].length;
+        DemandObject.bus_demands = new Array(listLength);
+        for (let i = 0; i < listLength; i++) {
+            DemandObject.bus_demands[i] = new Array(5).fill('0'.repeat(Object.keys(DemandObject.demand_electricity).length));
+        }
+    })
+  }
+
   
   function fillSelectedFeatureDemandEditor(target) {
       let sel = document.getElementById('demandSelect');
@@ -160,6 +189,7 @@ var maptool_urbs_demand = function () {
 
   return {
     DemandObject : DemandObject,
+    fetchDemandProfiles: fetchDemandProfiles,
     fillSelectedFeatureDemandEditor: fillSelectedFeatureDemandEditor, 
     populateDemandEditor: populateDemandEditor,
     check_uncheck_demand, check_uncheck_demand
