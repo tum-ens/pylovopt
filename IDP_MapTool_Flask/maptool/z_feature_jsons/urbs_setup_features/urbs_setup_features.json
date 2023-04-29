@@ -71,5 +71,48 @@
         "electricity_import": "list",
         "electricity_hp_import": "list",
         "electricity_feed_in": "list"
+    },
+    "commodity":
+    {
+        "name": "string",
+        "type": "select",
+        "price":"float",
+        "max": "int",
+        "max_per_hour":"int",
+        "electrical": "int"
+    },
+    "process": 
+    {
+        "pro_com_prop":
+        {
+            "process": "string",
+            "commodity":"string",
+            "direction":"string",
+            "ratio": "float",
+            "ratio-min":"float"
+        },
+        "pro_prop": 
+        {
+            "name": "string",
+            "cap_up":"select",
+            "ramp-up-grad":"int",
+            "ramp-down-grad":"int",
+            "min-fraction":"float",
+            "start-time": "float",
+            "inv-cost":"float",
+            "fix-cost":"float",
+            "var-cost":"float",
+            "wacc":"float",
+            "deprecation":"int",
+            "area-per-cap":"string",
+            "cap-block":"string",
+            "start-price":"string",
+            "on-off":"string",
+            "pf-min":"string",
+            "decommissionable":"string",
+            "decom-saving":"string",
+            "inv-cost-fix":"string"
+        }
+
     }
 }
