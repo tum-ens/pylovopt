@@ -30,14 +30,18 @@ var maptool_urbs_setup = function() {
             populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
             maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
-            maptool_urbs_process.populateProcessEditorList('pro_prop', ['import, import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
-            maptool_urbs_process.populateProcessEditorList('pro_com_prop', ['import, import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
+            maptool_urbs_process.populateProcessEditorList('pro_prop', ['electricity_import, electricity_hp_import', 'electricity_feed_in', 'space heat']);
+            maptool_urbs_process.populateProcessEditorList('pro_com_prop', ['import', 'import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
+            maptool_urbs_process.populateProcessEditorList('commodity', ['import', 'import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
+
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input']);
             populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data']);
             populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data']);
             populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits']);
-            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'])
-            populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop'])
+            populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity']);
+            populateUrbsEditor('global', UrbsPropertiesJSON['global']);
+            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop']);
+            populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop']);
 
             
             maptool_urbs_demand.fetchDemandProfiles();
@@ -135,7 +139,13 @@ var maptool_urbs_setup = function() {
             let label = document.createElement("label");
             label.htmlFor = property;
             label.innerHTML = property;
-            formDiv.appendChild(input)
+            if(propertiesToAdd[property] == 'boolean') {
+                label.appendChild(input)
+                label.classList.add('urbs-checkbox')
+            }
+            else {
+                formDiv.appendChild(input)
+            }
             formDiv.appendChild(label)
         }
         form.appendChild(formDiv)
@@ -217,7 +227,13 @@ var maptool_urbs_setup = function() {
     
             document.getElementById('transmission_' + trans_editor + 'Editor').style.display='inline-block';
         }
+        if(featureName == 'global') {
+            document.getElementById(featureName + 'Editor').style.display='inline-block';
+        }
         if(featureName == 'pro_prop' || featureName == 'pro_com_prop') {
+            document.getElementById(featureName + 'Editor').style.display='inline-block';
+        }
+        if(featureName == 'commodity') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
         }
     }

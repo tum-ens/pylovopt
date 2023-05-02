@@ -568,3 +568,13 @@ input[type="number"]::-webkit-inner-spin-button {
 .panel input[type=checkbox]{
   flex: none;
 }
+
+.urbs-checkbox{
+  width: 100%;
+  top: 0.5rem;
+  bottom: 0rem !important; 
+}
+
+.urbs-checkbox input[type="checkbox"]{
+  margin-right: 95%;
+}

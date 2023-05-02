@@ -38,34 +38,6 @@
             "hw_tank_cap": "float"
         }
     },
-    "transmission": 
-    {
-        "cable_data": 
-        {
-            "id" : "string",
-            "material_cost": "int",
-            "digging_cost": "int",
-            "loading_limit": "int",
-            "wacc": "float",
-            "deprecation": "float"
-        },
-        "trafo_data": 
-        {
-            "id":"string",
-            "inv-cost":"float",
-            "fix-cost":"float",
-            "var-cost":"float",
-            "cap":"int",
-            "wacc":"float",
-            "deprecation":"int"
-        },
-        "voltage_limits": 
-        {
-            "v_min": "float",
-            "v_max": "float"
-        }
-
-    },
     "buysellprice": 
     {
         "electricity_import": "list",
@@ -80,6 +52,25 @@
         "max": "int",
         "max_per_hour":"int",
         "electrical": "int"
+    },
+    "global": 
+    {
+        "CO2 limit": "int",
+        "Cost limit": "int",
+        "TransDist": "int",
+        "tsam" : "boolean",
+        "tsam_season": "boolean",
+        "PF_elec": "float",
+        "PF_HP": "float",
+        "retrofit": "boolean",
+        "uncoordinated": "boolean",
+        "flexible": "boolean", 
+        "lp":"boolean",
+        "excel":"boolean",
+        "assumelowq":"boolean",
+        "grid_curtailment":"boolean",
+        "power_price_kw": "float"
+
     },
     "process": 
     {
@@ -113,6 +104,77 @@
             "decom-saving":"string",
             "inv-cost-fix":"string"
         }
-
+    },
+    "storage": 
+    {
+        "sto_conf": 
+        {
+            "urbs_name": "string",
+            "battery_private.c": "int",
+            "heat_storage.c": "int",
+            "mobility_storage.c": "int",
+            "battery_private.p": "int",
+            "heat_storage.p": "int",
+            "mobility_storage.p": "int" 
+        },
+        "sto_prop": 
+        {
+            "name":"string",
+            "commodity":"string",
+            "cap_up":"list",
+            "eff_in":"float",
+            "eff_out":"float",
+            "inv_cost_p":"float",
+            "inv_cost_c":"float",
+            "fix_cost_p":"float",
+            "fix_cost_c":"float",
+            "var_cost_p":"float",
+            "var_cost_c":"float",
+            "wacc":"float",
+            "depreciation":"float",
+            "init":"float",
+            "discharge":"float",
+            "ep_ratio":"float",
+            "c_block":"float",
+            "p_block":"float",
+            "decommissionable":"float",
+            "decom-saving-p":"float",
+            "decom-saving-c":"float"
+        }
+    },
+    "supim": 
+    {
+        
+    },
+    "timevareff": 
+    {
+        
+    },
+    "transmission": 
+    {
+        "cable_data": 
+        {
+            "id" : "string",
+            "material_cost": "int",
+            "digging_cost": "int",
+            "loading_limit": "int",
+            "wacc": "float",
+            "deprecation": "float"
+        },
+        "trafo_data": 
+        {
+            "id":"string",
+            "inv-cost":"float",
+            "fix-cost":"float",
+            "var-cost":"float",
+            "cap":"int",
+            "wacc":"float",
+            "deprecation":"int"
+        },
+        "voltage_limits": 
+        {
+            "v_min": "float",
+            "v_max": "float"
+        }
     }
 }

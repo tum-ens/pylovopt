@@ -17,7 +17,7 @@
     <button class="feature-editor__buttons-tab__tablinks" id="demandButton" title="Demand" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'demand')"><span>D</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="buysellpriceButton" title="Buy-Sell Price" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'buysellprice')"><span>BSP</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="transmissionButton" title="Transmission" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'transmission')"><span>T</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="globalButton" title="Global" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'global')"><span>G</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="globalButton" title="Global" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'global'); maptool_urbs_setup.fillSelectedEditor(this, 'global')"><span>G</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="commodityButton" title="Commodity" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'commodity')"><span>C</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="processesButton" title="Processes" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'processes')"><span>P</span></button>
 </div>
@@ -37,7 +37,8 @@
     <select class ="feature-editor__featurelist-tab__feature-select" id="globalSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'global')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="commodity">
-    <select class ="feature-editor__featurelist-tab__feature-select" id="commoditySelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'processes')" multiple></select>
+    <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="maptool_urbs_commodity.createNewCommodity()">Add Commodity</button>
+    <select class ="feature-editor__featurelist-tab__feature-select" id="commoditySelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'commodity')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="processes">
     <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="pro_propSelectButton">Process Properties</button>
@@ -102,6 +103,14 @@
     <form id="transmission_voltage_limitsForm">
     </form>
   </div>
+  <div class="feature-editor__selected-feature-editor" id="globalEditor">
+    <form id="globalForm">
+    </form>
+  </div>
+  <div class="feature-editor__selected-feature-editor" id="commodityEditor">
+    <form id="commodityForm">
+    </form>
+  </div>
   <div class="feature-editor__selected-feature-editor" id="pro_propEditor">
     <form id="pro_propForm">
     </form>
@@ -124,4 +133,5 @@
 <script defer src="{{url_for('static', filename='/urbs_editor/buysellprice_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/transmission_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/process_editor.js')}}"></script>
+<script defer src="{{url_for('static', filename='/urbs_editor/commodity_editor.js')}}"></script>
 {% endblock %}
