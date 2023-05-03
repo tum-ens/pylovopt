@@ -8,7 +8,19 @@ var maptool_urbs_process = function() {
         }
     }
 
+    function createNewProcessProperty() {
+
+    }
+
+    
+    function createNewProcessCommodity() {
+
+    }
+
+    
     return {
-        populateProcessEditorList: populateProcessEditorList
+        populateProcessEditorList: populateProcessEditorList,
+        createNewProcessProperty: createNewProcessProperty,
+        createNewProcessCommodity: createNewProcessCommodity
     }
 }();

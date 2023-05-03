@@ -28,20 +28,23 @@ var maptool_urbs_setup = function() {
     
             populateUrbsEditorLoadBusLists('demand', 'busWithLoad');
             populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
+
             maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
+            maptool_urbs_commodity.prepareCommodityObject(UrbsPropertiesJSON, ['import', 'import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
+
             maptool_urbs_process.populateProcessEditorList('pro_prop', ['electricity_import, electricity_hp_import', 'electricity_feed_in', 'space heat']);
             maptool_urbs_process.populateProcessEditorList('pro_com_prop', ['import', 'import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
             maptool_urbs_process.populateProcessEditorList('commodity', ['import', 'import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
 
-            populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input']);
-            populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data']);
-            populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data']);
-            populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits']);
-            populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity']);
-            populateUrbsEditor('global', UrbsPropertiesJSON['global']);
-            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop']);
-            populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop']);
+            populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input'], 'maptool_urbs_buildings.writeBackEditedBuildingFeatures(this)');
+            populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], '');
+            populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data'],'');
+            populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits'],'');
+            populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity'],'maptool_urbs_commodity.writeBackCommodityFeatures(this)');
+            populateUrbsEditor('global', UrbsPropertiesJSON['global'],'');
+            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'],'');
+            populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop'],'');
 
             
             maptool_urbs_demand.fetchDemandProfiles();
@@ -116,13 +119,15 @@ var maptool_urbs_setup = function() {
     }
     
     
-    function populateUrbsEditor(feature, propertiesToAdd) {
+    function populateUrbsEditor(feature, propertiesToAdd, writebackFunction) {
         let form = document.getElementById(feature + 'Form');
         let formDiv = document.createElement('DIV');
         formDiv.classList.add('feature-editor__selected-feature-editor__div');
         for (property in propertiesToAdd) {
             let input = document.createElement("input");
-            
+            input.setAttribute('onchange', writebackFunction);
+
+
             if(propertiesToAdd[property] == 'boolean') {
                 input.type="checkbox";
             }
@@ -235,7 +240,12 @@ var maptool_urbs_setup = function() {
         }
         if(featureName == 'commodity') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
+            maptool_urbs_commodity.fillSelectedFeatureCommodityEditor(maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.selectedIndex])
         }
+    }
+
+    function writeBackEditedFeature() {
+
     }
     
     window.addEventListener("load", (event) => {

@@ -42,9 +42,15 @@
   </div>
   <div class="feature-editor__featurelist-tab" id="processes">
     <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="pro_propSelectButton">Process Properties</button>
-    <select class ="panel feature-editor__featurelist-tab__feature-select" id="pro_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_prop')" multiple></select>
+    <div class="panel">
+      <button type='button' class="button feature-editor__featurelist-tab__add-feature-button" id="pro_propAddButton" onclick="maptool_urbs_process.createNewProcessProperty()">Add Property</button>
+      <select class ="feature-editor__featurelist-tab__feature-select" id="pro_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_prop')" multiple></select>  
+    </div>
     <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="pro_com_propSelectButton">Process Commodities</button>
-    <select class ="panel feature-editor__featurelist-tab__feature-select" id="pro_com_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_com_prop')" multiple></select>
+    <div class="panel">
+      <button type='button' class="button feature-editor__featurelist-tab__add-feature-button" id="pro_com_propAddButton" onclick="maptool_urbs_process.createNewProcessCommodity()">Add Commodity</button>
+      <select class ="feature-editor__featurelist-tab__feature-select" id="pro_com_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_com_prop')" multiple></select>
+    </div>
   </div>
   <div class="feature-editor__featurelist-tab" id="storage">
     <select class ="feature-editor__featurelist-tab__feature-select" id="storageSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'storage')" multiple></select>

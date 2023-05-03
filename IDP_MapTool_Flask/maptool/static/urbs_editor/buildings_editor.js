@@ -5,14 +5,13 @@ var maptool_urbs_buildings = function () {
     }
     
     function prepareBuildingsObject(UrbsPropertiesJSON) {
-        console.log(UrbsPropertiesJSON)
         let propertiesToAdd = UrbsPropertiesJSON['_buildings']['from_user_input'];
         for (bus in BuildingsObject.busWithLoadList) {
             let coordinates = BuildingsObject.busWithLoadList[bus].feature.geometry.coordinates
             let name = BuildingsObject.busWithLoadList[bus].feature.properties.name
             let buildingJSON = {"name": name,"x": coordinates[0], "y": coordinates[1]};
             for (property in propertiesToAdd) {
-                buildingJSON[property] = parseInt(bus)
+                buildingJSON[property] = ''
             }
             BuildingsObject.buildingsPropertiesList.push(buildingJSON);
         }
@@ -20,14 +19,6 @@ var maptool_urbs_buildings = function () {
     
     function fillSelectedFeatureBuildingEditor(target) {
         maptool_urbs_setup.resetLoadBusStyle(target)
-    
-    
-        let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
-        for (i = 0; i < editorcontent.length; i++) {
-            editorcontent[i].style.display = "none";
-        }
-    
-        document.getElementById('buildingsEditor').style.display = 'inline-block';
     
         let editor_form = document.getElementById('buildingsForm');
         let editor_divs = editor_form.children;
@@ -50,8 +41,12 @@ var maptool_urbs_buildings = function () {
         }
     }
     
-    function writeBackEditedBuildingFeatures() {
-    
+    function writeBackEditedBuildingFeatures(target) {
+        let idxInFeatureList = document.getElementById("buildingsSelect").selectedIndex;
+        let selectedElement = BuildingsObject.buildingsPropertiesList[idxInFeatureList];
+        console.log(selectedElement[target.name], target.value);
+        selectedElement[target.name] = target.value;
+        console.log(selectedElement[target.name], target.value);
     }
 
     return {
