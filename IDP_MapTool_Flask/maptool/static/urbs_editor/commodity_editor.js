@@ -1,20 +1,29 @@
 var maptool_urbs_commodity = function () {
     
     let CommodityObject = {
-        "commodityPropertiesList": []
+        "commodityPropertiesList": {}
     }
 
     function prepareCommodityObject(UrbsPropertiesJSON, commodities) {
         let propertiesToAdd = UrbsPropertiesJSON['commodity'];
         for (idx in commodities) {
             let name = commodities[idx]
-            let commodityJSON = {"name": name};
+            let commodityJSON = {};
             for (property in propertiesToAdd) {
                 commodityJSON[property] = ''
             }
-            CommodityObject.commodityPropertiesList.push(commodityJSON);
+            CommodityObject.commodityPropertiesList[name] = commodityJSON;
+            addCommToProcessCreationFormList(name)
         }
-        console.log(CommodityObject)
+    }
+
+    function addCommToProcessCreationFormList(name) {
+        let commSelect = document.getElementById("pro_propCommSelect");
+        let newOption = document.createElement("option");
+        newOption.value = name;
+        newOption.text = name;
+        commSelect.appendChild(newOption);
+
     }
 
     function createNewCommodity() {
@@ -22,7 +31,7 @@ var maptool_urbs_commodity = function () {
     }
 
     function fillSelectedFeatureCommodityEditor(target) {
-        console.log(target);
+        console.log(CommodityObject);
 
         let editor_form = document.getElementById('commodityForm');
         let editor_divs = editor_form.children;

@@ -31,6 +31,10 @@ li {
   display: flex;
 }
 
+.hidden {
+  display: none;
+}
+
 .feature-editor__featurelist-tab__demand-select {
   position: relative;
   width: 100%;

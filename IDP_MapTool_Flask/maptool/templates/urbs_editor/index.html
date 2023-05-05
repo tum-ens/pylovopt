@@ -41,16 +41,8 @@
     <select class ="feature-editor__featurelist-tab__feature-select" id="commoditySelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'commodity')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="processes">
-    <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="pro_propSelectButton">Process Properties</button>
-    <div class="panel">
-      <button type='button' class="button feature-editor__featurelist-tab__add-feature-button" id="pro_propAddButton" onclick="maptool_urbs_process.createNewProcessProperty()">Add Property</button>
-      <select class ="feature-editor__featurelist-tab__feature-select" id="pro_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_prop')" multiple></select>  
-    </div>
-    <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="pro_com_propSelectButton">Process Commodities</button>
-    <div class="panel">
-      <button type='button' class="button feature-editor__featurelist-tab__add-feature-button" id="pro_com_propAddButton" onclick="maptool_urbs_process.createNewProcessCommodity()">Add Commodity</button>
-      <select class ="feature-editor__featurelist-tab__feature-select" id="pro_com_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_com_prop')" multiple></select>
-    </div>
+    <button type='button' class="button feature-editor__featurelist-tab__add-feature-button" id="pro_propAddButton" onclick="maptool_urbs_process.openNewProcessForm(false)">Add Process</button>
+    <select class ="feature-editor__featurelist-tab__feature-select" id="pro_propSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'pro_prop')" multiple></select>  
   </div>
   <div class="feature-editor__featurelist-tab" id="storage">
     <select class ="feature-editor__featurelist-tab__feature-select" id="storageSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'storage')" multiple></select>
@@ -78,8 +70,8 @@
         <div class="panel" id="demand_electricity_reactivePanel"></div>
         <div class="feature-editor__selected-feature-editor__demand__graph"></div>
       </div>
-      <div class="feature-editor__selected-feature-editor__demand" id="movility">
-        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="movilitySelect">Mobility</button>
+      <div class="feature-editor__selected-feature-editor__demand" id="mobility">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="mobilitySelect">Mobility</button>
         <div class="panel" id="demand_mobilityPanel"></div>
         <div class="feature-editor__selected-feature-editor__demand__graph"></div>
       </div>
@@ -120,12 +112,44 @@
   <div class="feature-editor__selected-feature-editor" id="pro_propEditor">
     <form id="pro_propForm">
     </form>
+    <button type='button' class="button feature-editor__featurelist-tab__add-feature-button" id="pro_com_propAddButton" onclick="maptool_urbs_process.createNewProcessPropertyOrCommodity(true)">Add Commodity</button>
   </div>
-  <div class="feature-editor__selected-feature-editor" id="pro_com_propEditor">
-    <form id="pro_com_propForm">
+</div>
+
+<div class="optionsPopup">
+  <div class="formPopup" id="urbsProcessPopupForm">
+    <form class="formContainer">
+      Please give a name for the new process:
+      <div class="form-popup__version-select">
+        <input type="text" name="newProcessTextInput" id="newProcessTextInput" placeholder="Process Name" onchange="maptool_urbs_process.processFormCommoditySelection(document.getElementById('pro_propCommSelect'))">
+      </div>
+      Select a commodity for your new process:
+      <div class="form-popup__version-select">
+        <select class ="feature-editor__featurelist-tab__feature-select" id="pro_propCommSelect" onchange="maptool_urbs_process.processFormCommoditySelection(this)">
+          <option value="none" selected disabled hidden>Select an Option</option>
+          <option value="newCommodity">New Commodity</option>
+        </select>
+        <input type="text" class="hidden" name="newProcessCommTextInput" id="newProcessCommTextInput" placeholder="Commodity Name" onchange="maptool_urbs_process.processFormCommoditySelection(document.getElementById('pro_propCommSelect'))">
+      </div>
+      <button type="button" class="btn" id="newProcessCreateButton" onclick="maptool_urbs_process.createNewProcessPropertyOrCommodity(false)" disabled>Create Process</button>
+      <button type="button" class="btn cancel" onclick="maptool_urbs_process.closeNewProcessForm(false)">Cancel</button>
     </form>
   </div>
 </div>
+
+<div class="optionsPopup">
+  <div class="formPopup" id="urbsProcessCommPopupForm">
+    <form class="formContainer">
+      Please give a name for the new process:
+      <div class="form-popup__version-select">
+        <input type="text" name="newProcessCommTextInput" id="newProcessCommTextInput" placeholder="Commodity Name">
+      </div>
+      <button type="button" class="btn" onclick="maptool_urbs_process.createNewProcessPropertyOrCommodity(true)">Create Commodity</button>
+      <button type="button" class="btn cancel" onclick="maptool_urbs_process.closeNewProcessForm(true)">Cancel</button>
+    </form>
+  </div>
+</div>
+
 
 <div class="action-buttons">
   <button class="button action-buttons__button" type="button" id="returnUrbsSetupButton" onclick="maptool_return_urbs.returnUrbsSetup()">Finish Urbs Setup</button>

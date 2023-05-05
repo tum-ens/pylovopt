@@ -25,17 +25,17 @@ var maptool_urbs_setup = function() {
             });
     
             displayUrbsEditorNet(ppdata);
+
+            maptool_urbs_demand.fetchDemandProfiles();
+            maptool_urbs_process.fetchProcessProfiles();
     
             populateUrbsEditorLoadBusLists('demand', 'busWithLoad');
             populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
 
             maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
-            maptool_urbs_commodity.prepareCommodityObject(UrbsPropertiesJSON, ['import', 'import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
-
-            maptool_urbs_process.populateProcessEditorList('pro_prop', ['electricity_import, electricity_hp_import', 'electricity_feed_in', 'space heat']);
-            maptool_urbs_process.populateProcessEditorList('pro_com_prop', ['import', 'import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
-            maptool_urbs_process.populateProcessEditorList('commodity', ['import', 'import_hp', 'feed_in', 'slack', 'Q', 'rooftop PV']);
+            maptool_urbs_commodity.prepareCommodityObject(UrbsPropertiesJSON, ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
+            maptool_urbs_process.populateProcessEditorList('commodity', ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
 
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input'], 'maptool_urbs_buildings.writeBackEditedBuildingFeatures(this)');
             populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], '');
@@ -43,11 +43,8 @@ var maptool_urbs_setup = function() {
             populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits'],'');
             populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity'],'maptool_urbs_commodity.writeBackCommodityFeatures(this)');
             populateUrbsEditor('global', UrbsPropertiesJSON['global'],'');
-            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'],'');
-            populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop'],'');
-
-            
-            maptool_urbs_demand.fetchDemandProfiles();
+            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'],'maptool_urbs_process.writeBackProcessFeatures(this)');
+            //populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_com_prop'],'');
 
             tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
             for (i = 0; i < tabcontent.length; i++) {
@@ -122,6 +119,7 @@ var maptool_urbs_setup = function() {
     function populateUrbsEditor(feature, propertiesToAdd, writebackFunction) {
         let form = document.getElementById(feature + 'Form');
         let formDiv = document.createElement('DIV');
+        formDiv.id = feature + 'FormDiv';
         formDiv.classList.add('feature-editor__selected-feature-editor__div');
         for (property in propertiesToAdd) {
             let input = document.createElement("input");
@@ -237,10 +235,11 @@ var maptool_urbs_setup = function() {
         }
         if(featureName == 'pro_prop' || featureName == 'pro_com_prop') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
+            maptool_urbs_process.fillSelectedProcessEditor(maptool_urbs_process.ProcessObject.pro_propList[sel.options[sel.selectedIndex].text])
         }
         if(featureName == 'commodity') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
-            maptool_urbs_commodity.fillSelectedFeatureCommodityEditor(maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.selectedIndex])
+            maptool_urbs_commodity.fillSelectedFeatureCommodityEditor(maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.options[sel.selectedIndex].text])
         }
     }
 

@@ -100,7 +100,6 @@ def formatBuildingsSetup():
             if buildings_osm_id:
                 buildings_osm_id_list.append(buildings_osm_id)
 
-
         buildings_data_aggregator = []
         for osm_id in buildings_osm_id_list:
             additional_data = pg.test_getAdditionalBuildingData(osm_id)
@@ -113,3 +112,15 @@ def formatBuildingsSetup():
         # json.dump(buildings_data.to_json(orient="split"), f, indent=6)
         # f.close()
         return 'Success', 200
+    
+@bp.route('/urbs/process_profiles', methods=['GET', 'POST'])
+def formatProcessSetup():
+    pro_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/process/pro_prop.csv'), sep=',')
+    pro_com_prop = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/process/pro_com_prop.csv'), sep=',')
+    print(pro_com_prop.columns)
+    process_json = {
+        "pro_prop" : pro_prop.to_json(),
+        "pro_com_prop" : pro_com_prop.to_json(),
+        }
+
+    return process_json
