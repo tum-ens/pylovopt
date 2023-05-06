@@ -50,7 +50,7 @@ var maptool_urbs_process = function() {
         document.getElementById("newProcessTextInput").value = '';
         document.getElementById("newProcessCommTextInput").value = '';
         document.getElementById("newProcessCreateButton").disabled = true;
-        document.getElementById("newProcessCommTextInput").classList.add('hidden');
+        document.getElementById("newProcessCommDiv").classList.add('hidden');
     }
 
     function processFormCommoditySelection(sel) {
@@ -59,7 +59,7 @@ var maptool_urbs_process = function() {
 
         if (sel.value == 'newCommodity') {
             document.getElementById("newProcessCreateButton").disabled = true;
-            document.getElementById("newProcessCommTextInput").classList.remove('hidden');
+            document.getElementById("newProcessCommDiv").classList.remove('hidden');
             if(document.getElementById("newProcessCommTextInput").value != '' && processNameFlag) {
                 document.getElementById("newProcessCreateButton").disabled = false;
             }
@@ -68,7 +68,7 @@ var maptool_urbs_process = function() {
             if (processNameFlag) {
                 document.getElementById("newProcessCreateButton").disabled = false;
             }
-            document.getElementById("newProcessCommTextInput").classList.add('hidden');
+            document.getElementById("newProcessCommDiv").classList.add('hidden');
 
         }
     }
@@ -79,6 +79,9 @@ var maptool_urbs_process = function() {
         }
         else {
             createNewProcessProperty(document.getElementById("newProcessTextInput").value);
+            if (document.getElementById("pro_propCommSelect").value == 'newCommodity') {
+                createNewProcessCommodity(document.getElementById("newProcessCommTextInput").value);
+            }
         }
         closeNewProcessForm(isCommodity)
     }
@@ -95,9 +98,14 @@ var maptool_urbs_process = function() {
     }   
 
     
-    function createNewProcessCommodity() {
+    function createNewProcessCommodity(name) {
         console.log("new Process Commodity")
-        let form = document.getElementById("pro_prop_form")
+        let commodityList = document.getElementById("commoditySelect");
+        let option = document.createElement("option");
+        option.text = name;
+        commodityList.add(option);
+
+        maptool_urbs_commodity.CommodityObject.commodityPropertiesList[name] = JSON.parse(JSON.stringify(maptool_urbs_commodity.CommodityObject.commodityPropertiesTemplate));
     }
 
     function writeBackProcessFeatures(target) {
@@ -125,6 +133,47 @@ var maptool_urbs_process = function() {
             }
         }
     }
+
+    function createPro_Conf_Editor() {
+        var data = [];
+        var headers = ['urbs_name'];
+        var placeholders = []
+
+        for (commodity in maptool_urbs_commodity.CommodityObject.commodityPropertiesList) {
+            headers.push(commodity);
+            placeholders.push('');
+        }
+        
+        console.log(placeholders);
+
+        for (bus in maptool_urbs_buildings.BuildingsObject.busWithLoadList) {
+            data.push([maptool_urbs_buildings.BuildingsObject.busWithLoadList[bus].feature.properties.name].concat(placeholders));
+        }
+
+        var container = document.getElementById('example');
+        var hot = new Handsontable(container, {
+        data: data,
+        rowHeaders: true,
+        colHeaders: headers,
+        overflow: 'auto',
+        licenseKey: 'non-commercial-and-evaluation'
+        });
+
+        hot.updateSettings({
+            cells(row, col, prop) {
+                const cellProperties = {};
+            
+                if (col == 0) {
+                  cellProperties.readOnly = true;
+            
+                } else {
+                  cellProperties.editor = 'numeric';
+                }
+            
+                return cellProperties;
+              }
+        })
+    }
     
     return {
         ProcessObject: ProcessObject,
@@ -135,7 +184,7 @@ var maptool_urbs_process = function() {
         closeNewProcessForm: closeNewProcessForm,
         processFormCommoditySelection: processFormCommoditySelection,
         createNewProcessPropertyOrCommodity: createNewProcessPropertyOrCommodity,
-        writeBackProcessFeatures: writeBackProcessFeatures
-        
+        writeBackProcessFeatures: writeBackProcessFeatures,
+        createPro_Conf_Editor: createPro_Conf_Editor
     }
 }();

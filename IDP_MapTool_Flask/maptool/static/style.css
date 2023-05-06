@@ -244,6 +244,20 @@ font-weight: 500;
   scrollbar-width: none; 
 }
 
+.feature-editor__feature-tab {
+  position: absolute;
+  top: 0px;
+  right: 5%;
+  color: #000000;
+  background-color: #f1f1f1;
+  height: 100%;
+  width: 100%;
+  pointer-events: all;
+  display: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none; 
+}
+
 /* || Editor List of Features --------------------------*/
 .feature-editor__featurelist-tab__feature-select {
   position: relative;
@@ -426,6 +440,14 @@ input[type=text]:focus + label, input[type=number]:focus + label {
 
 .form-popup__version-select {
   padding-bottom: 2rem;
+}
+
+.form-popup__version-select__comm__checkboxes {
+  padding-top: 2rem;
+}
+
+.form-popup__version-select__comm__checkboxes label{
+  padding-right: 2rem;
 }
 
 .form-popup__version-select label{

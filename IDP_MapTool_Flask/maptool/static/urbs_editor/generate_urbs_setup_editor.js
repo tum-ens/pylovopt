@@ -37,6 +37,8 @@ var maptool_urbs_setup = function() {
             maptool_urbs_commodity.prepareCommodityObject(UrbsPropertiesJSON, ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
             maptool_urbs_process.populateProcessEditorList('commodity', ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
 
+            maptool_urbs_process.createPro_Conf_Editor();
+
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input'], 'maptool_urbs_buildings.writeBackEditedBuildingFeatures(this)');
             populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], '');
             populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data'],'');
@@ -155,7 +157,7 @@ var maptool_urbs_setup = function() {
     }
     
     //gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
-    function openUrbsEditorList(e, listName) {
+    function openUrbsEditorList(e, listName, hasEditor) {
         tabcontent = document.getElementsByClassName("feature-editor__featurelist-tab");
         for (i = 0; i < tabcontent.length; i++) {
           tabcontent[i].style.display = "none";
@@ -178,7 +180,7 @@ var maptool_urbs_setup = function() {
         let editor = document.getElementById(listName + "Editor")
         //if a list element had been selected previously and the tab had been closed without another feature editor being opened elsewhere, we reopen the editor window of the 
         //currently selected feature
-        if(listName != 'processes') {
+        if(listName != 'processes' && hasEditor) {
             if (document.getElementById(listName + 'Select').selectedIndex != -1) {
             
                 if(listName == 'transmission') {

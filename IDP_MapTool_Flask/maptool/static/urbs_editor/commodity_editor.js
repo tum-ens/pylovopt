@@ -1,18 +1,21 @@
 var maptool_urbs_commodity = function () {
     
     let CommodityObject = {
-        "commodityPropertiesList": {}
+        "commodityPropertiesList": {},
+        "commodityPropertiesTemplate": {}
     }
 
     function prepareCommodityObject(UrbsPropertiesJSON, commodities) {
         let propertiesToAdd = UrbsPropertiesJSON['commodity'];
+        let commodityJSON = {};
+        for (property in propertiesToAdd) {
+            commodityJSON[property] = ''
+        }
+        CommodityObject.commodityPropertiesTemplate = commodityJSON;
+
         for (idx in commodities) {
             let name = commodities[idx]
-            let commodityJSON = {};
-            for (property in propertiesToAdd) {
-                commodityJSON[property] = ''
-            }
-            CommodityObject.commodityPropertiesList[name] = commodityJSON;
+            CommodityObject.commodityPropertiesList[name] = JSON.parse(JSON.stringify(commodityJSON));
             addCommToProcessCreationFormList(name)
         }
     }
