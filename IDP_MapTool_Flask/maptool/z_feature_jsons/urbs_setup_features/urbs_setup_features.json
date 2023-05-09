@@ -109,13 +109,7 @@
     {
         "sto_conf": 
         {
-            "urbs_name": "string",
-            "battery_private.c": "int",
-            "heat_storage.c": "int",
-            "mobility_storage.c": "int",
-            "battery_private.p": "int",
-            "heat_storage.p": "int",
-            "mobility_storage.p": "int" 
+            "urbs_name": "string"
         },
         "sto_prop": 
         {

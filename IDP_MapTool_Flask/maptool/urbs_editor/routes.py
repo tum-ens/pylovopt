@@ -124,3 +124,22 @@ def formatProcessSetup():
         }
 
     return process_json
+
+@bp.route('/urbs/storage_profiles', methods=['GET', 'POST'])
+def formatStorageSetup():
+    sto_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/storage/sto_prop.csv'), sep=',')
+    storage_json = {
+        "sto_prop" : sto_prop.to_json(),
+        }
+
+    return storage_json
+
+
+@bp.route('/urbs/commodity_profiles', methods=['GET', 'POST'])
+def formatCommoditySetup():
+    com_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/commodity/com_prop.csv'), sep=',')
+    commodity_json = {
+        "com_prop" : com_prop.to_json(),
+        }
+
+    return commodity_json

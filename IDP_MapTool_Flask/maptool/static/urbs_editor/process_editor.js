@@ -1,9 +1,23 @@
+//TODO: Edit conf table when new process, new commodity is added
+
 var maptool_urbs_process = function() {
     let ProcessObject = {
         "pro_propList": {},
         "pro_com_propList": {},
         "pro_propTemplate": {}
     }
+
+    let container = document.getElementById('process_confHOTContainer');
+    let hot = new Handsontable(container, {
+        data: [[]],
+        rowHeaders: true,
+        colHeaders: [],
+        minRows: 1,
+        minCols: 1,
+        minSpareRows: 1,
+        overflow: 'auto',
+        licenseKey: 'non-commercial-and-evaluation'
+        });
 
     function fetchProcessProfiles() {
         fetch('urbs/process_profiles')
@@ -20,12 +34,20 @@ var maptool_urbs_process = function() {
 
             ProcessObject.pro_propTemplate = processPropertyJSONTemplate;
 
+            let i = 0;
             for (idx in processes['name']) {
                 let processPropertyJSON = JSON.parse(JSON.stringify(processPropertyJSONTemplate));
+                for (feature_idx in processes) {
+                    if (feature_idx != 'name') {
+                        processPropertyJSON[feature_idx] = processes[feature_idx][i];
+                    }
+                }
                 ProcessObject.pro_propList[processes['name'][idx]] = processPropertyJSON;
+                i++;
             }
             
             populateProcessEditorList('pro_prop', Object.keys(ProcessObject.pro_propList));
+            createPro_Conf_Editor();
         });
     }
 
@@ -115,25 +137,6 @@ var maptool_urbs_process = function() {
         selectedElement[target.name] = target.value;
     }
 
-    function fillSelectedProcessEditor(target) {
-        let editor_form = document.getElementById('pro_propForm');
-        let editor_divs = editor_form.children;
-
-        for (let i = 0; i < editor_divs.length; i++) {
-            let editor_elems = editor_form.children[i].children;
-            for (let i = 0; i < editor_elems.length; i++) {
-                if (editor_elems[i].nodeName == 'INPUT') {
-                    if(target[editor_elems[i].name] != null) {
-                        editor_elems[i].value = target[editor_elems[i].name];
-                    }
-                    else {
-                        editor_elems[i].value = '';
-                    }
-                }
-            }
-        }
-    }
-
     function createPro_Conf_Editor() {
         var data = [];
         var headers = ['urbs_name'];
@@ -143,21 +146,12 @@ var maptool_urbs_process = function() {
             headers.push(commodity);
             placeholders.push('');
         }
-        
-        console.log(placeholders);
 
         for (bus in maptool_urbs_buildings.BuildingsObject.busWithLoadList) {
             data.push([maptool_urbs_buildings.BuildingsObject.busWithLoadList[bus].feature.properties.name].concat(placeholders));
         }
-
-        var container = document.getElementById('example');
-        var hot = new Handsontable(container, {
-        data: data,
-        rowHeaders: true,
-        colHeaders: headers,
-        overflow: 'auto',
-        licenseKey: 'non-commercial-and-evaluation'
-        });
+        hot.loadData(data);
+        hot.headers = headers;
 
         hot.updateSettings({
             cells(row, col, prop) {
@@ -171,15 +165,16 @@ var maptool_urbs_process = function() {
                 }
             
                 return cellProperties;
-              }
+              }, 
+              colHeaders: headers 
         })
     }
     
     return {
         ProcessObject: ProcessObject,
+        hot: hot,
         fetchProcessProfiles: fetchProcessProfiles,
         populateProcessEditorList: populateProcessEditorList,
-        fillSelectedProcessEditor: fillSelectedProcessEditor,
         openNewProcessForm: openNewProcessForm,
         closeNewProcessForm: closeNewProcessForm,
         processFormCommoditySelection: processFormCommoditySelection,

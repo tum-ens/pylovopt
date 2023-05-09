@@ -27,7 +27,9 @@ var maptool_urbs_setup = function() {
             displayUrbsEditorNet(ppdata);
 
             maptool_urbs_demand.fetchDemandProfiles();
+            maptool_urbs_commodity.fetchProfiles();
             maptool_urbs_process.fetchProcessProfiles();
+            maptool_urbs_storage.fetchProfiles();
     
             populateUrbsEditorLoadBusLists('demand', 'busWithLoad');
             populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
@@ -35,9 +37,8 @@ var maptool_urbs_setup = function() {
             maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
             maptool_urbs_commodity.prepareCommodityObject(UrbsPropertiesJSON, ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
-            maptool_urbs_process.populateProcessEditorList('commodity', ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
-
-            maptool_urbs_process.createPro_Conf_Editor();
+            //maptool_urbs_process.populateProcessEditorList('commodity', ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
+            // maptool_urbs_process.populateProcessEditorList('storage', ['battery_private', 'heat_storage', 'mobility_storage']);
 
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input'], 'maptool_urbs_buildings.writeBackEditedBuildingFeatures(this)');
             populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], '');
@@ -46,19 +47,20 @@ var maptool_urbs_setup = function() {
             populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity'],'maptool_urbs_commodity.writeBackCommodityFeatures(this)');
             populateUrbsEditor('global', UrbsPropertiesJSON['global'],'');
             populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'],'maptool_urbs_process.writeBackProcessFeatures(this)');
-            //populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_com_prop'],'');
+            populateUrbsEditor('storage', UrbsPropertiesJSON['storage']['sto_prop'],'');
+
 
             tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
             for (i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.display = "inline-flex";
             }
     
-            document.getElementById('demand').style.display = 'inline-block';
-            document.getElementById('demandSelect').selectedIndex = 0;
-            
             for (i = 0; i < tabcontent.length; i++) {
                 tabcontent[i].style.padding = "30px 15px";
             }
+
+            document.getElementById('demand').style.display = 'inline-block';
+            document.getElementById('demandSelect').selectedIndex = 0;
     
         });
     }
@@ -116,7 +118,7 @@ var maptool_urbs_setup = function() {
             x.add(option);
         }
     }
-    
+
     
     function populateUrbsEditor(feature, propertiesToAdd, writebackFunction) {
         let form = document.getElementById(feature + 'Form');
@@ -180,7 +182,7 @@ var maptool_urbs_setup = function() {
         let editor = document.getElementById(listName + "Editor")
         //if a list element had been selected previously and the tab had been closed without another feature editor being opened elsewhere, we reopen the editor window of the 
         //currently selected feature
-        if(listName != 'processes' && hasEditor) {
+        if(listName != 'processes' && listName != 'storage_conf' && hasEditor) {
             if (document.getElementById(listName + 'Select').selectedIndex != -1) {
             
                 if(listName == 'transmission') {
@@ -189,6 +191,13 @@ var maptool_urbs_setup = function() {
                 }
                 editor.style.display = "inline-block";
             }
+        }
+
+        if(listName == 'process_conf') {
+            maptool_urbs_process.hot.render();
+        }
+        if(listName == 'storage_conf') {
+            maptool_urbs_storage.hot.render();
         }
     }
     
@@ -204,8 +213,13 @@ var maptool_urbs_setup = function() {
         target.setStyle(maptool_network_gen.NetworkObject['busStyles'][0]);
         clicked = target;
     
+        highlightSelectedElementInList(target, "demandSelect");
+        highlightSelectedElementInList(target, "buildingsSelect");
+    }
+
+    function highlightSelectedElementInList(target, selectId) {
         let featureList = maptool_urbs_buildings.BuildingsObject['busWithLoadList'];
-        let selectedList = document.getElementById("demandSelect");
+        let selectedList = document.getElementById(selectId);
         let newIndex = featureList.findIndex((entry) => entry === target);
         selectedList.selectedIndex = newIndex;
     }
@@ -235,13 +249,36 @@ var maptool_urbs_setup = function() {
         if(featureName == 'global') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
         }
-        if(featureName == 'pro_prop' || featureName == 'pro_com_prop') {
+        if(featureName == 'pro_prop') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
-            maptool_urbs_process.fillSelectedProcessEditor(maptool_urbs_process.ProcessObject.pro_propList[sel.options[sel.selectedIndex].text])
+            fillSelectedFeatureEditorFields(maptool_urbs_process.ProcessObject.pro_propList[sel.value], featureName)
         }
         if(featureName == 'commodity') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
-            maptool_urbs_commodity.fillSelectedFeatureCommodityEditor(maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.options[sel.selectedIndex].text])
+            fillSelectedFeatureEditorFields(maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.value], featureName)
+        }
+        if(featureName == 'storage') {
+            document.getElementById(featureName + 'Editor').style.display='inline-block';
+            fillSelectedFeatureEditorFields(maptool_urbs_storage.StorageObject['storagePropertiesList'][sel.value], featureName)
+        }
+    }
+
+    function fillSelectedFeatureEditorFields(target, featureName) {
+        let editor_form = document.getElementById(featureName + 'Form');
+        let editor_divs = editor_form.children;
+
+        for (let i = 0; i < editor_divs.length; i++) {
+            let editor_elems = editor_form.children[i].children;
+            for (let i = 0; i < editor_elems.length; i++) {
+                if (editor_elems[i].nodeName == 'INPUT') {
+                    if(target[editor_elems[i].name] != null) {
+                        editor_elems[i].value = target[editor_elems[i].name];
+                    }
+                    else {
+                        editor_elems[i].value = '';
+                    }
+                }
+            }
         }
     }
 
