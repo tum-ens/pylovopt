@@ -59,7 +59,6 @@ var maptool_urbs_commodity = function () {
         newOption.value = name;
         newOption.text = name;
         commSelect.appendChild(newOption);
-
     }
 
     function createNewCommodity() {

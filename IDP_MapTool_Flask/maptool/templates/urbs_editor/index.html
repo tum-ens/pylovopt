@@ -129,6 +129,17 @@
     <form id="storageForm">
     </form>
   </div>
+  <div class="feature-editor__selected-feature-editor" id="supimEditor" style="display: inline-block">
+    <form>
+      <div class="feature-editor__selected-feature-editor__demand" id="solar">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="solarSelect">Solar</button>
+        <div class="panel" id="solarPanel"></div>
+        <div class="feature-editor__selected-feature-editor__supim__graph" id="main"></div>
+      </div>
+      </div>
+    </form>
+  </div>
+
 </div>
 
 <div class="optionsPopup">
@@ -176,4 +187,6 @@
 <script defer src="{{url_for('static', filename='/urbs_editor/process_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/commodity_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/storage_editor.js')}}"></script>
+<script defer src="{{url_for('static', filename='/urbs_editor/supim_editor.js')}}"></script>
+
 {% endblock %}

@@ -397,7 +397,7 @@ input[type=text]:focus + label, input[type=number]:focus + label {
   color: #0065BD;
 }
 
-.feature-editor__selected-feature-editor__demand__graph {
+.feature-editor__selected-feature-editor__demand__graph, .feature-editor__selected-feature-editor__supim__graph {
   min-height: 200px;
 }
 

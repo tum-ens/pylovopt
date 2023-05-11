@@ -143,3 +143,12 @@ def formatCommoditySetup():
         }
 
     return commodity_json
+
+
+@bp.route('/urbs/supim_profiles', methods=['GET', 'POST'])
+def supimProfiles():
+    supim_solar = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/supim/profiles/solar.csv'), sep=',')
+    supim_json = {"solar" : supim_solar.to_json(),
+                }
+
+    return supim_json

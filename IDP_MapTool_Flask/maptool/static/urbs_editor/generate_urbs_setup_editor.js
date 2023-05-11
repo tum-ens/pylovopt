@@ -30,15 +30,15 @@ var maptool_urbs_setup = function() {
             maptool_urbs_commodity.fetchProfiles();
             maptool_urbs_process.fetchProcessProfiles();
             maptool_urbs_storage.fetchProfiles();
+            maptool_urbs_supim.fetchSupimProfiles();
     
             populateUrbsEditorLoadBusLists('demand', 'busWithLoad');
             populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
+            populateUrbsEditorLoadBusLists('supim', 'busWithLoad');
 
             maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
             maptool_urbs_commodity.prepareCommodityObject(UrbsPropertiesJSON, ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
-            //maptool_urbs_process.populateProcessEditorList('commodity', ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
-            // maptool_urbs_process.populateProcessEditorList('storage', ['battery_private', 'heat_storage', 'mobility_storage']);
 
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input'], 'maptool_urbs_buildings.writeBackEditedBuildingFeatures(this)');
             populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], '');
@@ -61,6 +61,9 @@ var maptool_urbs_setup = function() {
 
             document.getElementById('demand').style.display = 'inline-block';
             document.getElementById('demandSelect').selectedIndex = 0;
+            document.getElementById('demandEditor').style.display = 'none';
+            document.getElementById('supimEditor').style.display = 'none';
+
     
         });
     }
@@ -96,6 +99,8 @@ var maptool_urbs_setup = function() {
                             marker.setStyle(maptool_network_gen.NetworkObject.busStyles[1]);
                             marker.on('click', function(e) {
                                 maptool_urbs_demand.fillSelectedFeatureDemandEditor(e.target);
+                                maptool_urbs_buildings.fillSelectedFeatureBuildingEditor(e.target);
+                                maptool_urbs_supim.fillSelectedFeatureSupimEditor(e.target);
                             });
                         }
                     }
@@ -215,6 +220,8 @@ var maptool_urbs_setup = function() {
     
         highlightSelectedElementInList(target, "demandSelect");
         highlightSelectedElementInList(target, "buildingsSelect");
+        highlightSelectedElementInList(target, "supimSelect");
+
     }
 
     function highlightSelectedElementInList(target, selectId) {
@@ -231,11 +238,11 @@ var maptool_urbs_setup = function() {
         }
     
         if(featureName == 'demand') {
-            maptool_urbs_demand.fillSelectedFeatureDemandEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex])
+            maptool_urbs_demand.fillSelectedFeatureDemandEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex]);
             document.getElementById('demandEditor').style.display='inline-block';
         }
         if(featureName == 'buildings') {
-            maptool_urbs_buildings.fillSelectedFeatureBuildingEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex])
+            maptool_urbs_buildings.fillSelectedFeatureBuildingEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex]);
             document.getElementById('buildingsEditor').style.display='inline-block';
         }
         if(featureName == 'transmission') {
@@ -251,15 +258,19 @@ var maptool_urbs_setup = function() {
         }
         if(featureName == 'pro_prop') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
-            fillSelectedFeatureEditorFields(maptool_urbs_process.ProcessObject.pro_propList[sel.value], featureName)
+            fillSelectedFeatureEditorFields(maptool_urbs_process.ProcessObject.pro_propList[sel.value], featureName);
         }
         if(featureName == 'commodity') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
-            fillSelectedFeatureEditorFields(maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.value], featureName)
+            fillSelectedFeatureEditorFields(maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.value], featureName);
         }
         if(featureName == 'storage') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
-            fillSelectedFeatureEditorFields(maptool_urbs_storage.StorageObject['storagePropertiesList'][sel.value], featureName)
+            fillSelectedFeatureEditorFields(maptool_urbs_storage.StorageObject['storagePropertiesList'][sel.value], featureName);
+        }
+        if(featureName == 'supim') {
+            maptool_urbs_supim.fillSelectedFeatureSupimEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex]);
+            document.getElementById('supimEditor').style.display='inline-block';
         }
     }
 

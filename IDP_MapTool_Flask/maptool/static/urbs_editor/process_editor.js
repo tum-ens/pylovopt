@@ -128,6 +128,9 @@ var maptool_urbs_process = function() {
         commodityList.add(option);
 
         maptool_urbs_commodity.CommodityObject.commodityPropertiesList[name] = JSON.parse(JSON.stringify(maptool_urbs_commodity.CommodityObject.commodityPropertiesTemplate));
+        hot.alter('insert_col', hot.countCols(), 1)
+        hot.headers[hot.headers.length - 1] = name;
+        console.log(hot.headers);
     }
 
     function writeBackProcessFeatures(target) {
