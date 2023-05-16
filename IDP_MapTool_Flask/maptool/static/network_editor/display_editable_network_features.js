@@ -123,25 +123,50 @@ var maptool_net_display = function() {
         }
         
         editor_form.appendChild(formDiv);
+        formDiv.id = formDivId;
+    }
 
-        if (secondaryFeatureName != null) {
-            // formDivId = secondaryFeatureName + 'FormDiv';
-            // formDiv.style.display = 'block'    
-            // let label = document.createElement("label");
-            // label.innerHTML = secondaryFeatureName.toUpperCase();
-            // label.classList.add('secondary-feature-label');
-            // formDiv.insertBefore(label, formDiv.firstChild);
+    function populateEditableNetworkEditorSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
+        let editor_form = document.getElementById(primaryFeatureName + 'Form');
 
-            // let addFeatureButton = document.createElement('BUTTON');
-            // addFeatureButton.innerHTML = 'Create ' + secondaryFeatureName;
-            // addFeatureButton.type = 'button';
-            // addFeatureButton.id = secondaryFeatureName + 'AddButton';
-            // addFeatureButton.classList.add('button', 'feature-editor__selected-feature-editor__delete-button');
-            // addFeatureButton.setAttribute('onclick', "maptool_net_display.addSecondaryFeature('" + listName + "', '" + secondaryFeatureName + "')");
-            // insertAfter(formDiv, addFeatureButton)
+        let formDiv = document.createElement('DIV');
+        formDiv.id = secondaryFeatureName + 'FormDiv';
+        formDiv.classList.add('feature-editor__selected-feature-editor__div');
+
+        formDiv.style.display = 'block'
+        let label = document.createElement("label");
+        label.innerHTML = secondaryFeatureName.toUpperCase();
+        label.classList.add('secondary-feature-label');
+
+        formDiv.append(label);
+
+        let featureSelect = document.createElement('SELECT');
+        featureSelect.id = secondaryFeatureName + 'Select';
+        featureSelect.classList.add('feature-editor__featurelist-tab__feature-select');
+        featureSelect.multiple = true;
+
+
+        let featureList = maptool_network_gen.NetworkObject[ primaryFeatureName + 'List'];
+        let maxNumberOfSecondaryFeatures = 0;
+
+        for (idx in featureList) {
+            let currentFeature = featureList[idx].feature.properties[secondaryFeatureName];
+            if(Object.keys(currentFeature).length != 0) {
+                if (maxNumberOfSecondaryFeatures < Object.keys(currentFeature).length) {
+                    maxNumberOfSecondaryFeatures = Object.keys(currentFeature).length;
+                }
+            }
         }
 
-        formDiv.id = formDivId;
+        for (let i = 0; i < maxNumberOfSecondaryFeatures; i++) {
+            let featureOption = document.createElement('OPTION');
+            featureOption.text = i;
+            featureOption.value = i;
+            featureSelect.append(featureOption);
+        }
+
+        formDiv.append(featureSelect)
+        editor_form.appendChild(formDiv);
     }
 
     function addSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
@@ -243,42 +268,32 @@ var maptool_net_display = function() {
                 
                 //At the moment we know that only busses have more than one div and we know that load is the second, sgen the third div 
                 if(feature == 'bus') {
-                    // if (i == 1) {
-                    //     target_properties = target.feature.properties.load;
-                    //     if(Object.keys(target_properties).length === 0) {
-                    //         document.getElementById('loadFormDiv').style.display = 'none';
-                    //         document.getElementById('loadAddButton').style.display = 'inline-block';
-                    //     }
-                    //     else {
-                    //         console.log(target_properties)
-                    //         document.getElementById('loadFormDiv').style.display = 'block';
-                    //         document.getElementById('loadAddButton').style.display = 'none';
-                    //     }
-                    // }
-                    // if (i == 3) {
-                    //     target_properties = target.feature.properties.sgen;
-                    //     if(Object.keys(target_properties).length === 0) {
-                    //         document.getElementById('sgenFormDiv').style.display = 'none';
-                    //         document.getElementById('sgenAddButton').style.display = 'inline-block';
-                    //     }
-                    //     else {
-                    //         document.getElementById('sgenFormDiv').style.display = 'block';
-                    //         document.getElementById('sgenAddButton').style.display = 'none';
-                    //     }
-                    // }
-                    // if (i == 5) {
-                    //     target_properties = target.feature.properties.switch;
-                    //     if(Object.keys(target_properties).length === 0) {
-                    //         document.getElementById('switchFormDiv').style.display = 'none';
-                    //         document.getElementById('switchAddButton').style.display = 'inline-block';
-                    //     }
-                    //     else {
-                    //         document.getElementById('switchFormDiv').style.display = 'block';
-                    //         document.getElementById('switchAddButton').style.display = 'none';
-                    //     }
-                    // }
-                }
+                    let secondaryFeature = '';
+                    if (i == 1) {
+                        target_properties = target.feature.properties.load;
+                        secondaryFeature = 'load';
+                    }
+                    if (i == 3) {
+                        target_properties = target.feature.properties.sgen;
+                        secondaryFeature = 'sgen';
+                    }
+                    if (i == 5) {
+                        target_properties = target.feature.properties.switch;
+                        secondaryFeature = 'switch';
+                    }
 
+                    if(secondaryFeature != '') {
+                        let secondaryFeatureSelect = document.getElementById(secondaryFeature + 'Select');
+                        for (let i = 0; i < secondaryFeatureSelect.options.length; i++) {
+                            if (i < Object.keys(target_properties).length) {
+                                secondaryFeatureSelect.options[i].hidden = false;
+                            }
+                            else {
+                                secondaryFeatureSelect.options[i].hidden = true;
+                            }
+                        }
+                    }
+                }
                 let editor_elems = editor_form.children[i].children;
 
                 //features can have a std_type input and other input fields related to that std_type. Std_type properties should only be editable via the std_type list
@@ -294,25 +309,27 @@ var maptool_net_display = function() {
                         }
                     }
                     if (editor_elems[i].nodeName == 'SELECT') {
-                        selectedStdType = target.feature.properties['std_type']
+                        if(editor_elems[i].id == 'std_type') {
+                            selectedStdType = target.feature.properties['std_type']
 
-                        for (let j = 0; j < editor_elems[i].options.length; j++) {
-                            if (editor_elems[i].options[j].text == selectedStdType) {
-                                editor_elems[i].selectedIndex = j;
-                                break;
+                            for (let j = 0; j < editor_elems[i].options.length; j++) {
+                                if (editor_elems[i].options[j].text == selectedStdType) {
+                                    editor_elems[i].selectedIndex = j;
+                                    break;
+                                }
                             }
+                            let k = 1;
+                                for (idx in maptool_network_gen.NetworkObject[feature + '_stdList'][selectedStdType]) {
+                                    if(feature == 'trafo') {
+                                        //console.log(idx, editor_elems[i+k+1].name);
+                                    }
+                                    if(maptool_network_gen.NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name] != undefined) {
+                                        editor_elems[i+k+1].value = maptool_network_gen.NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name];
+                                    }
+                                    k += 2; // + 2 because we need to skip the label elements
+                                }
+                            i += k;
                         }
-                        let k = 1;
-                            for (idx in maptool_network_gen.NetworkObject[feature + '_stdList'][selectedStdType]) {
-                                if(feature == 'trafo') {
-                                    //console.log(idx, editor_elems[i+k+1].name);
-                                }
-                                if(maptool_network_gen.NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name] != undefined) {
-                                    editor_elems[i+k+1].value = maptool_network_gen.NetworkObject[feature + '_stdList'][selectedStdType][editor_elems[i+k+1].name];
-                                }
-                                k += 2; // + 2 because we need to skip the label elements
-                            }
-                        i += k;
                     }
                 }
             }
@@ -390,6 +407,7 @@ var maptool_net_display = function() {
         fillStdTypeEditor: fillStdTypeEditor,
         populateLists: populateLists,
         populateEditableNetworkEditor: populateEditableNetworkEditor,
+        populateEditableNetworkEditorSecondaryFeature: populateEditableNetworkEditorSecondaryFeature,
         openEditableNetworkList: openEditableNetworkList,
         fillSelectedEditableNetworkFeatureEditor: fillSelectedEditableNetworkFeatureEditor,
         clickOnMarker: clickOnMarker,

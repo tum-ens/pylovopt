@@ -319,7 +319,7 @@ font-weight: 500;
 
 .secondary-feature-label {
   position: relative;
-  top: 1rem;
+  top: 0rem;
   bottom: 0rem;
   color: #0065BD;
 }
