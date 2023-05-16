@@ -10,21 +10,20 @@
 
 
 var maptool_network_gen = function (){
-    let line_std_properties = ["r_ohm_per_km", "x_ohm_per_km", "max_i_ka", "c_nf_per_km", "q_mm2", "type", "alpha"];
-    let trafo_std_properties = ["sn_mva", "vn_hv_kv", "vn_lv_kv", "vk_percent", "vkr_percent", "pfe_kw", "i0_percent", "shift_degree", "tap_side", "tap_neutral", "tap_min", "tap_max", "tap_step_percent", "tap_step_degree", "tap_phase_shifter"];
-    let trafo3w_std_properties = ["sn_hv_mva","sn_mv_mva","sn_lv_mva","vn_hv_kv", "vn_mv_kv","vn_lv_kv","vk_hv_percent", "vk_mv_percent","vk_lv_percent","vkr_hv_percent","vkr_mv_percent","vkr_lv_percent","pfe_kw","i0_percent","shift_mv_degree","shift_lv_degree","tap_side","tap_neutral","tap_min","tap_max","tap_step_percent"];
+    let line_std_properties = {};
+    let trafo_std_properties = {};
+    let trafo3w_std_properties = {};
 
-    let line_properties = ["name","from_bus", "to_bus","length_km", "r0_ohm_per_km", "x0_ohm_per_km", "c0_nf_per_km","df","g_us_per_km", "g0_us_per_km","parallel","max_loading_percent","temperature_degree_celsius", "tdpf","wind_speed_m_per_s", "wind_angle_degree", "conductor_outer_diameter_m", "air_temperature_degree_celsius","reference_temperature_degree_celsius", "solar_radiation_w_per_sq_m", "solar_absorptivity", "emissivity", "r_theta_kelvin_per_mw", "mc_joule_per_m_k", "std_type"];
+    let line_properties = {};
 
-    let ext_grid_properties = ["name", "bus", "vm_pu", "va_degree", "s_sc_max_mva", "s_sc_min_mva", "rx_max", "rx_min", "max_p_mw", "max_p_mw", "max_q_mvar", "min_q_mvar", "r0x0_max", "x0x_max", "slack_weight", "controllable"];
+    let ext_grid_properties = {};
 
-    let bus_properties =  ["name","vn_kv","type", "zone", "in_service", "max_vm_pu","min_vm_pu",]    
-    let load_features = ['name', 'p_mw', 'q_mvar','max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling', 'in_service', 'type', 'controllable'];
-    let sgen_features = ['name', 'p_mw', 'q_mvar', 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar', 'sn_mva', 'scaling', 'in_service', 'type', 'current_source', 'k', 'rx', 'generator_type', 'lrc_pu', 'max_ik_ka', 'kappa', 'controllable'];
-    let switch_features = ['name', 'element', 'et', 'type', 'closed', 'z_ohm', 'in_ka'];  
+    let bus_properties = {};  
+    let load_features = {};
+    let sgen_features = {};
+    let switch_features = {};  
 
-    let trafo_properties = ["name", "hv_bus", "lv_bus", "vk0_percent", "vkr0_percent", "mag0_percent", "mag0_rx", "si0_hv_partial", "tap_pos", "in_service", "max_loading_percent", "parallel", "df", "tap_dependent_impedance", "vk_percent_characteristic", "vkr_percent_characteristic", "xn_ohm", "std_type"];
-
+    let trafo_properties = {};
     let NetworkObject = {
         'busList' : [],
         'lineList' : [],
@@ -111,7 +110,28 @@ var maptool_network_gen = function (){
         if(window.location.pathname == '/networks') {
             fetchString = '/networks/editableNetwork';
             document.getElementById("nav-item-networks").setAttribute('href', '#scroll-to-top');
-        }
+        }  
+
+        fetch('/networks/networkProperties')       
+        .then(function (response) {
+            return response.json();
+        }).then(function(properties) {
+            line_std_properties = properties['std_type']['line']
+            trafo_std_properties = properties['std_type']['trafo']
+            trafo3w_std_properties = properties['std_type']['trafo3w']
+
+            line_properties = properties['line']
+
+            ext_grid_properties = properties['ext_grid']
+
+            bus_properties = properties['bus']
+            load_features = properties['load']
+            sgen_features = properties['sgen']
+            switch_features = properties['switch']
+
+            trafo_properties = properties['trafo']
+            trafo3w_properties = properties['trafo3w']
+        });
     
         fetch(fetchString)
         .then(function (response) {
@@ -149,7 +169,6 @@ var maptool_network_gen = function (){
             maptool_net_display.populateEditableNetworkEditor('line_std_types', line_std_properties, null, null, null);
             maptool_net_display.populateEditableNetworkEditor('trafo_std_types', trafo_std_properties, null, null, null);
             maptool_net_display.populateEditableNetworkEditor('trafo3w_std_types', trafo3w_std_properties, null, null, null);
-            
         });
     }
 

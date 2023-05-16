@@ -52,11 +52,14 @@ var maptool_urbs_storage = function () {
 
     function createSto_Conf_Editor() {
         var data = [];
-        var headers = ['urbs_name'];
+        var headers_c = ['urbs_name'];
+        var headers_p = [];
         var placeholders = []
 
         for (storage in StorageObject.storagePropertiesList) {
-            headers.push(storage);
+            headers_c.push(storage + '.c');
+            headers_p.push(storage + '.p');
+            placeholders.push('');
             placeholders.push('');
         }
 
@@ -79,7 +82,7 @@ var maptool_urbs_storage = function () {
             
                 return cellProperties;
               }, 
-              colHeaders: headers 
+              colHeaders: headers_c.concat(headers_p)
         })
     }
 

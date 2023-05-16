@@ -383,21 +383,21 @@ input[type=text]:focus + label, input[type=number]:focus + label {
   font-weight: bold;
 }
 
-.feature-editor__selected-feature-editor__demand {
+.feature-editor__selected-feature-editor__profile-select {
   background-color: #ffffff;
   margin-bottom: 25px;
 }
 
-.feature-editor__selected-feature-editor__demand select{
+.feature-editor__selected-feature-editor__profile-select select{
   width: 100%;
 }
 
-.feature-editor__selected-feature-editor__demand label{
+.feature-editor__selected-feature-editor__profile-select label{
   width: 100%;
   color: #0065BD;
 }
 
-.feature-editor__selected-feature-editor__demand__graph, .feature-editor__selected-feature-editor__supim__graph {
+.feature-editor__selected-feature-editor__demand__graph, .feature-editor__selected-feature-editor__supim__graph, .feature-editor__selected-feature-editor__timevareff__graph {
   min-height: 200px;
 }
 

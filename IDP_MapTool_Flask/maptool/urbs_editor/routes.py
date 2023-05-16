@@ -134,7 +134,6 @@ def formatStorageSetup():
 
     return storage_json
 
-
 @bp.route('/urbs/commodity_profiles', methods=['GET', 'POST'])
 def formatCommoditySetup():
     com_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/commodity/com_prop.csv'), sep=',')
@@ -144,7 +143,6 @@ def formatCommoditySetup():
 
     return commodity_json
 
-
 @bp.route('/urbs/supim_profiles', methods=['GET', 'POST'])
 def supimProfiles():
     supim_solar = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/supim/profiles/solar.csv'), sep=',')
@@ -152,3 +150,17 @@ def supimProfiles():
                 }
 
     return supim_json
+
+@bp.route('/urbs/timevareff_profiles', methods=['GET', 'POST'])
+def timevareffProfiles():
+    charging_station = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/timevareff/profiles/charging_station.csv'), sep=',')
+    heatpump_air = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/timevareff/profiles/heatpump_air.csv'), sep=',')
+    heatpump_air_heizstrom = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/timevareff/profiles/heatpump_air_heizstrom.csv'), sep=',')
+
+    timevareff_json = {
+            "charging_station" : charging_station.to_json(),
+            "heatpump_air" : heatpump_air.to_json(),
+            "heatpump_air_heizstrom" : heatpump_air_heizstrom.to_json()
+            }
+
+    return timevareff_json

@@ -24,7 +24,7 @@
     <button class="feature-editor__buttons-tab__tablinks" id="commodityButton" title="Commodity" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'commodity', true)"><span>C</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="processesButton" title="Processes" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'processes', true)"><span>P</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="process_confButton" title="Process Configuration" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'process_conf', false)"><span>P Conf</span></button>
-</div>
+  </div>
   <div class="feature-editor__featurelist-tab" id="buildings">
     <select class ="feature-editor__featurelist-tab__feature-select" id="buildingsSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'buildings')" multiple></select>
   </div>
@@ -71,27 +71,27 @@
   </div>
   <div class="feature-editor__selected-feature-editor" id="demandEditor" style="display: inline-block">
     <form>
-      <div class="feature-editor__selected-feature-editor__demand" id="electricity">
+      <div class="feature-editor__selected-feature-editor__profile-select" id="electricity">
         <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="electricitySelect">Electricity</button>
         <div class="panel" id="demand_electricityPanel"></div>
         <div class="feature-editor__selected-feature-editor__demand__graph" id="main"></div>
       </div>
-      <div class="feature-editor__selected-feature-editor__demand" id="electricity-reactive">
+      <div class="feature-editor__selected-feature-editor__profile-select" id="electricity-reactive">
         <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="electricity-reactiveSelect">Electricity-Reactive</button>
         <div class="panel" id="demand_electricity_reactivePanel"></div>
         <div class="feature-editor__selected-feature-editor__demand__graph"></div>
       </div>
-      <div class="feature-editor__selected-feature-editor__demand" id="mobility">
+      <div class="feature-editor__selected-feature-editor__profile-select" id="mobility">
         <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="mobilitySelect">Mobility</button>
         <div class="panel" id="demand_mobilityPanel"></div>
         <div class="feature-editor__selected-feature-editor__demand__graph"></div>
       </div>
-      <div class="feature-editor__selected-feature-editor__demand" id="space_heat">
+      <div class="feature-editor__selected-feature-editor__profile-select" id="space_heat">
         <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="space_heatSelect">Space Heat</button>
         <div class="panel" id="demand_space_heatPanel"></div>
         <div class="feature-editor__selected-feature-editor__demand__graph"></div>
       </div>
-      <div class="feature-editor__selected-feature-editor__demand" id="water_heat">
+      <div class="feature-editor__selected-feature-editor__profile-select" id="water_heat">
         <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="water_heatSelect">Water Heat</button>
         <div class="panel" id="demand_water_heatPanel"></div>
         <div class="feature-editor__selected-feature-editor__demand__graph"></div>
@@ -118,6 +118,7 @@
   </div>
   <div class="feature-editor__selected-feature-editor" id="commodityEditor">
     <form id="commodityForm">
+      <button type='button' class="button feature-editor__featurelist-tab__add-feature-button">Add Buy Sell Price CSV</button>
     </form>
   </div>
   <div class="feature-editor__selected-feature-editor" id="pro_propEditor">
@@ -131,15 +132,32 @@
   </div>
   <div class="feature-editor__selected-feature-editor" id="supimEditor" style="display: inline-block">
     <form>
-      <div class="feature-editor__selected-feature-editor__demand" id="solar">
+      <div class="feature-editor__selected-feature-editor__profile-select" id="solar">
         <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="solarSelect">Solar</button>
         <div class="panel" id="solarPanel"></div>
         <div class="feature-editor__selected-feature-editor__supim__graph" id="main"></div>
       </div>
+    </form>
+  </div>
+  <div class="feature-editor__selected-feature-editor" id="timevareffEditor" style="display: inline-block">
+    <form>
+      <div class="feature-editor__selected-feature-editor__profile-select" id="charging_station">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="charging_stationSelect">Charging Station</button>
+        <div class="panel" id="charging_stationPanel"></div>
+        <div class="feature-editor__selected-feature-editor__timevareff__graph" id="main"></div>
+      </div>
+      <div class="feature-editor__selected-feature-editor__profile-select" id="heatpump_air">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button" id="heatpump_airSelect">Heatpump Air</button>
+        <div class="panel" id="heatpump_airPanel"></div>
+        <div class="feature-editor__selected-feature-editor__timevareff__graph"></div>
+      </div>
+      <div class="feature-editor__selected-feature-editor__profile-select" id="heatpump_air_heizstrom">
+        <button type='button' class="accordion button feature-editor__featurelist-tab__add-feature-button"  id="heatpump_air_heizstromSelect">Heatpump Air Heizstrom Select</button>
+        <div class="panel" id="heatpump_air_heizstromPanel"></div>
+        <div class="feature-editor__selected-feature-editor__timevareff__graph"></div>
       </div>
     </form>
   </div>
-
 </div>
 
 <div class="optionsPopup">
@@ -188,5 +206,7 @@
 <script defer src="{{url_for('static', filename='/urbs_editor/commodity_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/storage_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/supim_editor.js')}}"></script>
+<script defer src="{{url_for('static', filename='/urbs_editor/timevareff_editor.js')}}"></script>
+
 
 {% endblock %}

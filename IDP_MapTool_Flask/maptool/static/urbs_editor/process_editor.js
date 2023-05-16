@@ -19,6 +19,7 @@ var maptool_urbs_process = function() {
         licenseKey: 'non-commercial-and-evaluation'
         });
 
+
     function fetchProcessProfiles() {
         fetch('urbs/process_profiles')
         .then(function (response) {
@@ -119,18 +120,23 @@ var maptool_urbs_process = function() {
         ProcessObject.pro_propList[name] = processPropertyJSON;
     }   
 
-    
+    //we must add a newly defined process commodity to the list of commodities, the process_config table and the editor window of the process
+    //the commodity is associated with
     function createNewProcessCommodity(name) {
         console.log("new Process Commodity")
+
+        //we grab the commodity list and add a new option. All values are blank at the start. We also add a blank entry to the Commodity Object List
         let commodityList = document.getElementById("commoditySelect");
         let option = document.createElement("option");
         option.text = name;
         commodityList.add(option);
-
         maptool_urbs_commodity.CommodityObject.commodityPropertiesList[name] = JSON.parse(JSON.stringify(maptool_urbs_commodity.CommodityObject.commodityPropertiesTemplate));
+        
+        //we insert a new column into the commodity table
         hot.alter('insert_col', hot.countCols(), 1)
         hot.headers[hot.headers.length - 1] = name;
-        console.log(hot.headers);
+
+        //we create a new div to attach to the process editor
     }
 
     function writeBackProcessFeatures(target) {

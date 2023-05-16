@@ -24,13 +24,12 @@ f.close()
 def extractPropertiesFromNet(input, index, properties):
     if input.empty:
         return {}
-    
     output = {}
     input = input.fillna('')
-
-    for entry in input:
-        output[entry] = input.T.loc[entry].iloc[0]
-    
+    for idx in range(len(input.index)):
+        output[idx] = {}
+        for entry in input:
+            output[idx][entry] = input.T.loc[entry].iloc[idx]
     return output
 
 def createFeatures (isLines, ppdata, featureName, featureProperties, propertyGroupNames, propertyGroupFeatures):

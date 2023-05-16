@@ -17,7 +17,9 @@ var maptool_urbs_commodity = function () {
             let propertyJSONTemplate = {};
             
             for (idx in commodity) {
-                propertyJSONTemplate[idx] = '';
+                if(idx != 'name') {
+                    propertyJSONTemplate[idx] = '';
+                }
             }
 
             CommodityObject.commodityPropertiesTemplate = propertyJSONTemplate;
@@ -32,26 +34,27 @@ var maptool_urbs_commodity = function () {
                 }
                 let name = commodity['name'][idx];
                 CommodityObject.commodityPropertiesList[name] = propertyJSON;
+                addCommToProcessCreationFormList(name)
                 i++;
             }
             maptool_urbs_process.populateProcessEditorList('commodity', Object.keys(CommodityObject.commodityPropertiesList));
         });
     }
 
-    function prepareCommodityObject(UrbsPropertiesJSON, commodities) {
-        let propertiesToAdd = UrbsPropertiesJSON['commodity'];
-        let commodityJSON = {};
-        for (property in propertiesToAdd) {
-            commodityJSON[property] = ''
-        }
-        CommodityObject.commodityPropertiesTemplate = commodityJSON;
+    // function prepareCommodityObject(UrbsPropertiesJSON, commodities) {
+    //     let propertiesToAdd = UrbsPropertiesJSON['commodity'];
+    //     let commodityJSON = {};
+    //     for (property in propertiesToAdd) {
+    //         commodityJSON[property] = ''
+    //     }
+    //     CommodityObject.commodityPropertiesTemplate = commodityJSON;
 
-        for (idx in commodities) {
-            let name = commodities[idx]
-            CommodityObject.commodityPropertiesList[name] = JSON.parse(JSON.stringify(commodityJSON));
-            addCommToProcessCreationFormList(name)
-        }
-    }
+    //     for (idx in commodities) {
+    //         let name = commodities[idx]
+    //         CommodityObject.commodityPropertiesList[name] = JSON.parse(JSON.stringify(commodityJSON));
+    //         addCommToProcessCreationFormList(name)
+    //     }
+    // }
 
     function addCommToProcessCreationFormList(name) {
         let commSelect = document.getElementById("pro_propCommSelect");
@@ -76,7 +79,7 @@ var maptool_urbs_commodity = function () {
         fetchProfiles: fetchProfiles,
         createNewCommodity: createNewCommodity,
         writeBackCommodityFeatures: writeBackCommodityFeatures,
-        prepareCommodityObject: prepareCommodityObject
+        // prepareCommodityObject: prepareCommodityObject
     }
 
 }();

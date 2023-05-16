@@ -78,10 +78,10 @@ var maptool_net_display = function() {
 
         for (idx in selectedProperties) {
             let label = document.createElement("label");
-            label.htmlFor = selectedProperties[idx];
-            label.innerHTML = selectedProperties[idx];
+            label.htmlFor = idx;
+            label.innerHTML = idx;
             
-            if(selectedProperties[idx] == 'std_type') {
+            if(idx == 'std_type') {
                 let form = document.createElement("select");
                 form.id = 'std_type'
                 form.classList.add('feature-editor__selected-feature-editor__stdtype-feature-select')
@@ -100,14 +100,14 @@ var maptool_net_display = function() {
                     let input = document.createElement("input");
                     input.type="text";
                     input.readOnly = true;
-                    input.id = std_type_properties[prop_idx];
-                    input.name = std_type_properties[prop_idx];
+                    input.id = prop_idx;
+                    input.name = prop_idx;
                     formDiv.appendChild(input);
 
                     let Prop_label = document.createElement("label");
 
-                    Prop_label.htmlFor = std_type_properties[prop_idx];
-                    Prop_label.innerHTML = std_type_properties[prop_idx];
+                    Prop_label.htmlFor = prop_idx;
+                    Prop_label.innerHTML = prop_idx;
                     formDiv.appendChild(Prop_label);
                 }
             }  
@@ -115,8 +115,8 @@ var maptool_net_display = function() {
                 let input = document.createElement("input");
                 input.type="text";
                 input.setAttribute('onchange', 'maptool_net_display.writeBackEditedNetworkFeature(this, "' + formDivId + '")');
-                input.id = selectedProperties[idx];
-                input.name = selectedProperties[idx];
+                input.id = idx;
+                input.name = idx;
                 formDiv.appendChild(input);
                 formDiv.appendChild(label);
             }
@@ -125,20 +125,20 @@ var maptool_net_display = function() {
         editor_form.appendChild(formDiv);
 
         if (secondaryFeatureName != null) {
-            formDivId = secondaryFeatureName + 'FormDiv';
-            formDiv.style.display = 'block'    
-            let label = document.createElement("label");
-            label.innerHTML = secondaryFeatureName.toUpperCase();
-            label.classList.add('secondary-feature-label');
-            formDiv.insertBefore(label, formDiv.firstChild);
+            // formDivId = secondaryFeatureName + 'FormDiv';
+            // formDiv.style.display = 'block'    
+            // let label = document.createElement("label");
+            // label.innerHTML = secondaryFeatureName.toUpperCase();
+            // label.classList.add('secondary-feature-label');
+            // formDiv.insertBefore(label, formDiv.firstChild);
 
-            let addFeatureButton = document.createElement('BUTTON');
-            addFeatureButton.innerHTML = 'Create ' + secondaryFeatureName;
-            addFeatureButton.type = 'button';
-            addFeatureButton.id = secondaryFeatureName + 'AddButton';
-            addFeatureButton.classList.add('button', 'feature-editor__selected-feature-editor__delete-button');
-            addFeatureButton.setAttribute('onclick', "maptool_net_display.addSecondaryFeature('" + listName + "', '" + secondaryFeatureName + "')");
-            insertAfter(formDiv, addFeatureButton)
+            // let addFeatureButton = document.createElement('BUTTON');
+            // addFeatureButton.innerHTML = 'Create ' + secondaryFeatureName;
+            // addFeatureButton.type = 'button';
+            // addFeatureButton.id = secondaryFeatureName + 'AddButton';
+            // addFeatureButton.classList.add('button', 'feature-editor__selected-feature-editor__delete-button');
+            // addFeatureButton.setAttribute('onclick', "maptool_net_display.addSecondaryFeature('" + listName + "', '" + secondaryFeatureName + "')");
+            // insertAfter(formDiv, addFeatureButton)
         }
 
         formDiv.id = formDivId;
@@ -243,39 +243,40 @@ var maptool_net_display = function() {
                 
                 //At the moment we know that only busses have more than one div and we know that load is the second, sgen the third div 
                 if(feature == 'bus') {
-                    if (i == 1) {
-                        target_properties = target.feature.properties.load;
-                        if(Object.keys(target_properties).length === 0) {
-                            document.getElementById('loadFormDiv').style.display = 'none';
-                            document.getElementById('loadAddButton').style.display = 'inline-block';
-                        }
-                        else {
-                            document.getElementById('loadFormDiv').style.display = 'block';
-                            document.getElementById('loadAddButton').style.display = 'none';
-                        }
-                    }
-                    if (i == 3) {
-                        target_properties = target.feature.properties.sgen;
-                        if(Object.keys(target_properties).length === 0) {
-                            document.getElementById('sgenFormDiv').style.display = 'none';
-                            document.getElementById('sgenAddButton').style.display = 'inline-block';
-                        }
-                        else {
-                            document.getElementById('sgenFormDiv').style.display = 'block';
-                            document.getElementById('sgenAddButton').style.display = 'none';
-                        }
-                    }
-                    if (i == 5) {
-                        target_properties = target.feature.properties.switch;
-                        if(Object.keys(target_properties).length === 0) {
-                            document.getElementById('switchFormDiv').style.display = 'none';
-                            document.getElementById('switchAddButton').style.display = 'inline-block';
-                        }
-                        else {
-                            document.getElementById('switchFormDiv').style.display = 'block';
-                            document.getElementById('switchAddButton').style.display = 'none';
-                        }
-                    }
+                    // if (i == 1) {
+                    //     target_properties = target.feature.properties.load;
+                    //     if(Object.keys(target_properties).length === 0) {
+                    //         document.getElementById('loadFormDiv').style.display = 'none';
+                    //         document.getElementById('loadAddButton').style.display = 'inline-block';
+                    //     }
+                    //     else {
+                    //         console.log(target_properties)
+                    //         document.getElementById('loadFormDiv').style.display = 'block';
+                    //         document.getElementById('loadAddButton').style.display = 'none';
+                    //     }
+                    // }
+                    // if (i == 3) {
+                    //     target_properties = target.feature.properties.sgen;
+                    //     if(Object.keys(target_properties).length === 0) {
+                    //         document.getElementById('sgenFormDiv').style.display = 'none';
+                    //         document.getElementById('sgenAddButton').style.display = 'inline-block';
+                    //     }
+                    //     else {
+                    //         document.getElementById('sgenFormDiv').style.display = 'block';
+                    //         document.getElementById('sgenAddButton').style.display = 'none';
+                    //     }
+                    // }
+                    // if (i == 5) {
+                    //     target_properties = target.feature.properties.switch;
+                    //     if(Object.keys(target_properties).length === 0) {
+                    //         document.getElementById('switchFormDiv').style.display = 'none';
+                    //         document.getElementById('switchAddButton').style.display = 'inline-block';
+                    //     }
+                    //     else {
+                    //         document.getElementById('switchFormDiv').style.display = 'block';
+                    //         document.getElementById('switchAddButton').style.display = 'none';
+                    //     }
+                    // }
                 }
 
                 let editor_elems = editor_form.children[i].children;

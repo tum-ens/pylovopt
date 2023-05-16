@@ -19,6 +19,12 @@ import json
 def networks():
     return render_template('network_editor/index.html')
 
+@bp.route('/networks/networkProperties', methods=['GET', 'POST'])
+def networkProperties():
+    f = open('maptool\\z_feature_jsons\\pandapower_network_features\\properties_final.json')
+    data = json.load(f)
+    return data
+
 @bp.route('/networks/editableNetwork', methods=['GET', 'POST'])
 def editableNetwork():
     #on opening of the network view the js code requests full information of the previously selected network

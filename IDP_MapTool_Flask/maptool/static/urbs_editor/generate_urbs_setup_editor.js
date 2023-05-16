@@ -31,14 +31,17 @@ var maptool_urbs_setup = function() {
             maptool_urbs_process.fetchProcessProfiles();
             maptool_urbs_storage.fetchProfiles();
             maptool_urbs_supim.fetchSupimProfiles();
+            maptool_urbs_timevareff.fetchFeatureProfiles();
+
     
             populateUrbsEditorLoadBusLists('demand', 'busWithLoad');
             populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
             populateUrbsEditorLoadBusLists('supim', 'busWithLoad');
+            populateUrbsEditorLoadBusLists('timevareff', 'busWithLoad');
 
             maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
-            maptool_urbs_commodity.prepareCommodityObject(UrbsPropertiesJSON, ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
+            //maptool_urbs_commodity.prepareCommodityObject(UrbsPropertiesJSON, ['electricity_import', 'electricity_hp_import', 'electricity_feed_in', 'space heat']);
 
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input'], 'maptool_urbs_buildings.writeBackEditedBuildingFeatures(this)');
             populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], '');
@@ -63,8 +66,7 @@ var maptool_urbs_setup = function() {
             document.getElementById('demandSelect').selectedIndex = 0;
             document.getElementById('demandEditor').style.display = 'none';
             document.getElementById('supimEditor').style.display = 'none';
-
-    
+            document.getElementById('timevareffEditor').style.display = 'none';
         });
     }
     
@@ -135,11 +137,22 @@ var maptool_urbs_setup = function() {
             input.setAttribute('onchange', writebackFunction);
 
 
-            if(propertiesToAdd[property] == 'boolean') {
+            if(propertiesToAdd[property]['type'] == 'boolean') {
                 input.type="checkbox";
             }
-            else if(propertiesToAdd[property] == 'float' || propertiesToAdd[property] == 'int') {
+            else if(propertiesToAdd[property]['type'] == 'float' || propertiesToAdd[property]['type'] == 'int') {
                 input.type="number";
+            }
+            else if(propertiesToAdd[property]['type'] == 'list') {
+                input = document.createElement("select");
+                input.classList.add('feature-editor__selected-feature-editor__stdtype-feature-select')
+                input.setAttribute('onchange', writebackFunction);
+                for (option in propertiesToAdd[property]['list_options']) {
+                    let listOption = document.createElement("option");
+                    listOption.text = propertiesToAdd[property]['list_options'][option];
+                    listOption.value = propertiesToAdd[property]['list_options'][option];
+                    input.add(listOption);
+                }
             }
             else {
                 input.type="text";
@@ -147,11 +160,11 @@ var maptool_urbs_setup = function() {
     
             input.id = property;
             input.name = property;
-    
+
             let label = document.createElement("label");
             label.htmlFor = property;
             label.innerHTML = property;
-            if(propertiesToAdd[property] == 'boolean') {
+            if(propertiesToAdd[property]['type'] == 'boolean') {
                 label.appendChild(input)
                 label.classList.add('urbs-checkbox')
             }
@@ -272,6 +285,11 @@ var maptool_urbs_setup = function() {
             maptool_urbs_supim.fillSelectedFeatureSupimEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex]);
             document.getElementById('supimEditor').style.display='inline-block';
         }
+        if(featureName == 'timevareff') {
+            //maptool_urbs_supim.fillSelectedFeatureSupimEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex]);
+            document.getElementById('timevareffEditor').style.display='inline-block';
+            console.log("he")
+        }
     }
 
     function fillSelectedFeatureEditorFields(target, featureName) {
@@ -281,7 +299,7 @@ var maptool_urbs_setup = function() {
         for (let i = 0; i < editor_divs.length; i++) {
             let editor_elems = editor_form.children[i].children;
             for (let i = 0; i < editor_elems.length; i++) {
-                if (editor_elems[i].nodeName == 'INPUT') {
+                if (editor_elems[i].nodeName == 'INPUT' || editor_elems[i].nodeName == 'SELECT') {
                     if(target[editor_elems[i].name] != null) {
                         editor_elems[i].value = target[editor_elems[i].name];
                     }
