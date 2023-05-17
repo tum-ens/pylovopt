@@ -167,6 +167,10 @@ var maptool_network_gen = function (){
             maptool_net_display.populateEditableNetworkEditorSecondaryFeature('bus','load');
             maptool_net_display.populateEditableNetworkEditorSecondaryFeature('bus','sgen');
             maptool_net_display.populateEditableNetworkEditorSecondaryFeature('bus','switch');
+            maptool_net_display.populateEditableNetworkEditor('load', load_features, null, null, null);
+            maptool_net_display.populateEditableNetworkEditor('sgen', sgen_features, null, null, null);
+            maptool_net_display.populateEditableNetworkEditor('switch', switch_features, null, null, null);
+
             maptool_net_display.populateEditableNetworkEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties, null);
             maptool_net_display.populateEditableNetworkEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties, null);
             maptool_net_display.populateEditableNetworkEditor('ext_grid', ext_grid_properties, null, null, null);

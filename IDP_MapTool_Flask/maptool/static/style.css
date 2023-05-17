@@ -152,7 +152,7 @@ font-weight: 500;
   background: #ffffff00;
   color: #333333;
   height: 80%;
-  width: 35%;
+  width: 75%;
   min-height: 40em;
   min-width: 40em;
   z-index: 99;
@@ -172,7 +172,7 @@ font-weight: 500;
   background: #0065bd00;
   color: #e90000;
   height: 5%;
-  width: 5%;
+  width: 2%;
   opacity: 1;
   pointer-events: all;
 }
@@ -234,10 +234,10 @@ font-weight: 500;
 .feature-editor__featurelist-tab{
   position: absolute;
   top: 0px;
-  right: 5%;
+  right: 2%;
   color: #000000;
   height: 100%;
-  width: 30%;
+  width: 15%;
   pointer-events: all;
   display: none;
   -ms-overflow-style: none;
@@ -299,11 +299,11 @@ font-weight: 500;
 .feature-editor__selected-feature-editor{
   position: absolute;
   top: 0px;
-  left: 0px;
+  right: 17%;
   background: #ffffff;
   color: #000000;
   height: 100%;
-  width: 65%;
+  width: 25%;
   opacity: 1;
   display: auto;
   pointer-events: all;
@@ -322,6 +322,19 @@ font-weight: 500;
   top: 0rem;
   bottom: 0rem;
   color: #0065BD;
+}
+
+.feature-editor__selected-feature-editor__secondary-editor {
+  display: none;
+  width: 20rem;
+  height: 30rem;
+  position: relative;
+  right: 42%;
+  top:40%;
+  float:right;
+  overflow: hidden;
+  pointer-events: all;
+  background-color: #ffffff;
 }
 
 .feature-editor__featurelist-tab__stdtype-feature-select {

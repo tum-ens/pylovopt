@@ -142,6 +142,7 @@ var maptool_net_display = function() {
 
         let featureSelect = document.createElement('SELECT');
         featureSelect.id = secondaryFeatureName + 'Select';
+        featureSelect.setAttribute('onclick', 'maptool_net_display.openSecondaryEditor(this, "' + secondaryFeatureName + '")')
         featureSelect.classList.add('feature-editor__featurelist-tab__feature-select');
         featureSelect.multiple = true;
 
@@ -258,6 +259,11 @@ var maptool_net_display = function() {
                 editorcontent[i].style.display = "none";
             }
 
+            let secondaryEditorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor__secondary-editor');
+            for (i = 0; i < secondaryEditorcontent.length; i++) {
+                secondaryEditorcontent[i].style.display = "none";
+            }
+
             document.getElementById(feature + 'Editor').style.display = 'inline-block';
 
             let editor_form = document.getElementById(feature + 'Form');
@@ -331,6 +337,28 @@ var maptool_net_display = function() {
                             i += k;
                         }
                     }
+                }
+            }
+        }
+    }
+
+    function openSecondaryEditor(sel, secondaryFeatureName) {
+        console.log(sel.value, secondaryFeatureName);
+        document.getElementById(secondaryFeatureName + 'Editor').style.display='block';
+        
+        let busIdx = document.getElementById('busSelect').selectedIndex;
+
+        let target_properties = maptool_network_gen.NetworkObject.busList[busIdx].feature.properties.load[sel.value];
+        let editor_form = document.getElementById(secondaryFeatureName + 'Form');
+        let editor_elems = editor_form.children[0].children;
+
+        for (let i = 0; i < editor_elems.length; i++) {
+            if (editor_elems[i].nodeName == 'INPUT') {
+                if(target_properties[editor_elems[i].name] != null) {
+                    editor_elems[i].value = target_properties[editor_elems[i].name];
+                }
+                else {
+                    editor_elems[i].value = '';
                 }
             }
         }
@@ -411,6 +439,7 @@ var maptool_net_display = function() {
         openEditableNetworkList: openEditableNetworkList,
         fillSelectedEditableNetworkFeatureEditor: fillSelectedEditableNetworkFeatureEditor,
         clickOnMarker: clickOnMarker,
+        openSecondaryEditor: openSecondaryEditor,
         writeBackEditedNetworkFeature: writeBackEditedNetworkFeature,
         createPopup: createPopup,
         addSecondaryFeature: addSecondaryFeature,
