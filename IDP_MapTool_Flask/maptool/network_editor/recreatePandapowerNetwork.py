@@ -87,7 +87,7 @@ def recreatePandapowerNetwork(net_features):
         ext_grid_data = createFeatureFromGeoJSONProperties(ext_grid_properties, ext_gridList[idx]) 
         pp.create_ext_grid(newNet, bus=ext_grid_data['bus'], vm_pu=ext_grid_data['vm_pu'], va_degree=ext_grid_data['va_degree'], name=ext_grid_data['name'], in_service=ext_grid_data['in_service'], s_sc_max_mva=ext_grid_data['s_sc_max_mva'], s_sc_min_mva=ext_grid_data['s_sc_min_mva'], rx_max=ext_grid_data['rx_max'], rx_min=ext_grid_data['rx_min'], max_p_mw=ext_grid_data['max_p_mw'], min_p_mw=ext_grid_data['min_p_mw'], max_q_mvar=ext_grid_data['max_q_mvar'], min_q_mvar=ext_grid_data['min_q_mvar'], index=ext_grid_data['index'], r0x0_max=ext_grid_data['r0x0_max'], x0x_max=ext_grid_data['x0x_max'], controllable=ext_grid_data['controllable'], slack_weight=ext_grid_data['slack_weight'],)
 
-        loadList = []
+    loadList = []
     sgenList = []
     switchList = []
 
@@ -98,17 +98,22 @@ def recreatePandapowerNetwork(net_features):
             sgenList.append(bus['sgen'])
         if not bus['switch'] == {}:
             switchList.append(bus['switch'])
-        
-    for idx in range(0, len(loadList)):
-        load_data = createFeatureFromGeoJSONProperties(load_features, loadList[idx])  
-        pp.create_load(newNet, bus=load_data['bus'], p_mw=load_data['p_mw'], q_mvar=load_data['q_mvar'], const_z_percent=load_data['const_z_percent'], const_i_percent=load_data['const_i_percent'], sn_mva=load_data['sn_mva'], name=load_data['name'], scaling=load_data['scaling'], in_service=load_data['in_service'], type=load_data['type'], max_p_mw=load_data['max_p_mw'], min_p_mw=load_data['min_p_mw'], max_q_mvar=load_data['max_q_mvar'], min_q_mvar=load_data['min_q_mvar'], controllable=load_data['controllable'])
+    
 
-    for idx in range(0, len(sgenList)):
-        sgen_data = createFeatureFromGeoJSONProperties(idx, sgen_features, sgenList[idx])
-        pp.create_sgen(newNet, bus=sgen_data['bus'], p_mw=sgen_data['p_mw'], q_mvar=sgen_data['q_mvar'], sn_mva=sgen_data['sn_mva'], name=sgen_data['name'], scaling=sgen_data['scaling'], type=sgen_data['type'], in_service=sgen_data['in_service'], max_p_mw=sgen_data['max_p_mw'], min_p_mw=sgen_data['min_p_mw'], max_q_mvar=sgen_data['max_q_mvar'], min_q_mvar=sgen_data['min_q_mvar'], controllable=sgen_data['controllable'], k=sgen_data['k'], rx=sgen_data['rx'], current_source=sgen_data['current_source'], generator_type=sgen_data['generator_type'], max_ik_ka=sgen_data['max_ik_ka'], kappa=sgen_data['kappa'], lrc_pu=sgen_data['lrc_pu'])
+    for loads in loadList:
+        # print(loads)
+        for key in loads:
+            load_data = createFeatureFromGeoJSONProperties(load_features, loads[key])  
+            pp.create_load(newNet, bus=load_data['bus'], p_mw=load_data['p_mw'], q_mvar=load_data['q_mvar'], const_z_percent=load_data['const_z_percent'], const_i_percent=load_data['const_i_percent'], sn_mva=load_data['sn_mva'], name=load_data['name'], scaling=load_data['scaling'], in_service=load_data['in_service'], type=load_data['type'], max_p_mw=load_data['max_p_mw'], min_p_mw=load_data['min_p_mw'], max_q_mvar=load_data['max_q_mvar'], min_q_mvar=load_data['min_q_mvar'], controllable=load_data['controllable'])
 
-    for idx in range(0, len(switchList)):
-        switch_data = createFeatureFromGeoJSONProperties(idx, switch_features, switch_features[idx]) 
-        pp.create_switch(newNet, bus=switch_data['bus'], element=switch_data['element'], et=switch_data['et'], closed=switch_data['closed'], type=switch_data['type'], name=switch_data['name'], z_ohm=switch_data['z_ohm'], in_ka=switch_data['in_ka'])
+    for sgens in sgenList:
+        for key in sgens:
+            sgen_data = createFeatureFromGeoJSONProperties(sgen_features, sgens[key])
+            pp.create_sgen(newNet, bus=sgen_data['bus'], p_mw=sgen_data['p_mw'], q_mvar=sgen_data['q_mvar'], sn_mva=sgen_data['sn_mva'], name=sgen_data['name'], scaling=sgen_data['scaling'], type=sgen_data['type'], in_service=sgen_data['in_service'], max_p_mw=sgen_data['max_p_mw'], min_p_mw=sgen_data['min_p_mw'], max_q_mvar=sgen_data['max_q_mvar'], min_q_mvar=sgen_data['min_q_mvar'], controllable=sgen_data['controllable'], k=sgen_data['k'], rx=sgen_data['rx'], current_source=sgen_data['current_source'], generator_type=sgen_data['generator_type'], max_ik_ka=sgen_data['max_ik_ka'], kappa=sgen_data['kappa'], lrc_pu=sgen_data['lrc_pu'])
+
+    for switches in switchList:
+        for key in switches:
+            switch_data = createFeatureFromGeoJSONProperties(switch_features, switch_features[key]) 
+            pp.create_switch(newNet, bus=switch_data['bus'], element=switch_data['element'], et=switch_data['et'], closed=switch_data['closed'], type=switch_data['type'], name=switch_data['name'], z_ohm=switch_data['z_ohm'], in_ka=switch_data['in_ka'])
 
     return newNet
