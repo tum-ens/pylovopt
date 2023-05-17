@@ -6,6 +6,8 @@ var maptool_return_urbs =  function() {
         returnUrbsSetup_Transmissions();
         returnUrbsSetup_Processes();
         returnUrbsSetup_Storage();
+        returnUrbsSetup_SupIm();
+        returnUrbsSetup_Timevareff();
     }
     
     function returnUrbsSetup_DemandConf() {
@@ -13,12 +15,11 @@ var maptool_return_urbs =  function() {
         for(idx in maptool_network_gen.NetworkObject.busList) {
             demand_json[maptool_network_gen.NetworkObject.busList[idx].feature.properties.name] = maptool_urbs_demand.DemandObject.bus_demands[idx];
         }
-    
         postData("http://127.0.0.1:5000/urbs/demand_setup", demand_json);
     }
     
     function returnUrbsSetup_Buildings() {
-        let buildings_json = JSON.stringify(BuildingsObject.buildingsPropertiesList);
+        let buildings_json = JSON.stringify(maptool_urbs_buildings.BuildingsObject.buildingsPropertiesList);
         postData("http://127.0.0.1:5000/urbs/buildings_setup", buildings_json);
     }
     
@@ -37,7 +38,15 @@ var maptool_return_urbs =  function() {
     function returnUrbsSetup_Storage() {
         //postData("http://127.0.0.1:5000/urbs/urbs_setup", jsonData);
     }
+
+    function returnUrbsSetup_SupIm() {
+
+    }
     
+    function returnUrbsSetup_Timevareff() {
+
+    }
+
     function postData(url, jsonData) {
         fetch(url, {
             method: 'POST',
