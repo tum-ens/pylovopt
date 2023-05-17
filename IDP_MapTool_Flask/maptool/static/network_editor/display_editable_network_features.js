@@ -168,15 +168,32 @@ var maptool_net_display = function() {
 
         formDiv.append(featureSelect)
         editor_form.appendChild(formDiv);
+
+        let featureCreateButton = document.createElement('BUTTON');
+        featureCreateButton.type = 'button';
+        featureCreateButton.classList.add('button');
+        featureCreateButton.classList.add('feature-editor__selected-feature-editor__delete-button');
+        featureCreateButton.innerHTML = 'Add ' + secondaryFeatureName.toUpperCase();
+        featureCreateButton.setAttribute('onclick', 'maptool_net_display.addSecondaryFeature("' + primaryFeatureName + '", "' + secondaryFeatureName + '")') 
+        editor_form.appendChild(featureCreateButton);
     }
 
     function addSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
         let idxInFeatureList = document.getElementById(primaryFeatureName + "Select").selectedIndex;
         let primaryFeatureIndex = maptool_network_gen.NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties.index;
-        console.log(maptool_network_gen.NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties);
-        maptool_network_gen.NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties[secondaryFeatureName].name = '' + secondaryFeatureName + ' ' + primaryFeatureIndex;
+        let secondaryFeatures = maptool_network_gen.NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties[secondaryFeatureName];
+        let numOfSecondaryFeatures = Object.keys(secondaryFeatures).length;
+        console.log(numOfSecondaryFeatures);
+        secondaryFeatures[numOfSecondaryFeatures] = {};
+        secondaryFeatures[numOfSecondaryFeatures]['name'] = '' + secondaryFeatureName + ' Household ' + numOfSecondaryFeatures;
+        secondaryFeatures[numOfSecondaryFeatures][primaryFeatureName] = primaryFeatureIndex;
         document.getElementById(secondaryFeatureName + 'FormDiv').style.display = 'block';
-        document.getElementById(secondaryFeatureName + 'AddButton').style.display = 'none';
+
+        let featureOption = document.createElement('OPTION');
+        featureOption.text = numOfSecondaryFeatures;
+        featureOption.value = numOfSecondaryFeatures;
+        document.getElementById(secondaryFeatureName + 'Select').append(featureOption);
+        console.log("Added new " + secondaryFeatureName)
     }
 
     //gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
@@ -343,7 +360,11 @@ var maptool_net_display = function() {
     }
 
     function openSecondaryEditor(sel, secondaryFeatureName) {
-        console.log(sel.value, secondaryFeatureName);
+        document.getElementById('loadEditor').style.display='none';
+        document.getElementById('sgenEditor').style.display='none';
+        document.getElementById('switchEditor').style.display='none';
+
+        
         document.getElementById(secondaryFeatureName + 'Editor').style.display='block';
         
         let busIdx = document.getElementById('busSelect').selectedIndex;
@@ -386,8 +407,8 @@ var maptool_net_display = function() {
                 //console.log(maptool_network_gen.NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName]);
             }
             else if (secondary_feature != '') {
-                maptool_network_gen.NetworkObject[feature + "List"][idxInFeatureList].feature.properties[secondary_feature][featureName] = target.value;
-                //console.log(maptool_network_gen.NetworkObject[feature + "List"][idxInFeatureList].feature.properties.load[featureName]);
+                let secondaryFeatureIdx = document.getElementById(secondary_feature + 'Select').selectedIndex
+                maptool_network_gen.NetworkObject[feature + "List"][idxInFeatureList].feature.properties[secondary_feature][secondaryFeatureIdx][featureName] = target.value;
             }
         }
         else {
