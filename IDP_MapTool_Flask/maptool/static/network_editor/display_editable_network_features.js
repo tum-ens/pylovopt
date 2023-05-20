@@ -174,7 +174,7 @@ var maptool_net_display = function() {
         featureCreateButton.classList.add('button');
         featureCreateButton.classList.add('feature-editor__selected-feature-editor__delete-button');
         featureCreateButton.innerHTML = 'Add ' + secondaryFeatureName.toUpperCase();
-        featureCreateButton.setAttribute('onclick', 'maptool_net_display.addSecondaryFeature("' + primaryFeatureName + '", "' + secondaryFeatureName + '")') 
+        featureCreateButton.setAttribute('onclick', 'maptool_urbs_process.addSecondaryFeature("' + primaryFeatureName + '", "' + secondaryFeatureName + '")') 
         editor_form.appendChild(featureCreateButton);
     }
 

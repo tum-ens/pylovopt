@@ -192,7 +192,7 @@ var maptool_urbs_setup = function() {
         formDiv.append(label);
         let featureSelect = document.createElement('SELECT');
         featureSelect.id = secondaryFeatureName + 'Select';
-        //featureSelect.setAttribute('onclick', 'maptool_urbs_setup.openSecondaryEditor(this, "' + secondaryFeatureName + '")')
+        featureSelect.setAttribute('onclick', 'maptool_urbs_setup.openSecondaryEditor(this, "' + secondaryFeatureName + '")')
         featureSelect.classList.add('feature-editor__featurelist-tab__feature-select');
         featureSelect.multiple = true;
 
@@ -224,26 +224,76 @@ var maptool_urbs_setup = function() {
         featureCreateButton.classList.add('button');
         featureCreateButton.classList.add('feature-editor__selected-feature-editor__delete-button');
         featureCreateButton.innerHTML = 'Add ' + secondaryFeatureName.toUpperCase();
-        featureCreateButton.setAttribute('onclick', 'maptool_net_display.addSecondaryFeature("' + primaryFeatureName + '", "' + secondaryFeatureName + '")') 
+        featureCreateButton.setAttribute('onclick', 'maptool_urbs_setup.addSecondaryFeature("' + primaryFeatureName + '", "' + secondaryFeatureName + '")') 
         editor_form.appendChild(featureCreateButton);
     }
 
-    function addSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
-        let idxInFeatureList = document.getElementById(primaryFeatureName + "Select").selectedIndex;
-        let primaryFeatureIndex = maptool_network_gen.NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties.index;
-        let secondaryFeatures = maptool_network_gen.NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties[secondaryFeatureName];
-        let numOfSecondaryFeatures = Object.keys(secondaryFeatures).length;
-        console.log(numOfSecondaryFeatures);
-        secondaryFeatures[numOfSecondaryFeatures] = {};
-        secondaryFeatures[numOfSecondaryFeatures]['name'] = '' + secondaryFeatureName + ' Household ' + numOfSecondaryFeatures;
-        secondaryFeatures[numOfSecondaryFeatures][primaryFeatureName] = primaryFeatureIndex;
-        document.getElementById(secondaryFeatureName + 'FormDiv').style.display = 'block';
+    function openSecondaryEditor(sel, secondaryFeatureName) {
+        document.getElementById(secondaryFeatureName + 'Editor').style.display='block';
+        
+        let key = document.getElementById('pro_propSelect').value;
+        console.log(key, maptool_urbs_process.ProcessObject.pro_com_propList);
+        let target_properties = maptool_urbs_process.ProcessObject.pro_com_propList[key][sel.value];
+        let editor_form = document.getElementById(secondaryFeatureName + 'Form');
+        let editor_elems = editor_form.children[0].children;
 
-        let featureOption = document.createElement('OPTION');
-        featureOption.text = numOfSecondaryFeatures;
-        featureOption.value = numOfSecondaryFeatures;
-        document.getElementById(secondaryFeatureName + 'Select').append(featureOption);
-        console.log("Added new " + secondaryFeatureName)
+        for (let i = 0; i < editor_elems.length; i++) {
+            if (editor_elems[i].nodeName == 'INPUT') {
+                if(target_properties[editor_elems[i].name] != null) {
+                    editor_elems[i].value = target_properties[editor_elems[i].name];
+                }
+                else {
+                    editor_elems[i].value = '';
+                }
+            }
+        }
+    }
+
+
+    //TODO: To Process js
+    function addSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
+        let pro_propkey = document.getElementById(primaryFeatureName + "Select").value;
+        let pro_com_propkey = "test";
+        let pro_com_propList = maptool_urbs_process.ProcessObject.pro_com_propList;
+        let pro_com_propSelect = document.getElementById('pro_com_propSelect');
+        console.log(key);
+        
+        let option = document.createElement('OPTION');
+        option.value = pro_com_propkey;
+        option.text = pro_com_propkey;
+
+        if (!Object.keys(pro_com_propList[pro_propkey]).includes(pro_com_propkey)) {
+            pro_com_propList[pro_propkey][pro_com_propkey] = JSON.parse(JSON.stringify(maptool_urbs_process.ProcessObject.pro_propTemplate));
+            let addToSelectFlag = true;
+            for (idx in pro_com_propSelect.options) {
+                if (pro_com_propSelect.options[idx].value == pro_com_propkey) {
+                    addToSelectFlag = false;
+                    break;
+                }
+            }
+            if(addToSelectFlag) {
+                pro_com_propSelect.add(option);
+            }
+
+            maptool_urbs_process.fillSecondaryEditorList(pro_com_propList[pro_propkey]);
+        }
+
+
+
+        // let primaryFeatureIndex = maptool_network_gen.NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties.index;
+        // let secondaryFeatures = maptool_network_gen.NetworkObject[primaryFeatureName + "List"][idxInFeatureList].feature.properties[secondaryFeatureName];
+        // let numOfSecondaryFeatures = Object.keys(secondaryFeatures).length;
+        // console.log(numOfSecondaryFeatures);
+        // secondaryFeatures[numOfSecondaryFeatures] = {};
+        // secondaryFeatures[numOfSecondaryFeatures]['name'] = '' + secondaryFeatureName + ' Household ' + numOfSecondaryFeatures;
+        // secondaryFeatures[numOfSecondaryFeatures][primaryFeatureName] = primaryFeatureIndex;
+        // document.getElementById(secondaryFeatureName + 'FormDiv').style.display = 'block';
+
+        // let featureOption = document.createElement('OPTION');
+        // featureOption.text = numOfSecondaryFeatures;
+        // featureOption.value = numOfSecondaryFeatures;
+        // document.getElementById(secondaryFeatureName + 'Select').append(featureOption);
+        // console.log("Added new " + secondaryFeatureName)
     }
     
     //gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
@@ -317,9 +367,14 @@ var maptool_urbs_setup = function() {
     function fillSelectedEditor(sel, featureName) {
         let urbsSetupEditors = document.getElementsByClassName("feature-editor__selected-feature-editor");
         for (let i = 0; i < urbsSetupEditors.length; i++) {
-            urbsSetupEditors[1].style.display='none';
+            urbsSetupEditors[i].style.display='none';
         }
-    
+
+        let secondaryUrbsSetupEditors = document.getElementsByClassName("feature-editor__selected-feature-editor__secondary-editor");
+        for (let i = 0; i < secondaryUrbsSetupEditors.length; i++) {
+            secondaryUrbsSetupEditors[i].style.display='none';
+        }
+
         if(featureName == 'demand') {
             maptool_urbs_demand.fillSelectedFeatureDemandEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex]);
             document.getElementById('demandEditor').style.display='inline-block';
@@ -342,6 +397,8 @@ var maptool_urbs_setup = function() {
         if(featureName == 'pro_prop') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
             fillSelectedFeatureEditorFields(maptool_urbs_process.ProcessObject.pro_propList[sel.value], featureName);
+            console.log(sel.value);
+            maptool_urbs_process.fillSecondaryEditorList(maptool_urbs_process.ProcessObject.pro_com_propList[sel.value]);
         }
         if(featureName == 'commodity') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
@@ -395,6 +452,8 @@ var maptool_urbs_setup = function() {
       return {
         openUrbsEditorList: openUrbsEditorList,
         resetLoadBusStyle: resetLoadBusStyle,
-        fillSelectedEditor: fillSelectedEditor
+        fillSelectedEditor: fillSelectedEditor,
+        openSecondaryEditor: openSecondaryEditor,
+        addSecondaryFeature: addSecondaryFeature
       }
 }();
