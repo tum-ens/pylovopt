@@ -1,4 +1,7 @@
-//TODO: Edit conf table when new process, new commodity is added
+//TODO: Pro_com_prop value write-back
+//TODO: Pro_com_prop in/out difference
+//TODO: Pro_com_prop deletion possible
+
 
 var maptool_urbs_process = function() {
     let ProcessObject = {
@@ -83,13 +86,42 @@ var maptool_urbs_process = function() {
         }
     }
 
+    function addSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
+        let pro_propkey = document.getElementById(primaryFeatureName + "Select").value;
+        let pro_com_propkey = "test";
+        let pro_com_propList = maptool_urbs_process.ProcessObject.pro_com_propList;
+        let pro_com_propSelect = document.getElementById('pro_com_propSelect');
+        console.log(key);
+        
+        let option = document.createElement('OPTION');
+        option.value = pro_com_propkey;
+        option.text = pro_com_propkey;
+
+        if (!Object.keys(pro_com_propList[pro_propkey]).includes(pro_com_propkey)) {
+            pro_com_propList[pro_propkey][pro_com_propkey] = JSON.parse(JSON.stringify(maptool_urbs_process.ProcessObject.pro_propTemplate));
+            let addToSelectFlag = true;
+            for (idx in pro_com_propSelect.options) {
+                if (pro_com_propSelect.options[idx].value == pro_com_propkey) {
+                    addToSelectFlag = false;
+                    break;
+                }
+            }
+            if(addToSelectFlag) {
+                pro_com_propSelect.add(option);
+            }
+
+            maptool_urbs_process.fillSecondaryEditorList(pro_com_propList[pro_propkey]);
+        }
+    }
+
     function openNewProcessForm(isCommodity) {
-        let form = (isCommodity) ? document.getElementById("urbsProcessCommPopupForm") :  document.getElementById("urbsProcessPopupForm");
+        let form = (isCommodity) ? document.getElementById("urbsProcessCommodityPopupForm") :  document.getElementById("urbsProcessPopupForm");
         form.style.display = "block";
     }
 
     function closeNewProcessForm(isCommodity) {
-        let form = (isCommodity) ? document.getElementById("urbsProcessCommPopupForm") :  document.getElementById("urbsProcessPopupForm");
+        let form = (isCommodity) ? document.getElementById("urbsProcessCommodityPopupForm") :  document.getElementById("urbsProcessPopupForm");
+        console.log(form)
         form.style.display = "none";
         document.getElementById('pro_propCommSelect').selectedIndex = 0;
         document.getElementById("newProcessTextInput").value = '';
@@ -118,9 +150,35 @@ var maptool_urbs_process = function() {
         }
     }
 
+    function processAddCommoditySelection(sel) {
+        
+        if (sel.value == 'newCommodity') {
+            document.getElementById("ProcessAddCreateButton").disabled = true;
+            document.getElementById("ProcessAddCommDiv").classList.remove('hidden');
+            if(document.getElementById("ProcessAddCommTextInput").value != '') {
+                document.getElementById("ProcessAddCreateButton").disabled = false;
+            }
+        }
+        else if(sel.value != 'none'){
+            document.getElementById("ProcessAddCreateButton").disabled = false;
+            document.getElementById("ProcessAddCommDiv").classList.add('hidden');
+
+        }
+    }
+
     function createNewProcessPropertyOrCommodity(isCommodity) {
         if(isCommodity) {
-            createNewProcessCommodity();
+            if (document.getElementById("pro_propAddCommSelect").value == 'newCommodity') {
+                createNewProcessCommodity(document.getElementById("pro_propSelect").value, document.getElementById("ProcessAddCommTextInput").value);
+            }
+            else {
+                ProcessObject.pro_com_propList[document.getElementById("pro_propSelect").value][document.getElementById("pro_propAddCommSelect").value] =JSON.parse(JSON.stringify(ProcessObject.pro_com_propTemplate));
+                console.log(ProcessObject.pro_com_propList[document.getElementById("pro_propSelect").value]);
+                let option = document.createElement("option");
+                option.text = document.getElementById("pro_propAddCommSelect").value;
+                option.value = document.getElementById("pro_propAddCommSelect").value;
+                document.getElementById('pro_com_propSelect').add(option);
+            }
         }
         else {
             createNewProcessProperty(document.getElementById("newProcessTextInput").value);
@@ -168,9 +226,16 @@ var maptool_urbs_process = function() {
         hot.alter('insert_col', hot.countCols(), 1)
         hot.headers[hot.headers.length - 1] = com_name;
 
-        //TODO: we create a new div to attach to the process editor
-        document.getElementById('pro_com_propSelect').add(option);
-        document.getElementById('pro_propCommSelect').add(option);
+        let pro_com_propOption = document.createElement("option");
+        pro_com_propOption.text = com_name;
+        pro_com_propOption.value = com_name;
+
+        document.getElementById('pro_com_propSelect').add(pro_com_propOption);
+
+        let pro_propCommOption = document.createElement("option");
+        pro_propCommOption.text = com_name;
+        pro_propCommOption.value = com_name;
+        document.getElementById('pro_propCommSelect').add(pro_propCommOption);
         if (!Object.keys(ProcessObject.pro_com_propList).includes(pro_name)) {
             ProcessObject.pro_com_propList[pro_name] = {};
         }
@@ -223,9 +288,11 @@ var maptool_urbs_process = function() {
         fetchProcessProfiles: fetchProcessProfiles,
         populateProcessEditorList: populateProcessEditorList,
         fillSecondaryEditorList: fillSecondaryEditorList,
+        addSecondaryFeature: addSecondaryFeature,
         openNewProcessForm: openNewProcessForm,
         closeNewProcessForm: closeNewProcessForm,
         processFormCommoditySelection: processFormCommoditySelection,
+        processAddCommoditySelection: processAddCommoditySelection,
         createNewProcessPropertyOrCommodity: createNewProcessPropertyOrCommodity,
         writeBackProcessFeatures: writeBackProcessFeatures,
         createPro_Conf_Editor: createPro_Conf_Editor

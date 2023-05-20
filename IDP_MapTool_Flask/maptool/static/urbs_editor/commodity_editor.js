@@ -58,10 +58,17 @@ var maptool_urbs_commodity = function () {
 
     function addCommToProcessCreationFormList(name) {
         let commSelect = document.getElementById("pro_propCommSelect");
+        let commAddSelect = document.getElementById("pro_propAddCommSelect");
+
         let newOption = document.createElement("option");
+        let newAddOption = document.createElement("option");
+
         newOption.value = name;
         newOption.text = name;
+        newAddOption.value = name;
+        newAddOption.text = name;
         commSelect.appendChild(newOption);
+        commAddSelect.appendChild(newAddOption);
     }
 
     function createNewCommodity() {

@@ -201,12 +201,12 @@
     <form class="formContainer">
       Select a new commodity for your process:
       <div class="form-popup__version-select">
-        <select class ="feature-editor__featurelist-tab__feature-select" id="pro_propAddCommSelect" onchange="maptool_urbs_process.processFormCommoditySelection(this)">
+        <select class ="feature-editor__featurelist-tab__feature-select" id="pro_propAddCommSelect" onchange="maptool_urbs_process.processAddCommoditySelection(this)">
           <option value="none" selected disabled hidden>Select an Option</option>
           <option value="newCommodity">New Commodity</option>
         </select>
         <div class="hidden form-popup__version-select__comm" id="ProcessAddCommDiv">
-          <input type="text" name="newProcessCommTextInput" id="ProcessAddCommTextInput" placeholder="Commodity Name" onchange="maptool_urbs_process.processFormCommoditySelection(document.getElementById('pro_propCommSelect'))">
+          <input type="text" name="newProcessCommTextInput" id="ProcessAddCommTextInput" placeholder="Commodity Name" onchange="maptool_urbs_process.processAddCommoditySelection(document.getElementById('pro_propAddCommSelect'))">
           <div class="form-popup__version-select__comm__checkboxes" id="ProcessAddCommCheckboxDiv">
             <input type="checkbox">
             <label>In</label>
@@ -217,8 +217,8 @@
           <input type="number" name="newProcessCommRatioMinInput" id="ProcessAddCommRatioMinInput" placeholder="Ratio Min">
         </div>
       </div>
-      <button type="button" class="btn" id="ProcessAddCreateButton" onclick="maptool_urbs_process.createNewProcessPropertyOrCommodity(false)" disabled>Create Process</button>
-      <button type="button" class="btn cancel" onclick="maptool_urbs_process.closeNewProcessForm(false)">Cancel</button>
+      <button type="button" class="btn" id="ProcessAddCreateButton" onclick="maptool_urbs_process.createNewProcessPropertyOrCommodity(true)" disabled>Add Commodity</button>
+      <button type="button" class="btn cancel" onclick="maptool_urbs_process.closeNewProcessForm(true)">Cancel</button>
     </form>
   </div>
 </div>
