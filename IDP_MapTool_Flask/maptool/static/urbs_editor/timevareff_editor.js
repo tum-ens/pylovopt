@@ -28,10 +28,36 @@ var maptool_urbs_timevareff = function() {
             let listLength = maptool_urbs_buildings.BuildingsObject['busWithLoadList'].length;
             TimevareffObject.bus_timevareff = new Array(listLength);
             for (let i = 0; i < listLength; i++) {
-                TimevareffObject.bus_timevareff[i] = new Array(1).fill('0'.repeat(Object.keys(TimevareffObject.charging_station).length));
+                TimevareffObject.bus_timevareff[i] = new Array(3).fill('0'.repeat(Object.keys(TimevareffObject.charging_station).length));
             }
         });
     }
+
+    function fillSelectedFeatureTimevareffEditor(target) {
+      let sel = document.getElementById('timevareffSelect');
+      maptool_urbs_setup.resetLoadBusStyle(target);
+      let dict_index = 0;
+      for (table in TimevareffObject) {
+          if(table != 'bus_timevareff') {
+              let checkboxDiv = document.getElementById(table + "Panel");
+              let chars = TimevareffObject.bus_timevareff[sel.selectedIndex][dict_index];
+              for (let i = 0;  i < checkboxDiv.children.length; i++) {
+                  if (chars[i] == '1') {
+                      checkboxDiv.children[i].firstChild.checked = true;
+                      check_uncheck_demand(checkboxDiv.children[i].firstChild, table, i, dict_index);
+                  }
+                  else {
+                      let wasTrue = checkboxDiv.children[i].firstChild.checked;
+                      checkboxDiv.children[i].firstChild.checked = false;
+                      if(wasTrue) {
+                          check_uncheck_demand(checkboxDiv.children[i].firstChild, table, i, dict_index);
+                      }
+                  }
+              }
+              dict_index++
+          }
+      }
+  }
 
     function check_uncheck_demand(checkbox, demand_type, key, demandIndex) {
         let listElem = document.getElementById('timevareffSelect').selectedIndex;
@@ -140,7 +166,8 @@ var maptool_urbs_timevareff = function() {
     return {
         TimevareffObject: TimevareffObject,
         fetchFeatureProfiles: fetchFeatureProfiles,
-        check_uncheck_demand: check_uncheck_demand
+        check_uncheck_demand: check_uncheck_demand,
+        fillSelectedFeatureTimevareffEditor: fillSelectedFeatureTimevareffEditor
     };
 
 }();

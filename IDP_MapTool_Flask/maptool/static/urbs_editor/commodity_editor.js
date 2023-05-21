@@ -41,21 +41,26 @@ var maptool_urbs_commodity = function () {
         });
     }
 
-    // function prepareCommodityObject(UrbsPropertiesJSON, commodities) {
-    //     let propertiesToAdd = UrbsPropertiesJSON['commodity'];
-    //     let commodityJSON = {};
-    //     for (property in propertiesToAdd) {
-    //         commodityJSON[property] = ''
-    //     }
-    //     CommodityObject.commodityPropertiesTemplate = commodityJSON;
+    function openNewCommodityForm() {
+        document.getElementById('urbsNewCommodityPopupForm').style.display = "block";
+    }
 
-    //     for (idx in commodities) {
-    //         let name = commodities[idx]
-    //         CommodityObject.commodityPropertiesList[name] = JSON.parse(JSON.stringify(commodityJSON));
-    //         addCommToProcessCreationFormList(name)
-    //     }
-    // }
+    function closeNewCommodityForm() {
+        let form = document.getElementById("urbsNewCommodityPopupForm");
+        form.style.display = "none";
+        document.getElementById("newCommTextInput").value = '';
+    }
 
+    function commodityFormCheckValidInput(comm_name) {
+        if(comm_name != '') {
+            document.getElementById("newCommCreateButton").disabled = false;
+        }
+        else {
+            document.getElementById("newCommCreateButton").disabled = true;
+        }
+
+    }
+ 
     function addCommToProcessCreationFormList(name) {
         let commSelect = document.getElementById("pro_propCommSelect");
         let commAddSelect = document.getElementById("pro_propAddCommSelect");
@@ -71,19 +76,46 @@ var maptool_urbs_commodity = function () {
         commAddSelect.appendChild(newAddOption);
     }
 
-    function createNewCommodity() {
-        console.log("new commodity");
+    function createNewCommodity(com_name) {
+                //we grab the commodity list and add a new option. All values are blank at the start. We also add a blank entry to the Commodity Object List
+                let commodityList = document.getElementById("commoditySelect");
+                let option = document.createElement("option");
+                option.text = com_name;
+                option.value = com_name;
+                commodityList.add(option);
+                CommodityObject.commodityPropertiesList[com_name] = JSON.parse(JSON.stringify(CommodityObject.commodityPropertiesTemplate));
+                
+                //we insert a new column into the commodity table
+                maptool_urbs_process.hot.alter('insert_col', maptool_urbs_process.hot.countCols(), 1)
+                maptool_urbs_process.hot.headers[maptool_urbs_process.hot.headers.length - 1] = com_name;
+        
+
+                let pro_propCommOption = document.createElement("option");
+                pro_propCommOption.text = com_name;
+                pro_propCommOption.value = com_name;
+                document.getElementById('pro_propCommSelect').add(pro_propCommOption);
+
+                let pro_propAddCommOption = document.createElement("option");
+                pro_propAddCommOption.text = com_name;
+                pro_propAddCommOption.value = com_name;
+                document.getElementById('pro_propAddCommSelect').add(pro_propAddCommOption);
+
+                closeNewCommodityForm();
     }
+
     function writeBackCommodityFeatures(target) {
+        console.log(target);
         let idxInFeatureList = document.getElementById("commoditySelect").value;
         let selectedElement = CommodityObject.commodityPropertiesList[idxInFeatureList];
         selectedElement[target.name] = target.value;
-        console.log(selectedElement[target.name], target.value);
     }
 
     return {
         CommodityObject: CommodityObject,
         fetchProfiles: fetchProfiles,
+        openNewCommodityForm: openNewCommodityForm,
+        closeNewCommodityForm: closeNewCommodityForm,
+        commodityFormCheckValidInput: commodityFormCheckValidInput,
         createNewCommodity: createNewCommodity,
         writeBackCommodityFeatures: writeBackCommodityFeatures,
         // prepareCommodityObject: prepareCommodityObject

@@ -372,7 +372,7 @@ var maptool_urbs_setup = function() {
             document.getElementById('supimEditor').style.display='inline-block';
         }
         if(featureName == 'timevareff') {
-            //maptool_urbs_supim.fillSelectedFeatureSupimEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex]);
+            maptool_urbs_timevareff.fillSelectedFeatureTimevareffEditor(maptool_urbs_buildings.BuildingsObject['busWithLoadList'][sel.selectedIndex]);
             document.getElementById('timevareffEditor').style.display='inline-block';
             console.log("he")
         }

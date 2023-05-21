@@ -41,7 +41,7 @@
     <select class ="feature-editor__featurelist-tab__feature-select" id="globalSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'global')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="commodity">
-    <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="maptool_urbs_commodity.createNewCommodity()">Add Commodity</button>
+    <button class="button feature-editor__featurelist-tab__add-feature-button" onclick="maptool_urbs_commodity.openNewCommodityForm()">Add Commodity</button>
     <select class ="feature-editor__featurelist-tab__feature-select" id="commoditySelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'commodity')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="processes">
@@ -219,6 +219,21 @@
       </div>
       <button type="button" class="btn" id="ProcessAddCreateButton" onclick="maptool_urbs_process.createNewProcessPropertyOrCommodity(true)" disabled>Add Commodity</button>
       <button type="button" class="btn cancel" onclick="maptool_urbs_process.closeNewProcessForm(true)">Cancel</button>
+    </form>
+  </div>
+</div>
+
+<div class="optionsPopup">
+  <div class="formPopup" id="urbsNewCommodityPopupForm">
+    <form class="formContainer">
+      Enter a name for your new commodity:
+      <div class="form-popup__version-select">
+        <div class="form-popup__version-select__comm" id="newCommDiv">
+          <input type="text" name="newCommTextInput" id="newCommTextInput" placeholder="Commodity Name" onchange="maptool_urbs_commodity.commodityFormCheckValidInput(this.text)">
+        </div>
+      </div>
+      <button type="button" class="btn" id="newCommCreateButton" onclick="maptool_urbs_commodity.createNewCommodity(document.getElementById('newCommTextInput').value)" disabled>Add Commodity</button>
+      <button type="button" class="btn cancel" onclick="maptool_urbs_commodity.closeNewCommodityForm(true)">Cancel</button>
     </form>
   </div>
 </div>
