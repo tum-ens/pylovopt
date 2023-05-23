@@ -18,7 +18,6 @@
   <div class="feature-editor__buttons-tab">
     <button class="feature-editor__buttons-tab__tablinks" id="buildingsButton" title="Buildings" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'buildings', true)"><span>B</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="demandButton" title="Demand" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'demand', true)"><span>D</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="buysellpriceButton" title="Buy-Sell Price" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'buysellprice', true)"><span>BSP</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="transmissionButton" title="Transmission" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'transmission', true)"><span>T</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="globalButton" title="Global" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'global'); maptool_urbs_setup.fillSelectedEditor(this, 'global', true)"><span>G</span></button>
     <button class="feature-editor__buttons-tab__tablinks" id="commodityButton" title="Commodity" onclick="maptool_urbs_setup.openUrbsEditorList(event, 'commodity', true)"><span>C</span></button>
@@ -30,9 +29,6 @@
   </div>
   <div class="feature-editor__featurelist-tab" id="demand">
     <select class ="feature-editor__featurelist-tab__feature-select" id="demandSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'demand')" multiple></select>
-  </div>
-  <div class="feature-editor__featurelist-tab" id="buysellprice">
-    <select class ="feature-editor__featurelist-tab__feature-select" id="buysellpriceSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'buysellprice')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="transmission">
     <select class ="feature-editor__featurelist-tab__feature-select" id="transmissionSelect"  onchange="maptool_urbs_setup.fillSelectedEditor(this, 'transmission')" multiple></select>
@@ -97,8 +93,6 @@
         <div class="feature-editor__selected-feature-editor__demand__graph"></div>
       </div>
     </form>
-  </div>
-  <div class="feature-editor__selected-feature-editor" id="buysellpriceEditor">
   </div>
   <div class="feature-editor__selected-feature-editor" id="transmission_cable_dataEditor">
     <form id="transmission_cable_dataForm">
@@ -247,7 +241,6 @@
 <script defer src="{{url_for('static', filename='/urbs_editor/generate_urbs_setup_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/demand_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/buildings_editor.js')}}"></script>
-<script defer src="{{url_for('static', filename='/urbs_editor/buysellprice_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/transmission_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/process_editor.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/commodity_editor.js')}}"></script>
