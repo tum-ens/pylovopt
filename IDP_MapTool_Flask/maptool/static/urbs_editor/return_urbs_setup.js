@@ -19,10 +19,10 @@ var maptool_return_urbs =  function() {
         }
         postData("http://127.0.0.1:5000/urbs/demand_csv_setup", demand_json);
     }
-    //DONE
+    //DONE BACKEND_DONE
     function returnUrbsSetup_Buildings() {
         let buildings_json = JSON.stringify(maptool_urbs_buildings.BuildingsObject.buildingsPropertiesList);
-        //postData("http://127.0.0.1:5000/urbs/buildings_csv_setup", buildings_json);
+        postData("http://127.0.0.1:5000/urbs/buildings_csv_setup", buildings_json);
     }
     //DONE
     function returnUrbsSetup_BuySellPrice() {
@@ -87,7 +87,7 @@ var maptool_return_urbs =  function() {
         let storage_json = {};
         storage_json['sto_prop'] = JSON.stringify(maptool_urbs_storage.StorageObject.storagePropertiesList);
         storage_json['sto_conf'] = JSON.stringify(maptool_urbs_storage.hot.getData());
-        postData("http://127.0.0.1:5000/urbs/storage_setup", storage_json);
+        //postData("http://127.0.0.1:5000/urbs/storag_csv_setup", storage_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_SupIm() {

@@ -9,7 +9,7 @@ var maptool_urbs_buildings = function () {
         for (bus in BuildingsObject.busWithLoadList) {
             let coordinates = BuildingsObject.busWithLoadList[bus].feature.geometry.coordinates
             let name = BuildingsObject.busWithLoadList[bus].feature.properties.name
-            let buildingJSON = {"name": name,"x": coordinates[0], "y": coordinates[1]};
+            let buildingJSON = {"name": name,"lat": coordinates[0], "lon": coordinates[1]};
             for (property in propertiesToAdd) {
                 buildingJSON[property] = ''
             }

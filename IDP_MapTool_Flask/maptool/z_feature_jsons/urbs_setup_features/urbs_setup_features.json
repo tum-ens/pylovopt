@@ -6,6 +6,16 @@
                       "tooltip": "",
                       "default_val": ""
                 },
+                "PV_cap_kW": {
+                  "type": "float",
+                  "tooltip": "",
+                  "default_val": ""
+                },
+                "use": {
+                        "type": "float",
+                        "tooltip": "",
+                        "default_val": ""
+                },
                 "free_walls": {
                       "type": "float",
                       "tooltip": "",
@@ -30,19 +40,34 @@
                       "type": "int",
                       "tooltip": "",
                       "default_val": ""
-                }
+                },
+                "occupants": {
+                  "type": "int",
+                  "tooltip": "",
+                  "default_val": ""
+                },
+                "ref_level_roof": {
+                        "type": "int",
+                        "tooltip": "",
+                        "default_val": ""
+                },
+                "ref_level_wall": {
+                        "type": "int",
+                        "tooltip": "",
+                        "default_val": ""
+                },
+                "ref_level_floor": {
+                        "type": "int",
+                        "tooltip": "",
+                        "default_val": ""
+                 },
+                 "ref_level_window": {
+                        "type": "int",
+                        "tooltip": "",
+                        "default_val": ""
+                 }
           },
           "from_user_input": {
-                "PV_cap_kW": {
-                      "type": "float",
-                      "tooltip": "",
-                      "default_val": ""
-                },
-                "use": {
-                      "type": "float",
-                      "tooltip": "",
-                      "default_val": ""
-                },
                 "dist_to_heat_source": {
                       "type": "float",
                       "tooltip": "",
@@ -80,31 +105,6 @@
                 },
                 "dwelling_size": {
                       "type": "float",
-                      "tooltip": "",
-                      "default_val": ""
-                },
-                "occupants": {
-                      "type": "int",
-                      "tooltip": "",
-                      "default_val": ""
-                },
-                "ref_level_roof": {
-                      "type": "int",
-                      "tooltip": "",
-                      "default_val": ""
-                },
-                "ref_level_wall": {
-                      "type": "int",
-                      "tooltip": "",
-                      "default_val": ""
-                },
-                "ref_level_floor": {
-                      "type": "int",
-                      "tooltip": "",
-                      "default_val": ""
-                },
-                "ref_level_window": {
-                      "type": "int",
                       "tooltip": "",
                       "default_val": ""
                 },

@@ -158,16 +158,14 @@ def formatDemandCSV():
         #demand_df.to_csv('demand_conf.csv', index=False)
         return 'Success', 200
 
+#TODO: Save in correct spot
 @bp.route('/urbs/buildings_csv_setup', methods=['GET', 'POST'])
 def formatBuildingsCSV():
-    # TODO: Create csvs from data
     if request.method == 'POST':
         buildings_user_data = json.loads(request.get_json())
 
-        buildings_df_columns =['area', 'type', 'peak_load_in_kw', 'free_walls_res','free_walls_oth', 'floors', 'houses_per_building']
-
+        buildings_df_columns =['bid','footprint_area', 'PV_cap_kW','use', 'free_walls', 'floors', 'dwellings', 'occupants','ref_level_roof', 'ref_level_wall', 'ref_level_floor','ref_level_window']      
         plz = session.get('plz')['value']
-        kcid_bcid = session.get('kcid_bcid')['value']
         plz_version = session['plz_version']
         gg = GridGenerator(plz=plz, version_id=plz_version)
         pg = gg.pgr
@@ -175,22 +173,24 @@ def formatBuildingsCSV():
         buildings_osm_id_list = []
 
         for entry in buildings_user_data:
-            buildings_osm_id = pg.test__getBuildingOfBus(plz, entry['x'], entry['y'])
+            buildings_osm_id = pg.test__getBuildingOfBus(plz, entry['lat'], entry['lon'])
             
             if buildings_osm_id:
                 buildings_osm_id_list.append(buildings_osm_id)
 
         buildings_data_aggregator = []
+        bid = 1
         for osm_id in buildings_osm_id_list:
             additional_data = pg.test_getAdditionalBuildingData(osm_id)
-            buildings_data_aggregator.append(additional_data)
+            print(additional_data[3], additional_data[4])
+            buildings_data_aggregator.append([bid] + additional_data)
+            bid += 1
 
         buildings_data = pd.DataFrame(buildings_data_aggregator,columns=buildings_df_columns)
         buildings_data = buildings_data.join(pd.DataFrame.from_dict(buildings_user_data))
-        #print(buildings_data.columns)
-        # f = open('buildings_ouput_test.json', 'w')
-        # json.dump(buildings_data.to_json(orient="split"), f, indent=6)
-        # f.close()
+        buildings_data = buildings_data.drop('name', axis='columns')
+        print(buildings_data.columns)
+ 
         #buildings_data.to_csv('building_data.csv', index=False)
         return 'Success', 200
     
@@ -210,7 +210,7 @@ def formatGlobalCSV():
             global_conf.append([key, global_json[key]])
 
         global_df = pd.DataFrame(global_conf, columns=global_columns)
-        global_df.to_csv('global.csv', index=False)
+        #global_df.to_csv('global.csv', index=False)
 
         return 'Success', 200
     
