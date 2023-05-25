@@ -8,12 +8,13 @@ from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwor
 import json
 
 
-#When user submits postal code or area selection in gui we return the corresponding postal code area boundary
+#As a frist step we always return the html for the current window
 @bp.route('/urbs', methods=['GET', 'POST'])
 def urbs_setup():
     print("test")
     return render_template('urbs_editor/index.html')
 
+#one page load javascript fetches the json file containing parameter names, types, default values etc for generation and maintenance of the editor environment
 @bp.route('/urbs/urbs_setup_properties', methods=['GET', 'POST'])
 def urbs_setup_properties():
     if request.method == 'GET':
@@ -21,32 +22,38 @@ def urbs_setup_properties():
         urbs_setup_props = json.load(f)
         return urbs_setup_props
 
+
 @bp.route('/urbs/editableNetwork', methods=['GET', 'POST'])
 def editableNetwork():
     #on opening of the network view the js code requests full information of the previously selected network
     #we return the network with previously chosen and session-dependant plz, kcid and bcid with all features
     if request.method == 'GET':
+        #--------------------------------COMMENT OUT IF DATABASE CONNECTION DOES NOT WORK--------------------------------#
         plz = session.get('plz')['value']
         kcid_bcid = session.get('kcid_bcid')['value']
         plz_version = session['plz_version']
         gg = GridGenerator(plz=plz, version_id=plz_version)
         pg = gg.pgr
         testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
+        #--------------------------------COMMENT OUT IF DATABASE CONNECTION DOES NOT WORK--------------------------------#
 
         #--------------------------------PURELY FOR DEBUG--------------------------------#
         #from maptool import net as testnet
         #from .generateEditableNetwork import createFeatures
         #createFeatures(False, pp.from_json(testnet), 'bus',0,0,0)
-        #--------------------------------PURELY FOR DEBUG--------------------------------#
         #return pp.to_json(testnet)
+        #--------------------------------PURELY FOR DEBUG--------------------------------#
+
         json_net = createGeoJSONofNetwork(testnet, True, True, True, True, True)
         json_net = json.dumps(json_net, default=str, indent=6)
         return json_net
 
+    #does nothing atm
     if request.method == 'POST':
         #print(request.get_json())
         return 'Success', 200
-    
+
+#at them moment we use purely pre-defined profiles the user can choose from. They are extracted from the csv template and sent to the frontend here   
 @bp.route('/urbs/demand_profiles', methods=['GET', 'POST'])
 def demandProfiles():
     demand_electricity = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/demand/profiles/electricity.csv'), sep=',')
@@ -63,55 +70,6 @@ def demandProfiles():
             }
 
     return demand_json
-
-@bp.route('/urbs/demand_setup', methods=['GET', 'POST'])
-def formatDemandSetup():
-    if request.method == 'POST':
-        # print(request.get_json())
-        # f = open('demand_ouput_test.json', 'w')
-        # json.dump(request.get_json(), f)
-        # f.close()
-        # TODO: extract demand info, save json in session and generate csv file
-        return 'Success', 200
-    
-
-
-@bp.route('/urbs/buildings_setup', methods=['GET', 'POST'])
-def formatBuildingsSetup():
-    
-    # TODO: Create csvs from data
-    
-    if request.method == 'POST':
-        buildings_user_data = json.loads(request.get_json())
-
-        plz = session.get('plz')['value']
-        kcid_bcid = session.get('kcid_bcid')['value']
-        plz_version = session['plz_version']
-        gg = GridGenerator(plz=plz, version_id=plz_version)
-        pg = gg.pgr
-        testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
-
-        buildings_osm_id_list = []
-
-        
-        for entry in buildings_user_data:
-            buildings_osm_id = pg.test__getBuildingOfBus(plz, entry['x'], entry['y'])
-            
-            if buildings_osm_id:
-                buildings_osm_id_list.append(buildings_osm_id)
-
-        buildings_data_aggregator = []
-        for osm_id in buildings_osm_id_list:
-            additional_data = pg.test_getAdditionalBuildingData(osm_id)
-            buildings_data_aggregator.append(additional_data)
-
-        buildings_data = pd.DataFrame(buildings_data_aggregator,columns=['area', 'type', 'peak_load_in_kw', 'free_walls_res','free_walls_oth', 'floors', 'houses_per_building'])
-        buildings_data = buildings_data.join(pd.DataFrame.from_dict(buildings_user_data))
-        print(buildings_data.columns)
-        # f = open('buildings_ouput_test.json', 'w')
-        # json.dump(buildings_data.to_json(orient="split"), f, indent=6)
-        # f.close()
-        return 'Success', 200
     
 @bp.route('/urbs/process_profiles', methods=['GET', 'POST'])
 def formatProcessSetup():
@@ -164,3 +122,128 @@ def timevareffProfiles():
             }
 
     return timevareff_json
+
+
+#help function that returns all the index positions of a char in a list
+#used to find which flags are set to 1 in the demand, supim, timevareff checkbox editors and correctly write to css
+def find(s, ch):
+    return [i for i, ltr in enumerate(s) if ltr == ch]
+
+def createCSVFromCheckboxes (json_data, columns): 
+    conf = []
+
+    for bus in json_data:
+        current_row = []
+        current_row.append(bus)
+        for profile in json_data[bus]:
+            chosen_profiles = find(profile, '1')
+            chosen_profiles_str = ''
+            if chosen_profiles:
+                chosen_profiles_str = ';'.join(str(p) for p in chosen_profiles)
+            current_row.append(chosen_profiles_str)
+        conf.append(current_row)
+    
+    demand_df = pd.DataFrame(conf, columns=columns)
+    #demand_df.to_csv('demand_conf.csv', index=False)
+    return demand_df
+
+#the js returns the aggregated profiles the user chose for load bus and each type of demand
+#the returned datastructure is changed into a csv that fits the demanded format
+#TODO: Save in correct spot
+@bp.route('/urbs/demand_csv_setup', methods=['GET', 'POST'])
+def formatDemandCSV():
+    if request.method == 'POST':
+        demand_profiles = ["site","demand_electricity","demand_electricity_reactive","demand_mobility","demand_space_heat","demand_water_heat" ]
+        demand_df = createCSVFromCheckboxes(request.get_json(), demand_profiles)
+        #demand_df.to_csv('demand_conf.csv', index=False)
+        return 'Success', 200
+
+@bp.route('/urbs/buildings_csv_setup', methods=['GET', 'POST'])
+def formatBuildingsCSV():
+    # TODO: Create csvs from data
+    if request.method == 'POST':
+        buildings_user_data = json.loads(request.get_json())
+
+        buildings_df_columns =['area', 'type', 'peak_load_in_kw', 'free_walls_res','free_walls_oth', 'floors', 'houses_per_building']
+
+        plz = session.get('plz')['value']
+        kcid_bcid = session.get('kcid_bcid')['value']
+        plz_version = session['plz_version']
+        gg = GridGenerator(plz=plz, version_id=plz_version)
+        pg = gg.pgr
+
+        buildings_osm_id_list = []
+
+        for entry in buildings_user_data:
+            buildings_osm_id = pg.test__getBuildingOfBus(plz, entry['x'], entry['y'])
+            
+            if buildings_osm_id:
+                buildings_osm_id_list.append(buildings_osm_id)
+
+        buildings_data_aggregator = []
+        for osm_id in buildings_osm_id_list:
+            additional_data = pg.test_getAdditionalBuildingData(osm_id)
+            buildings_data_aggregator.append(additional_data)
+
+        buildings_data = pd.DataFrame(buildings_data_aggregator,columns=buildings_df_columns)
+        buildings_data = buildings_data.join(pd.DataFrame.from_dict(buildings_user_data))
+        #print(buildings_data.columns)
+        # f = open('buildings_ouput_test.json', 'w')
+        # json.dump(buildings_data.to_json(orient="split"), f, indent=6)
+        # f.close()
+        #buildings_data.to_csv('building_data.csv', index=False)
+        return 'Success', 200
+    
+@bp.route('/urbs/transmission_csv_setup', methods=['GET', 'POST'])
+def formatTransmissionCSV():
+    if request.method == 'POST':
+        return 'Success', 200
+
+#TODO: Save in correct spot
+@bp.route('/urbs/global_csv_setup', methods=['GET', 'POST'])
+def formatGlobalCSV():
+    if request.method == 'POST':
+        global_columns = ['Property', 'value']
+        global_conf = []
+        global_json = json.loads(request.get_json())
+        for key in global_json:
+            global_conf.append([key, global_json[key]])
+
+        global_df = pd.DataFrame(global_conf, columns=global_columns)
+        global_df.to_csv('global.csv', index=False)
+
+        return 'Success', 200
+    
+@bp.route('/urbs/commodity_csv_setup', methods=['GET', 'POST'])
+def formatCommodityCSV():
+    if request.method == 'POST':
+        return 'Success', 200
+    
+@bp.route('/urbs/process_csv_setup', methods=['GET', 'POST'])
+def formatProcessCSV():
+    if request.method == 'POST':
+        return 'Success', 200
+
+@bp.route('/urbs/storage_csv_setup', methods=['GET', 'POST'])
+def formatStorageCSV():
+    if request.method == 'POST':
+        return 'Success', 200
+    
+#TODO: Save in correct spot   
+@bp.route('/urbs/supim_csv_setup', methods=['GET', 'POST'])
+def formatSupimCSV():
+    if request.method == 'POST':
+        supim_profiles = ["site","solar"]
+        supim_df = createCSVFromCheckboxes(request.get_json(), supim_profiles)
+        #supim_df.to_csv('supim_conf.csv', index=False)
+        return 'Success', 200
+
+#TODO: Save in correct spot
+@bp.route('/urbs/timevareff_csv_setup', methods=['GET', 'POST'])
+def formatTimevareffCSV():
+    if request.method == 'POST':
+        timevareff_profiles = ["site","charging_station","heatpump_air","heatpump_air_heizstrom"]
+        timevareff_df = createCSVFromCheckboxes(request.get_json(), timevareff_profiles)
+        #timevareff_df.to_csv('timevareff_conf.csv', index=False)
+        return 'Success', 200
+
