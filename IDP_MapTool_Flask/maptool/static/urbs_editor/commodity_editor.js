@@ -1,5 +1,5 @@
-//TODO: Edit conf table when new commodity is added
-//TODO: Create new commodity function
+//TODO: Handle upload of BSP, provide template form
+//TODO: If none uploaded, create basic BSP before returning
 
 var maptool_urbs_commodity = function () {
     
@@ -40,6 +40,11 @@ var maptool_urbs_commodity = function () {
             maptool_urbs_process.populateProcessEditorList('commodity', Object.keys(CommodityObject.commodityPropertiesList));
         });
     }
+
+    function createBuySellPriceEditor() {
+
+    }
+
 
     function openNewCommodityForm() {
         document.getElementById('urbsNewCommodityPopupForm').style.display = "block";
@@ -108,17 +113,26 @@ var maptool_urbs_commodity = function () {
         let idxInFeatureList = document.getElementById("commoditySelect").value;
         let selectedElement = CommodityObject.commodityPropertiesList[idxInFeatureList];
         selectedElement[target.name] = target.value;
+
+        if(target.nodeName == 'SELECT') {
+            if(target.value == 'Buy' || target.value == 'Sell') {
+                document.getElementById('BuySellPriceButton').style.display = 'inline-block';     
+            }
+            else {
+                document.getElementById('BuySellPriceButton').style.display='none';     
+            }
+        }
     }
 
     return {
         CommodityObject: CommodityObject,
         fetchProfiles: fetchProfiles,
+        createBuySellPriceEditor: createBuySellPriceEditor,
         openNewCommodityForm: openNewCommodityForm,
         closeNewCommodityForm: closeNewCommodityForm,
         commodityFormCheckValidInput: commodityFormCheckValidInput,
         createNewCommodity: createNewCommodity,
         writeBackCommodityFeatures: writeBackCommodityFeatures,
-        // prepareCommodityObject: prepareCommodityObject
     }
 
 }();

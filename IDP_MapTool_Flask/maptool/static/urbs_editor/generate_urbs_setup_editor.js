@@ -66,6 +66,7 @@ var maptool_urbs_setup = function() {
             populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data'],'maptool_urbs_trans.writeBackTransmissionFeatures(this)');
             populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits'],'');
             populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity'],'maptool_urbs_commodity.writeBackCommodityFeatures(this)');
+            maptool_urbs_commodity.createBuySellPriceEditor();
             populateUrbsEditor('global', UrbsPropertiesJSON['global'],'');
             populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'],'maptool_urbs_process.writeBackProcessFeatures(this)');
             populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop'],'maptool_urbs_process.writeBackProcessFeatures(this)');
@@ -439,6 +440,13 @@ var maptool_urbs_setup = function() {
         if(featureName == 'commodity') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
             fillSelectedFeatureEditorFields(maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.value], featureName);
+            if (maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.value].type == 'Sell' 
+                || maptool_urbs_commodity.CommodityObject['commodityPropertiesList'][sel.value].type == 'Buy') {
+                document.getElementById('BuySellPriceButton').style.display='inline-block';     
+            } 
+            else {
+                document.getElementById('BuySellPriceButton').style.display='none';        
+            }
         }
         if(featureName == 'storage') {
             document.getElementById(featureName + 'Editor').style.display='inline-block';
