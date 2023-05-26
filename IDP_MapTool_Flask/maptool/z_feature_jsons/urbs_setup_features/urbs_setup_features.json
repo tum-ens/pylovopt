@@ -508,41 +508,43 @@
     "transmission": {
           "cable_data": {
                 "id": {
-                      "type": "string",
+                      "type": "list",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "",
+                      "list_options": ["NAYY 4x150", "NAYY 4x50", "NAYY 4x50 SE","_others"]
                 },
                 "material_cost": {
                       "type": "int",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "10000"
                 },
                 "digging_cost": {
                       "type": "int",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "90000"
                 },
                 "loading_limit": {
                       "type": "int",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "0.7"
                 },
                 "wacc": {
                       "type": "float",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "0.06"
                 },
                 "deprecation": {
                       "type": "float",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "40"
                 }
           },
           "trafo_data": {
                 "id": {
-                      "type": "string",
+                      "type": "list",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "",
+                      "list_options": []
                 },
                 "inv-cost": {
                       "type": "float",

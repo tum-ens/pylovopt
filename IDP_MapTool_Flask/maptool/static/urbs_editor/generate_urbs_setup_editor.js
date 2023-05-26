@@ -15,10 +15,10 @@ var maptool_urbs_setup = function() {
             });
     }
     
-    /*
-    main aggregate function for editor generation: All the different preparatory functions for each editor component are called here
-    after the network data is retrieved from Flask
-    */
+    /**
+     * main aggregate function for editor generation: All the different preparatory functions for each editor component are called here
+     * after the network data is retrieved from Flask
+     */
     function SetupUrbsEditor() {    
         let fetchString = '/urbs/editableNetwork';
         
@@ -54,16 +54,16 @@ var maptool_urbs_setup = function() {
             populateUrbsEditorLoadBusLists('supim', 'busWithLoad');
             populateUrbsEditorLoadBusLists('timevareff', 'busWithLoad');
             
-
-            maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
-
+            maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
+            maptool_urbs_trans.prepareTransmissionObjectList(UrbsPropertiesJSON['transmission'], 'cable_data')
+            maptool_urbs_trans.prepareTransmissionObjectList(UrbsPropertiesJSON['transmission'],'trafo_data')
 
             //Here the content of each editor window is created. Each editor window is filled at runtime based on the predefined inputs in the UrbsPropertiesJSON
             //Changes to the JSON allow quick changes to editor makeup by adding or removing input fields
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input'], 'maptool_urbs_buildings.writeBackEditedBuildingFeatures(this)');
-            populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], '');
-            populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data'],'');
+            populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], 'maptool_urbs_trans.writeBackTransmissionFeatures(this)');
+            populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data'],'maptool_urbs_trans.writeBackTransmissionFeatures(this)');
             populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits'],'');
             populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity'],'maptool_urbs_commodity.writeBackCommodityFeatures(this)');
             populateUrbsEditor('global', UrbsPropertiesJSON['global'],'');
@@ -101,8 +101,13 @@ var maptool_urbs_setup = function() {
         addGeoJSONtoUrbsEditorMap(true, ppdata['trafo'], 'trafo');
     }
     
-    //creates a new geojson layer for leaflet map
-    //distinguishes between line (for lines and trafos) and circle marker (for busses and ext_grids) formats because line geojsons do not have the pointToLayer option
+    /**
+     * @param {bool}            isLines 
+     * @param {GeoJSON Object}  input_geoJSON 
+     * @param {string}               featureName 
+     * creates a new geojson layer for leaflet map
+     * distinguishes between line (for lines and trafos) and circle marker (for busses and ext_grids) formats because line geojsons do not have the pointToLayer option
+     */
     function addGeoJSONtoUrbsEditorMap(isLines, input_geoJSON, featureName) {
         let newGeoJson;
         if (isLines) {
@@ -144,7 +149,9 @@ var maptool_urbs_setup = function() {
     }
     
     //TODO: The networkListName parameter is useless, since all info is only stored in busWithLoads
-    //htmlListName: name of the html select element that is supposed to be filled with the busses with attached loads
+    /**
+     * @param {string} htmlListName name of the html select element that is supposed to be filled with the busses with attached loads      
+     */
     function populateUrbsEditorLoadBusLists(htmlListName, networkListName) {
         var x = document.getElementById(htmlListName + "Select");
         let networkList = maptool_urbs_buildings.BuildingsObject[networkListName + 'List'];
@@ -158,16 +165,17 @@ var maptool_urbs_setup = function() {
             x.add(option);
         }
     }
-    /*
-    feature (String):               name of the feature (i.e demand, process etc) for which input fields are to be generated
-    propertiesToAdd (Dict):         properties for which inputs are created, as well as tooltips, types and default values 
-                                    loaded from the UrbsPropertiesJSON file fetched from the backend
-    writebackFunction (function):   since the storage objects for each feature may not be the same, we can pass a custom function for each feature that 
-                                    saves inputs on changes to the html element                      
-    
-    We create the form and div elements holding input fields and associated labels from scratch right after page load and attach them to the corresponding static
-    editor div
-    */
+
+    /**
+     * @param {string}      feature             name of the feature (i.e demand, process etc) for which input fields are to be generated
+     * @param {dict}        propertiesToAdd     properties for which inputs are created, as well as tooltips, types and default values 
+     *                                          loaded from the UrbsPropertiesJSON file fetched from the backend
+     * @param {function}    writebackFunction   since the storage objects for each feature may not be the same, we can pass a custom function for each feature that 
+     *                                          saves inputs on changes to the html element
+     * 
+     * We create the form and div elements holding input fields and associated labels from scratch right after page load and attach them to the corresponding static
+     * editor div
+     */
     function populateUrbsEditor(feature, propertiesToAdd, writebackFunction) {
         let form = document.getElementById(feature + 'Form');
         let formDiv = document.createElement('DIV');
@@ -224,10 +232,10 @@ var maptool_urbs_setup = function() {
         form.appendChild(formDiv)
     }
 
-    /*
-    primaryFeatureName (String):    Key for the primary feature editor to which the secondary feature list is getting attached to
-    secondaryFeatureName (String):  Key for the secondary feature
-    */
+    /**
+     * @param {string} primaryFeatureName       Key for the primary feature editor to which the secondary feature list is getting attached to
+     * @param {string} secondaryFeatureName     Key for the secondary feature  
+     */
     function populateEditableNetworkEditorSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
         let editor_form = document.getElementById(primaryFeatureName + 'Form');
 
@@ -249,26 +257,6 @@ var maptool_urbs_setup = function() {
         featureSelect.classList.add('feature-editor__featurelist-tab__feature-select');
         featureSelect.multiple = true;
 
-        //TODO: Pointless for use case here, holdover from network editor code, probably needs to be removed
-        /*
-        let featureList = maptool_network_gen.NetworkObject[ primaryFeatureName + 'List'];
-        let maxNumberOfSecondaryFeatures = 0;
-
-        for (idx in featureList) {
-            let currentFeature = featureList[idx].feature.properties[secondaryFeatureName];
-            if(Object.keys(currentFeature).length != 0) {
-                if (maxNumberOfSecondaryFeatures < Object.keys(currentFeature).length) {
-                    maxNumberOfSecondaryFeatures = Object.keys(currentFeature).length;
-                }
-            }
-        }
-        for (let i = 0; i < maxNumberOfSecondaryFeatures; i++) {
-            let featureOption = document.createElement('OPTION');
-            featureOption.text = i;
-            featureOption.value = i;
-            featureSelect.append(featureOption);
-        }
-        */
         formDiv.append(featureSelect)
         editor_form.appendChild(formDiv);
 
