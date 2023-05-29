@@ -1,3 +1,5 @@
+//TODO: Commodity selection object in editor
+
 var maptool_urbs_storage = function () {
 
     let StorageObject = {

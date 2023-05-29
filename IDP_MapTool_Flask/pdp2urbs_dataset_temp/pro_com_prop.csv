@@ -1,0 +1,3 @@
+Process,Commodity,Direction,ratio,ratio-min
+import,test,out,1.1,0.1
+import_hp,electricity_hp,in,1.0,0.1

@@ -270,8 +270,26 @@ def formatProcessCSV():
                     columns.append(feature)
                 row.append(pro_prop_data[pro_prop][feature])
             data.append(row)
-        sto_prop_df = pd.DataFrame(data, columns=columns)
-        sto_prop_df.to_csv('pdp2urbs_dataset_temp\\pro_prop.csv', index=False)
+        pro_prop_df = pd.DataFrame(data, columns=columns)
+        pro_prop_df.to_csv('pdp2urbs_dataset_temp\\pro_prop.csv', index=False)
+
+        columns = ['Process', 'Commodity', 'Direction']
+        data = []
+        pro_com_prop_data = json.loads(process_data['pro_com_prop'])
+
+        for process in pro_com_prop_data:
+            for direction in pro_com_prop_data[process]:
+                if pro_com_prop_data[process][direction]:
+                    row = []
+                    for com_prop in pro_com_prop_data[process][direction]:
+                        row = [process, com_prop, direction]
+                        for feature in pro_com_prop_data[process][direction][com_prop]:
+                            if feature not in columns:
+                                columns.append(feature)
+                            row.append(pro_com_prop_data[process][direction][com_prop][feature])
+                    data.append(row)
+        pro_com_prop_df = pd.DataFrame(data, columns=columns)
+        pro_com_prop_df.to_csv('pdp2urbs_dataset_temp\\pro_com_prop.csv', index=False)
         return 'Success', 200
 
 @bp.route('/urbs/storage_csv_setup', methods=['GET', 'POST'])

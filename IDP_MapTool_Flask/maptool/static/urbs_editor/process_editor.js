@@ -223,7 +223,7 @@ var maptool_urbs_process = function() {
         hot.alter('insert_col', hot.countCols(), 1)
         hot.headers[hot.headers.length - 1] = com_name;
 
-        const select = document.querySelector("pro_com_propSelect");
+        const select = document.querySelector("#pro_com_propSelect");
         const optionLabels = Array.from(select.options).map((opt) => opt.value);
         const hasOption = optionLabels.includes(com_name + " " + inOrOut);
 
