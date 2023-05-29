@@ -68,8 +68,8 @@ var maptool_urbs_setup = function() {
             populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity'],'maptool_urbs_commodity.writeBackCommodityFeatures(this)');
             maptool_urbs_commodity.createBuySellPriceEditor();
             populateUrbsEditor('global', UrbsPropertiesJSON['global'],'');
-            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'],'maptool_urbs_process.writeBackProcessFeatures(this)');
-            populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop'],'maptool_urbs_process.writeBackProcessFeatures(this)');
+            populateUrbsEditor('pro_prop', UrbsPropertiesJSON['process']['pro_prop'],'maptool_urbs_process.writeBackProcessFeatures(this, false)');
+            populateUrbsEditor('pro_com_prop', UrbsPropertiesJSON['process']['pro_com_prop'],'maptool_urbs_process.writeBackProcessFeatures(this, true)');
             populateEditableNetworkEditorSecondaryFeature('pro_prop', 'pro_com_prop')
             populateUrbsEditor('storage', UrbsPropertiesJSON['storage']['sto_prop'],'');
 
@@ -282,15 +282,20 @@ var maptool_urbs_setup = function() {
         document.getElementById(secondaryFeatureName + 'Editor').style.display='block';
         
         let key = document.getElementById('pro_propSelect').value;
-        console.log(key, maptool_urbs_process.ProcessObject.pro_com_propList);
-        let target_properties = maptool_urbs_process.ProcessObject.pro_com_propList[key][sel.value];
+    
+        let inOrOutFlag = (sel.value.slice(-3) === ' in') ? true : false;
+
+        let target_properties = maptool_urbs_process.ProcessObject.pro_com_propList[key][(inOrOutFlag) ? "in" : "out"][(inOrOutFlag) ? sel.value.slice(0, -3) : sel.value.slice(0, -4)];
         let editor_form = document.getElementById(secondaryFeatureName + 'Form');
         let editor_elems = editor_form.children[0].children;
+
+        console.log(editor_elems);
 
         for (let i = 0; i < editor_elems.length; i++) {
             if (editor_elems[i].nodeName == 'INPUT') {
                 if(target_properties[editor_elems[i].name] != null) {
                     editor_elems[i].value = target_properties[editor_elems[i].name];
+                    console.log(editor_elems[i].value, target_properties[editor_elems[i].name])
                 }
                 else {
                     editor_elems[i].value = '';

@@ -28,28 +28,24 @@ var maptool_return_urbs =  function() {
     function returnUrbsSetup_BuySellPrice() {
         //postData("http://127.0.0.1:5000/urbs/urbs_setup", jsonData);
     }
-    //DONE
+    //DONE BACKEND_DONE
     function returnUrbsSetup_Transmissions() {
         let transmission_json = {};
 
-        const cableFormData = new FormData(document.getElementById('transmission_cable_dataForm'));
-        const cableFormProps = Object.fromEntries(cableFormData);
-        transmission_json['cable_data'] = cableFormProps;
+        transmission_json['cable_data'] = maptool_urbs_trans.TransmissionObject.cable_dataList;
 
-        const trafoFormData = new FormData(document.getElementById('transmission_trafo_dataForm'));
-        const trafoFormProps = Object.fromEntries(trafoFormData);
-        transmission_json['trafo_data'] = trafoFormProps;
+        transmission_json['trafo_data'] = maptool_urbs_trans.TransmissionObject.trafo_dataList;
 
         const voltageFormData = new FormData(document.getElementById('transmission_voltage_limitsForm'));
         const voltageProps = Object.fromEntries(voltageFormData);
         transmission_json['voltage_limits'] = voltageProps;
-
-        //postData("http://127.0.0.1:5000/urbs/transmission_csv_setup", transmission_json);
+        postData("http://127.0.0.1:5000/urbs/transmission_csv_setup", transmission_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_Global() {
         let global_json = {};
 
+        //TODO: Build checkbox list from UrbsPropertyJSON global entries with type boolean
         let global_checkboxes = ['assumelowq', 'excel', 'flexible', 'grid_curtailment', 'lp', 'retrofit', 'tsam', 'tsam_season', 'uncoordinated']
 
         const globalFormData = new FormData(document.getElementById('globalForm'));
@@ -65,29 +61,35 @@ var maptool_return_urbs =  function() {
         }) 
 
         global_json = JSON.stringify(globalProps);
-        console.log(globalProps)
         postData("http://127.0.0.1:5000/urbs/global_csv_setup", global_json);
     }
-    //DONE
+    //DONE BACKEND_DONE
     function returnUrbsSetup_Commodity() {
         let commodity_json = JSON.stringify(maptool_urbs_commodity.CommodityObject.commodityPropertiesList);
-        //postData("http://127.0.0.1:5000/urbs/commodity_csv_setup", commodity_json);
+        postData("http://127.0.0.1:5000/urbs/commodity_csv_setup", commodity_json);
     }
     //DONE
     function returnUrbsSetup_Processes() {
         let process_json = {};
         process_json['pro_prop'] = JSON.stringify(maptool_urbs_process.ProcessObject.pro_propList);
         process_json['pro_com_prop'] = JSON.stringify(maptool_urbs_process.ProcessObject.pro_com_propList);
-        process_json['pro_conf'] = JSON.stringify(maptool_urbs_process.hot.getData());
-
-        //postData("http://127.0.0.1:5000/urbs/process_csv_setup", jsonData);
+        process_json['pro_conf'] = JSON.stringify({'columns': maptool_urbs_process.hot.getColHeader(),
+                                                    'data': maptool_urbs_process.hot.getData()
+                                                });
+        console.log(maptool_urbs_process.ProcessObject.pro_com_propList);
+        postData("http://127.0.0.1:5000/urbs/process_csv_setup", process_json);
     }
-    //DONE
+    //DONE BACKEND_DONE
     function returnUrbsSetup_Storage() {
         let storage_json = {};
+
         storage_json['sto_prop'] = JSON.stringify(maptool_urbs_storage.StorageObject.storagePropertiesList);
-        storage_json['sto_conf'] = JSON.stringify(maptool_urbs_storage.hot.getData());
-        //postData("http://127.0.0.1:5000/urbs/storag_csv_setup", storage_json);
+        storage_json['sto_conf'] = JSON.stringify({'columns': maptool_urbs_storage.hot.getColHeader(),
+                                                    'data': maptool_urbs_storage.hot.getData()
+                                                });
+
+        console.log(maptool_urbs_storage.StorageObject.storagePropertiesList)
+        postData("http://127.0.0.1:5000/urbs/storage_csv_setup", storage_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_SupIm() {

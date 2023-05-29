@@ -6,7 +6,6 @@ var maptool_urbs_trans = function() {
     }
 
     //TODO: Allow adding additional cables, trafo data
-
     /**
      * @param {JSON Object} TransmissionPropertiesJSON 
      * @param {string}      listName

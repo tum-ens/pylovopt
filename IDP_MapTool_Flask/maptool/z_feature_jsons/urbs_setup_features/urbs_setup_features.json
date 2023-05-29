@@ -267,17 +267,6 @@
     },
     "process": {
           "pro_com_prop": {
-                "commodity": {
-                      "type": "string",
-                      "tooltip": "",
-                      "default_val": ""
-                },
-                "direction": {
-                      "type": "list",
-                      "tooltip": "",
-                      "default_val": "",
-                      "list_options": ["In", "Out"]
-                },
                 "ratio": {
                       "type": "float",
                       "tooltip": "",

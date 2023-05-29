@@ -27,7 +27,9 @@ var maptool_urbs_storage = function () {
             let storagePropertyJSONTemplate = {};
             
             for (idx in storage) {
-                storagePropertyJSONTemplate[idx] = '';
+                if(idx != 'name') {
+                    storagePropertyJSONTemplate[idx] = '';
+                }
             }
 
             StorageObject.storagePropertiesTemplate = storagePropertyJSONTemplate;
