@@ -21,7 +21,10 @@ var maptool_display_postcode = function (){
         fillOpacity: 0.7
     }
     
-    // We only ever want to have one shape at the same time for area selection
+    /**
+     * We only ever want to have one shape at the same time for area selection,
+     * so we delete all currently active shapes and change the Select Area/Generate Network button back to Select Area
+     */
     map.on('pm:create', (e) => {
         console.log(e)
         var layers = L.PM.Utils.findLayers(map);
@@ -34,7 +37,11 @@ var maptool_display_postcode = function (){
         btn.innerText="Select Area";
         btn.setAttribute('onclick',"maptool_display_postcode.getPostalCodeArea(this, 'plz-area')")
         });
-    
+
+    /**
+     * onclick function for submit plz button
+     * returns all versions of network associated with the passed id and generates the radiobuttons for the version select gui element
+     */
     function selectVersionOfPostalCodeNetwork() {
         let plz = document.getElementById("PLZ").value;
         fetch("http://127.0.0.1:5000/postcode", {
@@ -47,7 +54,6 @@ var maptool_display_postcode = function (){
             }).then(function (versionData) {
                 versions = versionData;
                 document.getElementById("plzVersionPopupForm").style.display = "block";
-                //console.log(versionData);
     
                 let versionRadioButtonsDiv = document.getElementById("versionRadioButtons");
                 while (versionRadioButtonsDiv.firstChild) {
@@ -94,20 +100,25 @@ var maptool_display_postcode = function (){
                 versionRadioButtonsDiv.append(versionRadioButtonDiv);
                 versionRadioButtonsDiv.append(newVersionTextInput);
     
-    
             }).catch((err) => console.error(err));
     }
     
+    /**
+     * onclick function for the Choose Version button of the version select gui element
+     * @returns nothing. Return statement exists simply to break out of function in case of faulty input
+     */
     function chooseVersionOfPlzNetwork() {
     
         let versionElement = document.querySelector('input[name="versionRadioButton"]:checked')
         if(versionElement) {
             let version = versionElement.value;
             console.log(versions)
+            //if we choose the new version option
             if(version == "0.0") {
                 let newVersionInput = document.getElementById("newVersionTextInput");
+                //We check if the text input for the new version name contains a value at all
                 if (newVersionInput.value) {
-                    console.log(newVersionInput.value)
+                    //we make sure the name has no overlap with currently existing versions
                     for (idx in versions) {
                         if (versions[idx][0] == String(newVersionInput.value)) {
                             document.getElementById("newVersionTextInput").style.outline = "red 5px solid";
@@ -121,8 +132,7 @@ var maptool_display_postcode = function (){
                     return
                 }
             }
-    
-            //console.log(version)
+            //the chosen version is passed back to flask and then all networks associated with the version are fetched
             fetch("http://127.0.0.1:5000/postcode/plz/version", {
                 method: 'POST',
                 headers: {
@@ -140,7 +150,16 @@ var maptool_display_postcode = function (){
         }
     }
     
+    /**
+     * @param {HTML button element} btn 
+     * @param {string} plz_type             Flag used to determine whether user wants to generate new networks from area selection or look at already existing ones
+     */
     function getPostalCodeArea(btn, plz_type) {
+        /**
+         * if the user wants to look at preexisting networks we initially post the plz again and get the outline of our network area as a geojson file, 
+         * which we display on the map
+         * We then fetch all networks included in that area and display only the lines to avoid performance hits due to too many objects
+         */
         if (plz_type == 'plz-number') {
             let plz = document.getElementById("PLZ").value;
             fetch("http://127.0.0.1:5000/postcode/plz", {
@@ -153,13 +172,11 @@ var maptool_display_postcode = function (){
                 }).then(function (postcodeData) {
                     let postcodeGeoJSON = L.geoJSON(postcodeData, {style:{ color: '#003359', dashArray: '5'}}).addTo(map);
                     map.fitBounds(postcodeGeoJSON.getBounds());
-                    //console.log('added plz area');
                     console.log('starting Postcode nets fetch');
                     fetch('/postcode/nets')
                     .then(function (response) {
                         return response.json();
                     }).then(function (postcodeNets) {
-                        console.log(JSON.parse(postcodeNets[0][2])["line"])
                         for(let i = 0; i < postcodeNets.length; i++) {
                             displayPreviewNet(postcodeNets[i][0], postcodeNets[i][1], JSON.parse(postcodeNets[i][2])["line"]);
                         }
@@ -168,6 +185,12 @@ var maptool_display_postcode = function (){
                     });
                 }).catch((err) => console.error(err));
         }
+        /**
+         * if the user wants to generate networks from a newly selected area shape, we initially return the shape the user has selected and receive a response
+         * containing the building shapes contained in the selected area
+         * We check res and oth buildings for emptiness and display them on the map
+         * We also change the Select Area button to Generate Network button
+         */
         if (plz_type == 'plz-area') {
             var layers = L.PM.Utils.findLayers(map);
             if(layers.length != 0) {
@@ -184,7 +207,6 @@ var maptool_display_postcode = function (){
                 }).then(function (response) {
                     return(response.json());
                 }).then(function (building_data) {
-                    //console.log(group);
                     group.remove();
                     var layers = L.PM.Utils.findLayers(map);
                     layers.forEach((layer) =>{
@@ -217,10 +239,13 @@ var maptool_display_postcode = function (){
         }
     }
     
+    /**
+     * onclick function for the Generate Network button
+     * makes the area version input GUI visible and adds a listener to it that makes sure the form can only be submitted if the inputs are correct
+     */
     function openAreaPopup() {
         let formDiv = document.getElementById("plzAreaPopupForm");
         formDiv.style.display = "block";
-        console.log(formDiv.children);
         const form = formDiv.children[0];
         form.addEventListener("change",() => {
             document.getElementById('submitBtn').disabled = !form.checkValidity()
@@ -228,6 +253,11 @@ var maptool_display_postcode = function (){
         });
     }
     
+    /**
+     * onclick function for the Generate Network button within the area version input GUI
+     * at the moment it only returns the new id and gives an error warning, if the selected version already exists for a given ID
+     * It also closes the GUI form
+     */
     function returnSelectedBuildings() {
         let newID = document.getElementById("newNetIDInput").value;
         let newVersion = document.getElementById("newNetVersionInput").value;
@@ -250,8 +280,16 @@ var maptool_display_postcode = function (){
     }
     
     
-    //we only display the lines of all networks for performance reasons, showing buses adds too many nodes
-    //Possible solution for adding buses might be looking into canvas renderers for leaflet
+    /**
+     * 
+     * @param {int} kcid                    the k cluster id of a network
+     * @param {int} bcid                    the building cluster id of a network
+     * @param {geoJSON dict} line_geoJSON   a dict containing all the lines of a network
+     * 
+     * adds all lines of a network to a new layer and displays it on the map
+     * further defines several inner functions to handle click, mouseover and mouseout functionality and attaches them to the layer
+     * We only display the lines of all networks for performance reasons, showing buses adds too many nodes.
+     */
     function displayPreviewNet(kcid, bcid, line_geoJSON) {
         let linePreviewLayer = L.geoJSON(line_geoJSON, {
             style: maptool_network_gen.NetworkObject.lineStyles[1], 
@@ -263,7 +301,10 @@ var maptool_display_postcode = function (){
         linePreviewLayer.on('mouseover', styleWhenMouseOver)
         linePreviewLayer.on('mouseout', styleWhenMouseOut)
         
-        //makes sure selection is possible both via list and via map overlay, activates Select Network button
+        /**
+         * resets styles for all lines within a previously selected network, if it exists, makes sure the correct network is highlighted in the list
+         * and activates the Select Network Button if it has not been enabled yet
+         */
         function styleWhenClick() {
             if(previousSelectedPreviewLayer) {
                 previousSelectedPreviewLayer.eachLayer(function (layer) {
@@ -282,14 +323,19 @@ var maptool_display_postcode = function (){
             let selectNetworkButton = document.getElementById("selectNetworkButton");
             selectNetworkButton.disabled = false;
         }
-    
-        function styleWhenMouseOver(e) {
+        
+        /**
+         * changes color of network in GUI when the mouse hovers above it
+         */
+        function styleWhenMouseOver() {
             if(linePreviewLayer != previousSelectedPreviewLayer) {
                 linePreviewLayer.setStyle({ color: '#005293', fillColor: '#005293' , weight: 3})
             }
         }
-        function styleWhenMouseOut(e) {
-          //geoJsonLayer.setStyle({color:"gray"});
+        /**
+         * changes color of network in GUI back of default once the mouse no longer hovers above it
+         */
+        function styleWhenMouseOut() {
             if(linePreviewLayer != previousSelectedPreviewLayer) {
                 linePreviewLayer.eachLayer(function (layer) {
                     linePreviewLayer.resetStyle(layer)
@@ -298,12 +344,18 @@ var maptool_display_postcode = function (){
         }
     }
     
-    //fills the GUI list with all our layers
+    /**
+     * 
+     * @param {string} listName key for the html select element we want to attach options to
+     * @param {list} list       list containing the objects we want to create select options for
+     * creates options for each network we have gotten from the backend
+     */
     function populateNetList(listName, list) {
         let networkList = document.getElementsByClassName("list-selection");
         networkList[0].style.display = "inline-block";
         let x = document.getElementById(listName + "Select");
-    
+        
+        //sets a minimum size for our list for the css purposes, to make sure the display of the list is not too short
         x.size = (list.length > 24) ? 24 : list.length;
         for (idx in list) {
             var option = document.createElement("option");
@@ -313,14 +365,20 @@ var maptool_display_postcode = function (){
         }
     }
     
-    //makes sure the selected network is highlighted on the map by manually triggering a click event for it
+    /**
+     * @param {html select element} sel reference to the network select html element
+     * onclick function for the network select html element
+     * makes sure a network selected in the html select element is highlighted on the map by manually triggering a click event for it
+     */
     function highlightSelectedPreviewLayer(sel) {
         let idx = parseInt(sel.options[sel.selectedIndex].value);
         let selectedObject = netList[idx][2];
         selectedObject.fireEvent('click');
     }
     
-    
+    /**
+     * extracts kcid and bcid from the feature properties of the selected element in the netlist and sends it to the backend
+     */
     function sendBackSelectedNetworkKcidBcid() {
         let selectedNetwork = document.getElementById("networkSelect");
         let kcid_bcid = [netList[selectedNetwork.selectedIndex][0], netList[selectedNetwork.selectedIndex][1]];
@@ -336,6 +394,10 @@ var maptool_display_postcode = function (){
             }).catch((err) => console.error(err));
     }
     
+    /**
+     * @param {event} e 
+     * mouseover function for buildings on the map
+     */
     function highlightBuildingFeature(e) {
         var layer = e.target;
         let color = '#a14d12'
@@ -353,7 +415,10 @@ var maptool_display_postcode = function (){
     
         layer.bringToFront();
     }
-    
+    /**
+     * @param {event} e 
+     * mouseout function for buildings on the map
+     */
     function resetBuildingHighlight(e) {
         if(e.target.feature.properties.type == 'res') {
             res_building_geojson.resetStyle(e.target);
@@ -362,14 +427,27 @@ var maptool_display_postcode = function (){
         }
     }
     
+    /**
+     * @param {event} e 
+     * onclick function for buildings on the map
+     */
     function zoomToBuildingFeature(e) {
         map.fitBounds(e.target.getBounds());
     }
     
+    /**
+     * @param {event} e 
+     * aggregate onclick function for buildings on the map in case click events should have multiple effects
+     */
     function displayBuildingEditOptions(e) {
         zoomToBuildingFeature(e);
     }
     
+    /**
+     * @param {dict} feature 
+     * @param {leaflet layer object} layer 
+     * is called when buildings are displayed on the map and defines different behaviours for each object on the map
+     */
     function onEachFeature(feature, layer) {
         createBuildingPopup(feature, layer);
         layer.on({
@@ -379,12 +457,17 @@ var maptool_display_postcode = function (){
         });
     }
     
+    /**
+     * @param {dict} feature 
+     * @param {leaflet layer object} layer 
+     * is called for each building when they are placed on the map and attaches a popup to it, containing a button that allows the user to delete that building
+     * the popup could contain other information as well
+     */
     function createBuildingPopup(feature, layer) {
         var container = L.DomUtil.create('div');
         var button = L.DomUtil.create('button', 'button cancel', container);
         button.innerText = 'delete Building';
         button.onclick = function() {
-            //console.log(layer);
             map.removeLayer(layer);
         }
     

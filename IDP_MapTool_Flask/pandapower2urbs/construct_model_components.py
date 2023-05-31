@@ -441,7 +441,8 @@ def convertPandapower2Urbs():
                                  1.732 * rated_voltage_kw * 1000)
 
             line_wacc = cable_data.loc[cable_type_for_params].wacc
-            line_depreciation = cable_data.loc[cable_type_for_params].depreciation
+            print(cable_type_for_params, cable_data.loc[cable_type_for_params]['deprecation'])
+            line_depreciation = cable_data.loc[cable_type_for_params]['deprecation']
 
             #reactance (or resistance) of a bundle with N cables = reactance (or resistance) of one cable / N
             line_reactance = (pp_grid.line.loc[line].x_ohm_per_km * pp_grid.line.loc[line].length_km /

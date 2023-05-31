@@ -40,7 +40,6 @@ def postcodePlz():
         gg = GridGenerator(plz=request.get_json())
         pg = gg.pgr
         version = session['plz_version']
-        print(version)
         postcode_gdf = pg.getGeoDataFrame(table="postcode_result", id=request.get_json(), version_id=version)
         postcode_boundary = postcode_gdf.to_crs(epsg=4326).boundary.to_json()
 

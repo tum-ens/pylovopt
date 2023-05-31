@@ -37,6 +37,7 @@ var maptool_return_urbs =  function() {
         transmission_json['cable_data'] = maptool_urbs_trans.TransmissionObject.cable_dataList;
 
         transmission_json['trafo_data'] = maptool_urbs_trans.TransmissionObject.trafo_dataList;
+        console.log(maptool_urbs_trans.TransmissionObject.trafo_dataList);
 
         const voltageFormData = new FormData(document.getElementById('transmission_voltage_limitsForm'));
         const voltageProps = Object.fromEntries(voltageFormData);

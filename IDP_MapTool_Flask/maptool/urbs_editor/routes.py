@@ -36,6 +36,7 @@ def editableNetwork():
         gg = GridGenerator(plz=plz, version_id=plz_version)
         pg = gg.pgr
         testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
+        pp.to_excel(testnet, "pandapower2urbs\\dataset\\_transmission\\test.xlsx")
         #--------------------------------COMMENT OUT IF DATABASE CONNECTION DOES NOT WORK--------------------------------#
 
         #--------------------------------PURELY FOR DEBUG--------------------------------#
@@ -74,8 +75,8 @@ def demandProfiles():
     
 @bp.route('/urbs/process_profiles', methods=['GET', 'POST'])
 def formatProcessSetup():
-    pro_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/process/pro_prop.csv'), sep=',')
-    pro_com_prop = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/process/pro_com_prop.csv'), sep=',')
+    pro_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/process/pro_prop.csv'), sep=',')
+    pro_com_prop = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs_dataset_template/dataset/process/pro_com_prop.csv'), sep=',')
     process_json = {
         "pro_prop" : pro_prop.to_json(),
         "pro_com_prop" : pro_com_prop.to_json(),
@@ -85,7 +86,7 @@ def formatProcessSetup():
 
 @bp.route('/urbs/storage_profiles', methods=['GET', 'POST'])
 def formatStorageSetup():
-    sto_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/storage/sto_prop.csv'), sep=',')
+    sto_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/storage/sto_prop.csv'), sep=',')
     storage_json = {
         "sto_prop" : sto_prop.to_json(),
         }
@@ -94,7 +95,7 @@ def formatStorageSetup():
 
 @bp.route('/urbs/commodity_profiles', methods=['GET', 'POST'])
 def formatCommoditySetup():
-    com_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/commodity/com_prop.csv'), sep=',')
+    com_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/commodity/com_prop.csv'), sep=',')
     commodity_json = {
         "com_prop" : com_prop.to_json(),
         }
@@ -103,7 +104,7 @@ def formatCommoditySetup():
 
 @bp.route('/urbs/supim_profiles', methods=['GET', 'POST'])
 def supimProfiles():
-    supim_solar = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/supim/profiles/solar.csv'), sep=',')
+    supim_solar = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/supim/profiles/solar.csv'), sep=',')
     supim_json = {"solar" : supim_solar.to_json(),
                 }
 
@@ -111,9 +112,9 @@ def supimProfiles():
 
 @bp.route('/urbs/timevareff_profiles', methods=['GET', 'POST'])
 def timevareffProfiles():
-    charging_station = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs/dataset/timevareff/profiles/charging_station.csv'), sep=',')
-    heatpump_air = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/timevareff/profiles/heatpump_air.csv'), sep=',')
-    heatpump_air_heizstrom = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs/dataset/timevareff/profiles/heatpump_air_heizstrom.csv'), sep=',')
+    charging_station = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/timevareff/profiles/charging_station.csv'), sep=',')
+    heatpump_air = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs_dataset_template/dataset/timevareff/profiles/heatpump_air.csv'), sep=',')
+    heatpump_air_heizstrom = pd.read_csv(os.path.join(os.getcwd(),'pandapower2urbs_dataset_template/dataset/timevareff/profiles/heatpump_air_heizstrom.csv'), sep=',')
 
     timevareff_json = {
             "charging_station" : charging_station.to_json(),
@@ -149,16 +150,14 @@ def createCSVFromCheckboxes (json_data, columns):
 
 #the js returns the aggregated profiles the user chose for load bus and each type of demand
 #the returned datastructure is changed into a csv that fits the demanded format
-#TODO: Save in correct spot
 @bp.route('/urbs/demand_csv_setup', methods=['GET', 'POST'])
 def formatDemandCSV():
     if request.method == 'POST':
-        demand_profiles = ["site","demand_electricity","demand_electricity_reactive","demand_mobility","demand_space_heat","demand_water_heat" ]
+        demand_profiles = ["site","electricity","electricity-reactive","mobility","space_heat","water_heat"]
         demand_df = createCSVFromCheckboxes(request.get_json(), demand_profiles)
-        demand_df.to_csv('pdp2urbs_dataset_temp\\demand_conf.csv', index=False)
+        demand_df.to_csv('pandapower2urbs\\dataset\\demand\\demand_conf.csv', index=False)
         return 'Success', 200
 
-#TODO: Save in correct spot
 @bp.route('/urbs/buildings_csv_setup', methods=['GET', 'POST'])
 def formatBuildingsCSV():
     if request.method == 'POST':
@@ -178,6 +177,8 @@ def formatBuildingsCSV():
             if buildings_osm_id:
                 buildings_osm_id_list.append(buildings_osm_id)
 
+        
+
         buildings_data_aggregator = []
         bid = 1
         for osm_id in buildings_osm_id_list:
@@ -187,12 +188,14 @@ def formatBuildingsCSV():
 
         buildings_data = pd.DataFrame(buildings_data_aggregator,columns=buildings_df_columns)
         buildings_data = buildings_data.join(pd.DataFrame.from_dict(buildings_user_data))
+        buildings_conf = buildings_data.filter(['name', 'bid'], axis='columns').copy()
+        buildings_conf = buildings_conf.rename(columns={'name' : 'urbs_name', 'bid' : 'building_id'})
         buildings_data = buildings_data.drop('name', axis='columns')
  
-        buildings_data.to_csv('pdp2urbs_dataset_temp\\building_data.csv', index=False)
+        buildings_data.to_csv('pandapower2urbs\\dataset\\_buildings\\building_data.csv', index=False)
+        buildings_conf.to_csv('pandapower2urbs\\dataset\\_buildings\\building_conf.csv', index=False)
         return 'Success', 200
 
-#TODO: Save in correct spot
 @bp.route('/urbs/transmission_csv_setup', methods=['GET', 'POST'])
 def formatTransmissionCSV():
     if request.method == 'POST':
@@ -216,10 +219,10 @@ def formatTransmissionCSV():
             if table == 'voltage_limits':
                 data = [data]
             trans_data_df = pd.DataFrame(data, columns=columns)
-            trans_data_df.to_csv('pdp2urbs_dataset_temp\\' + table  + '.csv', index=False)
+            if table != 'trafo_data':
+                trans_data_df.to_csv('pandapower2urbs\\dataset\\_transmission\\' + table  + '.csv', index=False)
         return 'Success', 200
 
-#TODO: Save in correct spot
 @bp.route('/urbs/global_csv_setup', methods=['GET', 'POST'])
 def formatGlobalCSV():
     if request.method == 'POST':
@@ -230,11 +233,10 @@ def formatGlobalCSV():
             global_conf.append([key, global_json[key]])
 
         global_df = pd.DataFrame(global_conf, columns=global_columns)
-        global_df.to_csv('pdp2urbs_dataset_temp\\global.csv', index=False)
+        global_df.to_csv('pandapower2urbs\\dataset\\global\\global.csv', index=False)
 
         return 'Success', 200
 
-#TODO: Save in correct spot
 @bp.route('/urbs/commodity_csv_setup', methods=['GET', 'POST'])
 def formatCommodityCSV():
     if request.method == 'POST':
@@ -249,7 +251,7 @@ def formatCommodityCSV():
                 row.append(commodity_data[commodity][feature])
             data.append(row)
         comm_df = pd.DataFrame(data, columns=columns)
-        comm_df.to_csv('pdp2urbs_dataset_temp\\com_prop.csv', index=False)
+        comm_df.to_csv('pandapower2urbs\\dataset\\commodity\\com_prop.csv', index=False)
         return 'Success', 200
 
 
@@ -260,7 +262,7 @@ def formatProcessCSV():
         process_data = request.get_json()
         pro_conf_df = pd.read_json(process_data['pro_conf'], orient='split')
         pro_conf_df = pro_conf_df[:-1]
-        pro_conf_df.to_csv('pdp2urbs_dataset_temp\\pro_conf.csv', index=False)
+        pro_conf_df.to_csv('pandapower2urbs\\dataset\\process\\pro_conf.csv', index=False)
 
         columns = ['name']
         data = []
@@ -273,7 +275,7 @@ def formatProcessCSV():
                 row.append(pro_prop_data[pro_prop][feature])
             data.append(row)
         pro_prop_df = pd.DataFrame(data, columns=columns)
-        pro_prop_df.to_csv('pdp2urbs_dataset_temp\\pro_prop.csv', index=False)
+        pro_prop_df.to_csv('pandapower2urbs\\dataset\\process\\pro_prop.csv', index=False)
 
         columns = ['Process', 'Commodity', 'Direction']
         data = []
@@ -291,7 +293,7 @@ def formatProcessCSV():
                             row.append(pro_com_prop_data[process][direction][com_prop][feature])
                     data.append(row)
         pro_com_prop_df = pd.DataFrame(data, columns=columns)
-        pro_com_prop_df.to_csv('pdp2urbs_dataset_temp\\pro_com_prop.csv', index=False)
+        pro_com_prop_df.to_csv('pandapower2urbs\\dataset\\process\\pro_com_prop.csv', index=False)
         return 'Success', 200
 
 @bp.route('/urbs/storage_csv_setup', methods=['GET', 'POST'])
@@ -300,7 +302,7 @@ def formatStorageCSV():
         storage_data = request.get_json()
         sto_conf_df = pd.read_json(storage_data['sto_conf'], orient='split')
         sto_conf_df = sto_conf_df[:-1]
-        sto_conf_df.to_csv('pdp2urbs_dataset_temp\\sto_conf.csv', index=False)
+        sto_conf_df.to_csv('pandapower2urbs\\dataset\\storage\\sto_conf.csv', index=False)
 
         #combine with com_prop, pro_prop into single method
         sto_prop_data = json.loads(storage_data['sto_prop'])
@@ -314,26 +316,24 @@ def formatStorageCSV():
                 row.append(sto_prop_data[sto_prop][feature])
             data.append(row)
         sto_prop_df = pd.DataFrame(data, columns=columns)
-        sto_prop_df.to_csv('pdp2urbs_dataset_temp\\sto_prop.csv', index=False)
+        sto_prop_df.to_csv('pandapower2urbs\\dataset\\storage\\sto_prop.csv', index=False)
         
         return 'Success', 200
     
-#TODO: Save in correct spot   
 @bp.route('/urbs/supim_csv_setup', methods=['GET', 'POST'])
 def formatSupimCSV():
     if request.method == 'POST':
         supim_profiles = ["site","solar"]
         supim_df = createCSVFromCheckboxes(request.get_json(), supim_profiles)
-        supim_df.to_csv('pdp2urbs_dataset_temp\\supim_conf.csv', index=False)
+        supim_df.to_csv('pandapower2urbs\\dataset\\supim\\supim_conf.csv', index=False)
         return 'Success', 200
 
-#TODO: Save in correct spot
 @bp.route('/urbs/timevareff_csv_setup', methods=['GET', 'POST'])
 def formatTimevareffCSV():
     if request.method == 'POST':
         timevareff_profiles = ["site","charging_station","heatpump_air","heatpump_air_heizstrom"]
         timevareff_df = createCSVFromCheckboxes(request.get_json(), timevareff_profiles)
-        timevareff_df.to_csv('pdp2urbs_dataset_temp\\timevareff_conf.csv', index=False)
+        timevareff_df.to_csv('pandapower2urbs\\dataset\\timevareff\\timevareff_conf.csv', index=False)
 
         return 'Success', 200
 
@@ -344,7 +344,6 @@ def switch_conda_environment(env_name):
     print(urbs_process.stdout)
     #print(f"Switched to conda environment: {env_name}")
 
-#TODO: Only call urbs method if all others have returned correct values
 @bp.route('/urbs/pdp2Urbs', methods=['GET', 'POST'])
 def runPdp2Urbs():
     pp2u.convertPandapower2Urbs()
