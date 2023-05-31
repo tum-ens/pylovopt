@@ -6,6 +6,8 @@ import pandas as pd
 import os
 from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
 import json
+from pandapower2urbs import construct_model_components as pp2u
+
 
 
 #As a frist step we always return the html for the current window
@@ -332,5 +334,21 @@ def formatTimevareffCSV():
         timevareff_profiles = ["site","charging_station","heatpump_air","heatpump_air_heizstrom"]
         timevareff_df = createCSVFromCheckboxes(request.get_json(), timevareff_profiles)
         timevareff_df.to_csv('pdp2urbs_dataset_temp\\timevareff_conf.csv', index=False)
+
         return 'Success', 200
+
+import subprocess
+
+def switch_conda_environment(env_name):
+    urbs_process = subprocess.run(f'cd ../urbs && conda run -n {env_name} python.exe run_single_year.py', shell=True, capture_output=True, check=True, bufsize=1)
+    print(urbs_process.stdout)
+    #print(f"Switched to conda environment: {env_name}")
+
+#TODO: Only call urbs method if all others have returned correct values
+@bp.route('/urbs/pdp2Urbs', methods=['GET', 'POST'])
+def runPdp2Urbs():
+    pp2u.convertPandapower2Urbs()
+    print(f"Switched to conda environment: urbs")
+    #switch_conda_environment('urbs')
+    return 'Success', 200
 

@@ -5,11 +5,10 @@ electricity_feed_in,Sell,0.064,,,
 space_heat,Demand,,,,
 water_heat,Demand,,,,
 solar,SupIm,,,,
-common_heat,Stock,0,0,0,
-electricity_hp_usable,Stock,0,0,0,
-mobility,Demand,0,0,0,
+common_heat,Stock,0.0,0.0,0.0,
+electricity_hp_usable,Stock,0.0,0.0,0.0,
+mobility,Demand,0.0,0.0,0.0,
 natural_gas,Stock,0.06,,,
-electricity,Demand,0,0,0,1
-electricity-reactive,Demand,0,0,0,1
-electricity_hp,Stock,0,0,0,1
-test,,,,,
+electricity,Demand,0.0,0.0,0.0,1.0
+electricity-reactive,Demand,0.0,0.0,0.0,1.0
+electricity_hp,Stock,0.0,0.0,0.0,1.0

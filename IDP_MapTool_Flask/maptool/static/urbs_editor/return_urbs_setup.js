@@ -1,15 +1,17 @@
 var maptool_return_urbs =  function() {
     function returnUrbsSetup() {
-        returnUrbsSetup_Buildings();
-        returnUrbsSetup_DemandConf();
-        returnUrbsSetup_BuySellPrice();
-        returnUrbsSetup_Transmissions();
-        returnUrbsSetup_Global();
-        returnUrbsSetup_Commodity();
-        returnUrbsSetup_Processes();
-        returnUrbsSetup_Storage();
-        returnUrbsSetup_SupIm();
-        returnUrbsSetup_Timevareff();
+        const buildings = returnUrbsSetup_Buildings();
+        const demand = returnUrbsSetup_DemandConf();
+        //const bsp = returnUrbsSetup_BuySellPrice();
+        const transmission = returnUrbsSetup_Transmissions();
+        const global = returnUrbsSetup_Global();
+        const commodity = returnUrbsSetup_Commodity();
+        const process = returnUrbsSetup_Processes();
+        const storage = returnUrbsSetup_Storage();
+        const supim = returnUrbsSetup_SupIm();
+        const timevareff = returnUrbsSetup_Timevareff();
+        
+        Promise.all([buildings, demand, transmission, global, commodity,process, storage, supim, timevareff]).then((res) => runPdp2Urbs());
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_DemandConf() {
@@ -17,12 +19,12 @@ var maptool_return_urbs =  function() {
         for(idx in maptool_urbs_buildings.BuildingsObject.busWithLoadList) {
             demand_json[maptool_urbs_buildings.BuildingsObject.busWithLoadList[idx].feature.properties.name] = maptool_urbs_demand.DemandObject.bus_demands[idx];
         }
-        postData("http://127.0.0.1:5000/urbs/demand_csv_setup", demand_json);
+        return postData("http://127.0.0.1:5000/urbs/demand_csv_setup", demand_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_Buildings() {
         let buildings_json = JSON.stringify(maptool_urbs_buildings.BuildingsObject.buildingsPropertiesList);
-        postData("http://127.0.0.1:5000/urbs/buildings_csv_setup", buildings_json);
+        return postData("http://127.0.0.1:5000/urbs/buildings_csv_setup", buildings_json);
     }
     //DONE
     function returnUrbsSetup_BuySellPrice() {
@@ -39,7 +41,7 @@ var maptool_return_urbs =  function() {
         const voltageFormData = new FormData(document.getElementById('transmission_voltage_limitsForm'));
         const voltageProps = Object.fromEntries(voltageFormData);
         transmission_json['voltage_limits'] = voltageProps;
-        postData("http://127.0.0.1:5000/urbs/transmission_csv_setup", transmission_json);
+        return postData("http://127.0.0.1:5000/urbs/transmission_csv_setup", transmission_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_Global() {
@@ -61,14 +63,14 @@ var maptool_return_urbs =  function() {
         }) 
 
         global_json = JSON.stringify(globalProps);
-        postData("http://127.0.0.1:5000/urbs/global_csv_setup", global_json);
+        return postData("http://127.0.0.1:5000/urbs/global_csv_setup", global_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_Commodity() {
         let commodity_json = JSON.stringify(maptool_urbs_commodity.CommodityObject.commodityPropertiesList);
         postData("http://127.0.0.1:5000/urbs/commodity_csv_setup", commodity_json);
     }
-    //DONE
+    //DONE BACKEND_DONE
     function returnUrbsSetup_Processes() {
         let process_json = {};
         process_json['pro_prop'] = JSON.stringify(maptool_urbs_process.ProcessObject.pro_propList);
@@ -77,7 +79,7 @@ var maptool_return_urbs =  function() {
                                                     'data': maptool_urbs_process.hot.getData()
                                                 });
         console.log(maptool_urbs_process.ProcessObject.pro_com_propList);
-        postData("http://127.0.0.1:5000/urbs/process_csv_setup", process_json);
+        return postData("http://127.0.0.1:5000/urbs/process_csv_setup", process_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_Storage() {
@@ -89,7 +91,7 @@ var maptool_return_urbs =  function() {
                                                 });
 
         console.log(maptool_urbs_storage.StorageObject.storagePropertiesList)
-        postData("http://127.0.0.1:5000/urbs/storage_csv_setup", storage_json);
+        return postData("http://127.0.0.1:5000/urbs/storage_csv_setup", storage_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_SupIm() {
@@ -97,8 +99,7 @@ var maptool_return_urbs =  function() {
         for(idx in maptool_urbs_buildings.BuildingsObject.busWithLoadList) {
             supim_json[maptool_urbs_buildings.BuildingsObject.busWithLoadList[idx].feature.properties.name] = maptool_urbs_supim.SupimObject.bus_supim[idx];
         }
-        postData("http://127.0.0.1:5000/urbs/supim_csv_setup", supim_json);
-
+        return postData("http://127.0.0.1:5000/urbs/supim_csv_setup", supim_json);
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_Timevareff() {
@@ -107,18 +108,23 @@ var maptool_return_urbs =  function() {
         for(idx in maptool_urbs_buildings.BuildingsObject.busWithLoadList) {
             timevareff_json[maptool_urbs_buildings.BuildingsObject.busWithLoadList[idx].feature.properties.name] = maptool_urbs_timevareff.TimevareffObject.bus_timevareff[idx];
         }
-        postData("http://127.0.0.1:5000/urbs/timevareff_csv_setup", timevareff_json);
+        return postData("http://127.0.0.1:5000/urbs/timevareff_csv_setup", timevareff_json);
     }
 
-    function postData(url, jsonData) {
-        fetch(url, {
+    function runPdp2Urbs() {
+        console.log("Starting pdp2urbs");
+        const promise = fetch("http://127.0.0.1:5000/urbs/pdp2Urbs");
+    }
+
+    async function postData(url, jsonData) {
+        const promise = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'},
             body: JSON.stringify(jsonData)
-        }).then(function (response) {
-            console.log(response)
-        }).catch((err) => console.error(err));
+        })
+
+        return promise;
     }
 
     return {
