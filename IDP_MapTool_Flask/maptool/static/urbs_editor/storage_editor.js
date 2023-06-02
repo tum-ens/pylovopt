@@ -21,7 +21,7 @@ var maptool_urbs_storage = function () {
 
 
     function fetchProfiles() {
-        fetch('urbs/storage_profiles')
+        return fetch('urbs/storage_profiles')
         .then(function (response) {
             return response.json();
         }).then(function (data) {
@@ -52,6 +52,16 @@ var maptool_urbs_storage = function () {
 
             createSto_Conf_Editor();
         });
+    }
+
+    function fillStorageEditorCommodityList(commodities) {
+        let commoditySelect = document.getElementById('storageFormDiv').querySelector('#commodity');
+        for (idx in commodities) {
+            let option = document.createElement('option');
+            option.text = commodities[idx];
+            option.value = commodities[idx];
+            commoditySelect.append(option);
+        }
     }
 
     function createSto_Conf_Editor() {
@@ -94,6 +104,7 @@ var maptool_urbs_storage = function () {
         StorageObject: StorageObject,
         hot: hot,
         fetchProfiles: fetchProfiles,
+        fillStorageEditorCommodityList: fillStorageEditorCommodityList,
         createSto_Conf_Editor: createSto_Conf_Editor
     };
 }();

@@ -49,7 +49,11 @@ def editableNetwork():
 def urbs_results():
     if request.method == 'POST':
         net = recreatePandapowerNetwork(request.get_json())
+        trafo_std_type = request.get_json()['trafoList'][0]['std_type']
+        trafo_sn_mva = request.get_json()['trafo_stdList'][trafo_std_type]['sn_mva']
+
+        session['trafo_sn_mva'] = trafo_sn_mva
+
         #pp.to_excel(net, "example2.xlsx")
         print(net)
-        #pp2u.convertPandapower2Urbs()
         return 'Success', 200

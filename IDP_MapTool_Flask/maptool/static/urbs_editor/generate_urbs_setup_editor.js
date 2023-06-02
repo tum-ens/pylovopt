@@ -39,32 +39,38 @@ var maptool_urbs_setup = function() {
             //each editor component has their own fetch method, since different components have different ways of preparing their data
             //in each editor component, the editor list is also filled
             //TODO: These methods may be generalized into a single generic function
-            maptool_urbs_demand.fetchDemandProfiles();
+            maptool_urbs_demand.fetchDemandProfiles().then((res) => {
+                populateUrbsEditorLoadBusLists('demand', 'busWithLoad');
+            })
+            maptool_urbs_trans.fetchTransmissionProfiles().then((res) =>{
+                maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
+                maptool_urbs_trans.prepareCableDataList(UrbsPropertiesJSON['transmission'], 'cable_data')
+                populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], 'maptool_urbs_trans.writeBackTransmissionFeatures(this)');
+                populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data'],'maptool_urbs_trans.writeBackTransmissionFeatures(this)');
+                populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits'],'');
+                maptool_urbs_trans.fillTrafoDataEditorIdSelect();
+            })
             maptool_urbs_commodity.fetchProfiles();
             maptool_urbs_process.fetchProcessProfiles();
-            maptool_urbs_storage.fetchProfiles();
-            maptool_urbs_supim.fetchSupimProfiles();
-            maptool_urbs_timevareff.fetchFeatureProfiles();
+            maptool_urbs_storage.fetchProfiles().then ((res) =>{
+                maptool_urbs_storage.fillStorageEditorCommodityList(Object.keys(maptool_urbs_commodity.CommodityObject.commodityPropertiesList))
+            });
+            maptool_urbs_supim.fetchSupimProfiles().then((res) => {
+                populateUrbsEditorLoadBusLists('supim', 'busWithLoad');
+            })
+            maptool_urbs_timevareff.fetchFeatureProfiles().then((res) => {
+                populateUrbsEditorLoadBusLists('timevareff', 'busWithLoad');
+            })
 
             //several components set their parameters per bus. Here the respective feature lists are filled with busses that fulfill the criteria
             //to be editable, in this case meaning busses with one or more loads attached
             //TODO: the second parameter is a holdover from when editor list datastructures worked differently and should be removed, since it's not needed
-            populateUrbsEditorLoadBusLists('demand', 'busWithLoad');
-            populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');
-            populateUrbsEditorLoadBusLists('supim', 'busWithLoad');
-            populateUrbsEditorLoadBusLists('timevareff', 'busWithLoad');
-            
+            populateUrbsEditorLoadBusLists('buildings', 'busWithLoad');            
             maptool_urbs_buildings.prepareBuildingsObject(UrbsPropertiesJSON);
-            maptool_urbs_trans.populateTransmissionEditorList(UrbsPropertiesJSON);
-            maptool_urbs_trans.prepareTransmissionObjectList(UrbsPropertiesJSON['transmission'], 'cable_data')
-            maptool_urbs_trans.prepareTransmissionObjectList(UrbsPropertiesJSON['transmission'],'trafo_data')
 
             //Here the content of each editor window is created. Each editor window is filled at runtime based on the predefined inputs in the UrbsPropertiesJSON
             //Changes to the JSON allow quick changes to editor makeup by adding or removing input fields
             populateUrbsEditor('buildings', UrbsPropertiesJSON['_buildings']['from_user_input'], 'maptool_urbs_buildings.writeBackEditedBuildingFeatures(this)');
-            populateUrbsEditor('transmission_cable_data', UrbsPropertiesJSON['transmission']['cable_data'], 'maptool_urbs_trans.writeBackTransmissionFeatures(this)');
-            populateUrbsEditor('transmission_trafo_data', UrbsPropertiesJSON['transmission']['trafo_data'],'maptool_urbs_trans.writeBackTransmissionFeatures(this)');
-            populateUrbsEditor('transmission_voltage_limits', UrbsPropertiesJSON['transmission']['voltage_limits'],'');
             populateUrbsEditor('commodity', UrbsPropertiesJSON['commodity'],'maptool_urbs_commodity.writeBackCommodityFeatures(this)');
             maptool_urbs_commodity.createBuySellPriceEditor();
             populateUrbsEditor('global', UrbsPropertiesJSON['global'],'');

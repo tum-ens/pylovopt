@@ -392,9 +392,10 @@
                       "default_val": ""
                 },
                 "commodity": {
-                      "type": "string",
+                      "type": "list",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "",
+                      "list_options": []
                 },
                 "cap_up": {
                       "type": "list",
@@ -560,7 +561,7 @@
                       "tooltip": "",
                       "default_val": ""
                 },
-                "deprecation": {
+                "depreciation": {
                       "type": "int",
                       "tooltip": "",
                       "default_val": ""

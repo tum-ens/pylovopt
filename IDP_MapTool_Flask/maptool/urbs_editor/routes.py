@@ -73,6 +73,16 @@ def demandProfiles():
 
     return demand_json
     
+@bp.route('/urbs/transmission_profiles', methods=['GET', 'POST'])
+def formatTransmissionSetup():
+    trafo_data = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/_transmission/trafo_data.csv'), sep=',')
+    trans_json = {
+        "trafo_data" : trafo_data.to_json(),
+        "trafo_sn_mva" : session.get('trafo_sn_mva'),
+        }
+
+    return trans_json
+
 @bp.route('/urbs/process_profiles', methods=['GET', 'POST'])
 def formatProcessSetup():
     pro_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/process/pro_prop.csv'), sep=',')
@@ -141,11 +151,12 @@ def createCSVFromCheckboxes (json_data, columns):
             chosen_profiles_str = ''
             if chosen_profiles:
                 chosen_profiles_str = ';'.join(str(p) for p in chosen_profiles)
+            else:
+                chosen_profiles_str = str(len(profile) - 1)
             current_row.append(chosen_profiles_str)
         conf.append(current_row)
     
     demand_df = pd.DataFrame(conf, columns=columns)
-    #demand_df.to_csv('demand_conf.csv', index=False)
     return demand_df
 
 #the js returns the aggregated profiles the user chose for load bus and each type of demand
@@ -219,8 +230,7 @@ def formatTransmissionCSV():
             if table == 'voltage_limits':
                 data = [data]
             trans_data_df = pd.DataFrame(data, columns=columns)
-            if table != 'trafo_data':
-                trans_data_df.to_csv('pandapower2urbs\\dataset\\_transmission\\' + table  + '.csv', index=False)
+            trans_data_df.to_csv('pandapower2urbs\\dataset\\_transmission\\' + table  + '.csv', index=False)
         return 'Success', 200
 
 @bp.route('/urbs/global_csv_setup', methods=['GET', 'POST'])

@@ -8,7 +8,7 @@ var maptool_urbs_timevareff = function() {
 
     
     function fetchFeatureProfiles() {
-        fetch('urbs/timevareff_profiles')
+        return fetch('urbs/timevareff_profiles')
         .then(function (response) {
             return response.json();
         }).then(function (data) {
@@ -27,8 +27,15 @@ var maptool_urbs_timevareff = function() {
 
             let listLength = maptool_urbs_buildings.BuildingsObject['busWithLoadList'].length;
             TimevareffObject.bus_timevareff = new Array(listLength);
+
+            let lengths = [Object.keys(TimevareffObject.charging_station).length, 
+              Object.keys(TimevareffObject.heatpump_air).length,
+              Object.keys(TimevareffObject.heatpump_air_heizstrom).length,
+]
+
             for (let i = 0; i < listLength; i++) {
-                TimevareffObject.bus_timevareff[i] = new Array(3).fill('0'.repeat(Object.keys(TimevareffObject.charging_station).length));
+              TimevareffObject.bus_timevareff[i] = lengths.map((i => length => '0'.repeat(length - 1))(0));
+              //TimevareffObject.bus_timevareff[i] = new Array(3).fill('0'.repeat(Object.keys(TimevareffObject.charging_station).length));
             }
         });
     }

@@ -5,7 +5,7 @@ var maptool_urbs_supim = function() {
   } 
 
   function fetchSupimProfiles() {
-      fetch('urbs/supim_profiles')
+      return fetch('urbs/supim_profiles')
       .then(function (response) {
           return response.json();
       }).then(function (supim_data) {

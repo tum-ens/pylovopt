@@ -108,6 +108,7 @@ var maptool_return_urbs =  function() {
 
         for(idx in maptool_urbs_buildings.BuildingsObject.busWithLoadList) {
             timevareff_json[maptool_urbs_buildings.BuildingsObject.busWithLoadList[idx].feature.properties.name] = maptool_urbs_timevareff.TimevareffObject.bus_timevareff[idx];
+            console.log(timevareff_json);
         }
         return postData("http://127.0.0.1:5000/urbs/timevareff_csv_setup", timevareff_json);
     }

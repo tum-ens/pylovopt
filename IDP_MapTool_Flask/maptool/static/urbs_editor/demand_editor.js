@@ -9,7 +9,7 @@ var maptool_urbs_demand = function () {
   }
 
   function fetchDemandProfiles() {
-    fetch('urbs/demand_profiles')
+    return fetch('urbs/demand_profiles')
     .then(function (response) {
         return response.json();
     }).then(function (demand_data) {
@@ -30,8 +30,16 @@ var maptool_urbs_demand = function () {
 
         let listLength = maptool_urbs_buildings.BuildingsObject['busWithLoadList'].length;
         DemandObject.bus_demands = new Array(listLength);
+
+        let lengths = [Object.keys(DemandObject.demand_electricity).length, 
+                  Object.keys(DemandObject.demand_electricity_reactive).length,
+                  Object.keys(DemandObject.demand_mobility).length,
+                  Object.keys(DemandObject.demand_space_heat).length,
+                  Object.keys(DemandObject.demand_water_heat).length]
+
         for (let i = 0; i < listLength; i++) {
-            DemandObject.bus_demands[i] = new Array(5).fill('0'.repeat(Object.keys(DemandObject.demand_electricity).length));
+            DemandObject.bus_demands[i] = lengths.map((i => length => '0'.repeat(length - 1))(0));
+            //DemandObject.bus_demands[i] = new Array(5).fill('0'.repeat(Object.keys(DemandObject.demand_electricity).length - 1));
         }
     })
   }
@@ -67,18 +75,18 @@ var maptool_urbs_demand = function () {
   
   function populateDemandEditor (demand_data, demandName, demandIndex) {
       let testDiv = document.getElementById(demandName + "Panel")
-      for (key in demand_data) {
-          let checkbox = document.createElement('INPUT');
-          checkbox.setAttribute("type", "checkbox");
-          checkbox.setAttribute("name", "checkbox_" + key);
-          checkbox.setAttribute("onclick", "maptool_urbs_demand.check_uncheck_demand(this, '" + demandName + "', " + key + ", '" + demandIndex + "')");
-          
-          let label = document.createElement('LABEL')
-          label.appendChild(checkbox);
-          label.insertAdjacentHTML("beforeend", key)
-          label.for = "checkbox_" + key;
-  
-          testDiv.appendChild(label);
+      for (let key = 0; key < Object.keys(demand_data).length - 1; key++) {
+        let checkbox = document.createElement('INPUT');
+        checkbox.setAttribute("type", "checkbox");
+        checkbox.setAttribute("name", "checkbox_" + key);
+        checkbox.setAttribute("onclick", "maptool_urbs_demand.check_uncheck_demand(this, '" + demandName + "', " + key + ", '" + demandIndex + "')");
+        
+        let label = document.createElement('LABEL')
+        label.appendChild(checkbox);
+        label.insertAdjacentHTML("beforeend", key)
+        label.for = "checkbox_" + key;
+
+        testDiv.appendChild(label);
       }
   }
   

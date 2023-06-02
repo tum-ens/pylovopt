@@ -5,15 +5,43 @@ var maptool_urbs_trans = function() {
         trafo_dataList: {}
     }
 
-    //TODO: Allow adding additional cables, trafo data
+    function fetchTransmissionProfiles() {
+        return fetch('urbs/transmission_profiles')
+        .then(function(response) {
+            return response.json();
+        }).then(function(trafo_json) {
+            let trafo_data = JSON.parse(trafo_json['trafo_data']);
+            let trafo_data_profiles = Object.keys(trafo_data.id);
+
+            for (let i = 0; i < trafo_data_profiles.length; i++) {
+                let data_dict = {};
+                for (key in trafo_data) {
+                    if (key != 'id') {
+                        data_dict[key] = trafo_data[key][i];
+                    } 
+                }
+                if (i == 0) {
+                    data_dict['cap'] = trafo_json['trafo_sn_mva']*1000;
+                    TransmissionObject.trafo_dataList['kont' + trafo_json['trafo_sn_mva']*1000] = data_dict;
+
+                }
+                else  {
+                    TransmissionObject.trafo_dataList[trafo_data.id[i]] = data_dict;
+                }
+            }
+            
+            console.log(TransmissionObject.trafo_dataList)
+        });
+    }
+
+    //TODO: Allow adding additional cables
     /**
      * @param {JSON Object} TransmissionPropertiesJSON 
      * @param {string}      listName
      * 
      * prefills the TransmissionObject
      */
-    //TODO: turn list_options into function parameter, find out how kont, ront are defined and pass as parameter for option generation
-    function prepareTransmissionObjectList(TransmissionPropertiesJSON, listName) {
+    function prepareCableDataList(TransmissionPropertiesJSON, listName) {
         TransmissionPropertiesJSON[listName].id.list_options.forEach(featureName => {
             let data_dict = {};
             for (feature in TransmissionPropertiesJSON[listName]) {
@@ -40,6 +68,19 @@ var maptool_urbs_trans = function() {
         }
     }
 
+    function fillTrafoDataEditorIdSelect() {
+        let input = document.getElementById("transmission_trafo_dataFormDiv").querySelector('#id');
+        let propertiesToAdd = TransmissionObject.trafo_dataList
+        console.log(propertiesToAdd)
+
+        for (option in propertiesToAdd) {
+            let listOption = document.createElement("option");
+            listOption.text = option;
+            listOption.value = option;
+            input.add(listOption);
+        }
+    }
+
     /**
      * @param {html element} target     reference to the changed html input element
      * 
@@ -59,7 +100,7 @@ var maptool_urbs_trans = function() {
     }
 
     /**
-     * @param {string} id      key for TransmissionObject list element that contains values for a given id
+     * @param {string} id key for TransmissionObject list element that contains values for a given id
      * 
      * If the Select element in the transmission editor changes, all other fields are updated with the values corresponding to the newly selected element
      */
@@ -74,8 +115,10 @@ var maptool_urbs_trans = function() {
 
     return {
         TransmissionObject: TransmissionObject,
-        prepareTransmissionObjectList: prepareTransmissionObjectList,
+        fetchTransmissionProfiles: fetchTransmissionProfiles,
+        prepareCableDataList: prepareCableDataList,
         populateTransmissionEditorList: populateTransmissionEditorList,
-        writeBackTransmissionFeatures: writeBackTransmissionFeatures
+        fillTrafoDataEditorIdSelect: fillTrafoDataEditorIdSelect,
+        writeBackTransmissionFeatures: writeBackTransmissionFeatures,
     }
 }();

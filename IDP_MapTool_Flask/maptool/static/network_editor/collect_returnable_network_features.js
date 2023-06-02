@@ -1,7 +1,5 @@
 var maptool_return_net = function() {
     function returnEditedNet() {
-        extractNetworFeatures()
-    
         fetch("http://127.0.0.1:5000/networks/urbs_results", {
                     method: 'POST',
                     headers: {
