@@ -1,7 +1,11 @@
 var maptool_add_delete = function() {
+    //array that contains all features connected to a bus that's about to be deleted
     let featuresToDeleteList = [];
 
-    //switches leaflet map mode to draw and makes sure we place down the correct marker type
+    /**
+     * switches leaflet map mode to draw and makes sure we place down the correct marker type
+     * @param {string} feature name of the network feature type we want to create
+     */
     function addFeature(feature) {
         let style = maptool_network_gen.NetworkObject[feature + 'Styles'][1];
         let type = '';
@@ -10,7 +14,7 @@ var maptool_add_delete = function() {
             map.pm.enableDraw('CircleMarker', {
                 snappable: true, 
                 snapDistance: 20,
-                requireSnapToFinish : (feature == 'ext_grid'),
+                requireSnapToFinish : (feature == 'ext_grid'), //busses can be placed anywhere, ext_grids need to be placed on a bus
                 continueDrawing: false,
                 pathOptions: style,
                 snapIgnore: (feature == 'ext_grid'),
@@ -22,14 +26,16 @@ var maptool_add_delete = function() {
             map.pm.enableDraw('Line', {
                 snappable: true,
                 snapDistance: 20,
-                requireSnapToFinish: true, 
+                requireSnapToFinish: true, //lines need to form a connection between two busses
                 pathOptions: style,
                 snapIgnore: true,
               })
         }
     }
     
-    //closes deletion popup window and resets all highlighted features in the map view
+    /**
+     * closes deletion popup window and resets all highlighted features in the map view
+     */
     function closeForm() {
         for (feature in featuresToDeleteList) {
             featuresToDeleteList[feature][0].setStyle(featuresToDeleteList[feature][0].defaultOptions);
@@ -39,7 +45,12 @@ var maptool_add_delete = function() {
       }
     
     //TODO: This is awful. Change this
-    //if you try to delete a bus, tries to find all connected features (lines, ext_grids, trafos) and marks them as about to be deleted as well 
+    //TODO: Change featuresToDeleteList to dict. Why did I even make this a list in the first place? Not enough coffee?
+    /**
+     * if you try to delete a bus, tries to find all connected features (lines, ext_grids, trafos) and marks them as about to be deleted as well 
+     * @param {string} featureName name of the feature type to delete
+     * @param {string array} featureLists contains feature names of all features that may be connected to the deletable feature
+     */
     function prepareFeatureDelete(featureName, featureLists) {
         if(featureName == 'bus') {
             //opens the delete popup window that allows the user to back out of deleting the bus
@@ -48,22 +59,21 @@ var maptool_add_delete = function() {
     
             featuresToDeleteList.push([maptool_network_gen.NetworkObject['busList'][featureSelect.selectedIndex], 'bus', featureSelect.selectedIndex]);
             for (featureType in featureLists) {
-                for (feature in maptool_network_gen.NetworkObject[featureLists[featureType] + 'List']) {
-                    //console.log(featureSelect.options[featureSelect.selectedIndex].text, maptool_network_gen.NetworkObject[lists[featureType] + 'List'][feature].feature.properties.from_bus)
-                    if (featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.from_bus) {
-                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                for (idx in maptool_network_gen.NetworkObject[featureLists[featureType] + 'List']) {
+                    if (featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx].feature.properties.from_bus) {
+                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx], featureLists[featureType], idx]);
                     }
-                    if (featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.to_bus) {
-                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                    if (featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx].feature.properties.to_bus) {
+                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx], featureLists[featureType], idx]);
                     }
-                    if(featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.bus) {
-                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                    if(featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx].feature.properties.bus) {
+                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx], featureLists[featureType], idx]);
                     }
-                    if(featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.hv_bus) {
-                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                    if(featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx].feature.properties.hv_bus) {
+                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx], featureLists[featureType], idx]);
                     }   
-                    if(featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature].feature.properties.lv_bus) {
-                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][feature], featureLists[featureType], feature]);
+                    if(featureSelect.options[featureSelect.selectedIndex].text ==  maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx].feature.properties.lv_bus) {
+                        featuresToDeleteList.push( [maptool_network_gen.NetworkObject[featureLists[featureType] + 'List'][idx], featureLists[featureType], idx]);
                     }
                     
                 }
@@ -75,13 +85,16 @@ var maptool_add_delete = function() {
         }
     }
     
+    /**
+     * removes all features attached to a deletable bus from the map, the network object and the feature list gui
+     */
     function deleteConnectedFeatures() {
         let lineCount = 0;
         let trafoCount = 0;
         let ext_gridCount = 0;
         for (feature in featuresToDeleteList) {
             let featureName = featuresToDeleteList[feature][1];
-            let featureIndex = featuresToDeleteList[feature][2] - lineCount * (featureName == 'line') - trafoCount * (featureName == 'trafo') - lineCount * (ext_gridCount == 'ext_grid')
+            let featureIndex = featuresToDeleteList[feature][2] - lineCount * (featureName == 'line') - trafoCount * (featureName == 'trafo') - ext_gridCount * (featureName == 'ext_grid')
             let featureSelect = document.getElementById(featureName + 'Select');
             map.removeLayer(maptool_network_gen.NetworkObject[featureName + 'List'][featureIndex]);
             maptool_network_gen.NetworkObject[featureName + 'List'].splice(featureIndex, 1);
@@ -97,6 +110,10 @@ var maptool_add_delete = function() {
         document.getElementById("popupForm").style.display = "none";
     }
     
+    /**
+     * delete function used for features that do not have other features attached to them aka lines, trafos, ext_grids
+     * @param {string} featureName key for the type of the feature we want to delete
+     */
     function deleteFeature(featureName) {
         let featureSelect = document.getElementById(featureName + 'Select');
         if (featureSelect.selectedIndex != -1) {
@@ -112,11 +129,13 @@ var maptool_add_delete = function() {
     let snappedFeature;
     let snappedFeatures = [];
     
-    
+    /**
+     * event listeners ensuring that new features on the map are snapped correctly when we draw them
+     */
     map.on('pm:drawstart', ({ workingLayer }) => {
         workingLayer.on('pm:snap', (e) => {
+            //we need to get the name of the feature we are snapping to so we can fill in the to_bus, from_bus, hv, lv etc features that require bus names later
             if (e.shape == 'Line' && e.layerInteractedWith.feature != undefined) {
-                //console.log(e);
                 snappedFeature = e.layerInteractedWith.feature.properties.name;
                 snapped = true;
             }
@@ -126,9 +145,12 @@ var maptool_add_delete = function() {
         });
         
         workingLayer.on('pm:unsnap', (e) => {
-            snapped = false;    
+            snapped = false; 
+            snappedFeature = undefined;   
         });
-    
+        
+        //if we are drawing a line and the first vertex we place is not on a snapped feature, we immediately remove that vertex
+        //otherwise we save the snapped feature for later
         workingLayer.on('pm:vertexadded', (e) => {
             if(map.pm.Draw.Line.enabled() && e.layer.getLatLngs().length == 1) {
                 if(!snapped) {

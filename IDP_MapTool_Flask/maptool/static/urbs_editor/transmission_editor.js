@@ -113,6 +113,47 @@ var maptool_urbs_trans = function() {
         }
     }
 
+    function openNewTrafoDataForm() {
+        document.getElementById('urbsNewTrafoDataPopupForm').style.display = "block";
+    }
+
+    function closeNewTrafoDataForm() {
+        document.getElementById('urbsNewTrafoDataPopupForm').style.display = "none";
+        document.getElementById('newTrafoDataTextInput').value = "";
+    }
+
+    function trafoDataFormCheckValidInput(text) {
+        if(!isNaN(text) && !isNaN(parseFloat(text))) {
+            document.getElementById("newTrafoDataCreateButton").disabled = false;
+        }
+        else {
+            //TODO: check if ront with this sn_mva already exists
+            document.getElementById("newTrafoDataCreateButton").disabled = true;
+        }
+    }
+
+    function createNewTrafoData(sn_mva) {
+        let list = document.getElementById("transmission_trafo_dataFormDiv").querySelector('#id');
+        let option = document.createElement('option');
+        let  option_name = 'ront' + parseFloat(sn_mva) * 1000;
+        option.value = option_name;
+        option.text = option_name;
+        list.append(option);
+
+        let data_dict = {};
+        for (key in maptool_urbs_setup.getUrbsPropertiesJSON()['transmission']['trafo_data']) {
+            if (key != 'id') {
+                data_dict[key] = '';
+            }
+        }
+
+        data_dict['cap'] = parseFloat(sn_mva) * 1000;
+
+        TransmissionObject.trafo_dataList[option_name] = data_dict;
+
+        closeNewTrafoDataForm()
+    }
+
     return {
         TransmissionObject: TransmissionObject,
         fetchTransmissionProfiles: fetchTransmissionProfiles,
@@ -120,5 +161,9 @@ var maptool_urbs_trans = function() {
         populateTransmissionEditorList: populateTransmissionEditorList,
         fillTrafoDataEditorIdSelect: fillTrafoDataEditorIdSelect,
         writeBackTransmissionFeatures: writeBackTransmissionFeatures,
+        openNewTrafoDataForm: openNewTrafoDataForm,
+        closeNewTrafoDataForm: closeNewTrafoDataForm,
+        trafoDataFormCheckValidInput: trafoDataFormCheckValidInput,
+        createNewTrafoData: createNewTrafoData
     }
 }();

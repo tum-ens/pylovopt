@@ -12,6 +12,8 @@ var maptool_urbs_setup = function() {
                 return response.json();
             }).then(function (urbs_setup_properties) { 
                 UrbsPropertiesJSON = urbs_setup_properties;
+                console.log(UrbsPropertiesJSON);
+
             });
     }
     
@@ -498,6 +500,10 @@ var maptool_urbs_setup = function() {
         }
     }
 
+    function getUrbsPropertiesJSON() {
+        return UrbsPropertiesJSON;
+    }
+
     //we retrieve the UrbsPropertiesJSON and create the editor and network visualization on page load of the urbs editor window
     window.addEventListener("load", (event) => {
         if(window.location.pathname == '/urbs') {
@@ -507,6 +513,7 @@ var maptool_urbs_setup = function() {
       });
 
       return {
+        getUrbsPropertiesJSON: getUrbsPropertiesJSON,
         openUrbsEditorList: openUrbsEditorList,
         resetLoadBusStyle: resetLoadBusStyle,
         fillSelectedEditor: fillSelectedEditor,

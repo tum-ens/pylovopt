@@ -1,10 +1,16 @@
 var maptool_display_postcode = function (){
+    //leaflet map layer object that saves the last selected object to reset its style once a new one is selected
     let previousSelectedPreviewLayer;
+    //array of arrays containing leaflet map layer object of a network and its kcid & bcid
     let netList = [];
+    //leaflet map layer object for residential buildings
     let res_building_geojson;
+    //leaflet map layer object for other buildings
     let oth_building_geojson;
+    //array of all existing versions of a network
     let versions;
     
+    //css styles for buildings
     let res_style = {
         fillColor: "#0065BD",
         color: "#0065BD",
@@ -112,7 +118,6 @@ var maptool_display_postcode = function (){
         let versionElement = document.querySelector('input[name="versionRadioButton"]:checked')
         if(versionElement) {
             let version = versionElement.value;
-            console.log(versions)
             //if we choose the new version option
             if(version == "0.0") {
                 let newVersionInput = document.getElementById("newVersionTextInput");

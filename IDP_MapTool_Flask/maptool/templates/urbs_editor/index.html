@@ -101,6 +101,7 @@
   <div class="feature-editor__selected-feature-editor" id="transmission_trafo_dataEditor">
     <form id="transmission_trafo_dataForm">
     </form>
+    <button type='button' class="button feature-editor__featurelist-tab__add-feature-button"  id="newTrafo_dataButton" onclick="maptool_urbs_trans.openNewTrafoDataForm()">Add Trafo Data</button>
   </div>
   <div class="feature-editor__selected-feature-editor" id="transmission_voltage_limitsEditor">
     <form id="transmission_voltage_limitsForm">
@@ -229,6 +230,9 @@
     </form>
   </div>
 </div>
+
+{% include "urbs_editor/include/trafo_data_form.html" %}
+
 
 <div class="action-buttons">
   <button class="button action-buttons__button" type="button" id="returnUrbsSetupButton" onclick="maptool_return_urbs.returnUrbsSetup()">Finish Urbs Setup</button>
