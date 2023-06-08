@@ -30,13 +30,12 @@ def editableNetwork():
     #we return the network with previously chosen and session-dependant plz, kcid and bcid with all features
     if request.method == 'GET':
         #--------------------------------COMMENT OUT IF DATABASE CONNECTION DOES NOT WORK--------------------------------#
-        plz = session.get('plz')['value']
-        kcid_bcid = session.get('kcid_bcid')['value']
-        plz_version = session['plz_version']
-        gg = GridGenerator(plz=plz, version_id=plz_version)
-        pg = gg.pgr
-        testnet = pg.read_net(plz=plz, kcid=kcid_bcid[0], bcid=kcid_bcid[1])
-        pp.to_excel(testnet, "pandapower2urbs\\dataset\\_transmission\\test.xlsx")
+        # plz = session.get('plz')['value']
+        # kcid_bcid = session.get('kcid_bcid')['value']
+        # plz_version = session['plz_version']
+        # gg = GridGenerator(plz=plz, version_id=plz_version)
+        # pg = gg.pgr
+        testnet = pp.from_excel("pandapower2urbs\\dataset\\_transmission\\test.xlsx")
         #--------------------------------COMMENT OUT IF DATABASE CONNECTION DOES NOT WORK--------------------------------#
 
         #--------------------------------PURELY FOR DEBUG--------------------------------#
@@ -187,14 +186,19 @@ def formatBuildingsCSV():
             
             if buildings_osm_id:
                 buildings_osm_id_list.append(buildings_osm_id)
+            else:
+                buildings_osm_id_list.append("")
 
-        
-
+        print(buildings_osm_id_list)
         buildings_data_aggregator = []
         bid = 1
         for osm_id in buildings_osm_id_list:
-            additional_data = pg.test_getAdditionalBuildingData(osm_id)
-            buildings_data_aggregator.append([bid] + additional_data)
+            if osm_id != "":
+                additional_data = pg.test_getAdditionalBuildingData(osm_id)
+                buildings_data_aggregator.append([bid] + additional_data)
+            else:
+                additional_data = [""] * 11
+                buildings_data_aggregator.append([bid] + additional_data)
             bid += 1
 
         buildings_data = pd.DataFrame(buildings_data_aggregator,columns=buildings_df_columns)
@@ -271,6 +275,7 @@ def formatProcessCSV():
         #combine with sto_conf into single method
         process_data = request.get_json()
         pro_conf_df = pd.read_json(process_data['pro_conf'], orient='split')
+        pro_conf_df = pro_conf_df.replace("", "0")
         pro_conf_df = pro_conf_df[:-1]
         pro_conf_df.to_csv('pandapower2urbs\\dataset\\process\\pro_conf.csv', index=False)
 
@@ -311,6 +316,7 @@ def formatStorageCSV():
     if request.method == 'POST':
         storage_data = request.get_json()
         sto_conf_df = pd.read_json(storage_data['sto_conf'], orient='split')
+        sto_conf_df = sto_conf_df.replace("", "0")
         sto_conf_df = sto_conf_df[:-1]
         sto_conf_df.to_csv('pandapower2urbs\\dataset\\storage\\sto_conf.csv', index=False)
 
@@ -350,13 +356,13 @@ def formatTimevareffCSV():
 import subprocess
 
 def switch_conda_environment(env_name):
-    urbs_process = subprocess.run(f'cd ../urbs && conda run -n {env_name} python.exe run_single_year.py', shell=True, capture_output=True, check=True, bufsize=1)
+    urbs_process = subprocess.run(f'cd ../urbs_optimizer && conda run -n {env_name} python.exe run_automatedoutput.py', shell=True, capture_output=True, check=True)
     print(urbs_process.stdout)
-    #print(f"Switched to conda environment: {env_name}")
+    print(f"Switched to conda environment: {env_name}")
 
 @bp.route('/urbs/pdp2Urbs', methods=['GET', 'POST'])
 def runPdp2Urbs():
-    #pp2u.convertPandapower2Urbs()
+    pp2u.convertPandapower2Urbs()
     print(f"Switched to conda environment: urbs")
     #switch_conda_environment('urbs')
     return 'Success', 200

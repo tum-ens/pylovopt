@@ -42,7 +42,7 @@ def postcodePlz():
         version = session['plz_version']
         postcode_gdf = pg.getGeoDataFrame(table="postcode_result", id=request.get_json(), version_id=version)
         postcode_boundary = postcode_gdf.to_crs(epsg=4326).boundary.to_json()
-
+        print(postcode_boundary)
         return postcode_boundary
 
 #called if the user decides to use a shape to define a network area

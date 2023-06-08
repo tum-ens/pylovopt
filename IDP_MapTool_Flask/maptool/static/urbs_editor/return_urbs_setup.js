@@ -11,7 +11,11 @@ var maptool_return_urbs =  function() {
         const supim = returnUrbsSetup_SupIm();
         const timevareff = returnUrbsSetup_Timevareff();
         
-        Promise.all([buildings, demand, transmission, global, commodity,process, storage, supim, timevareff]).then((res) => runPdp2Urbs());
+        Promise.all([buildings, demand, transmission, global, commodity,process, storage, supim, timevareff]).then((res) => {
+            runPdp2Urbs();
+            SetupUrbsResultEditor();
+            document.getElementById('nav-item-urbs-results').click();
+        });
     }
     //DONE BACKEND_DONE
     function returnUrbsSetup_DemandConf() {
@@ -127,6 +131,10 @@ var maptool_return_urbs =  function() {
         })
 
         return promise;
+    }
+
+    function SetupUrbsResultEditor() {
+        document.getElementById("nav-item-demand").href="#scroll-to-top";
     }
 
     return {

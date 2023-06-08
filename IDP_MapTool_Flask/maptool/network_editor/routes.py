@@ -51,7 +51,7 @@ def urbs_results():
         net = recreatePandapowerNetwork(request.get_json())
         trafo_std_type = request.get_json()['trafoList'][0]['std_type']
         trafo_sn_mva = request.get_json()['trafo_stdList'][trafo_std_type]['sn_mva']
-
+        pp.to_excel(net, "pandapower2urbs\\dataset\\_transmission\\test.xlsx")
         session['trafo_sn_mva'] = trafo_sn_mva
 
         #pp.to_excel(net, "example2.xlsx")

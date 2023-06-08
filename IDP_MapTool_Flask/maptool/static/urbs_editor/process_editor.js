@@ -267,8 +267,8 @@ var maptool_urbs_process = function() {
         var headers = ['urbs_name'];
         var placeholders = []
 
-        for (commodity in maptool_urbs_commodity.CommodityObject.commodityPropertiesList) {
-            headers.push(commodity);
+        for (processName in ProcessObject.pro_propList) {
+            headers.push(processName);
             placeholders.push('');
         }
 
