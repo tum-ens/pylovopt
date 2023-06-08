@@ -1,6 +1,5 @@
 //-----------------------------CRUCIAL JS TODOS-----------------------------//
 // TODO: define, check for correct inputs for all features
-// TODO: Add trafo3w features to network
 
 //-----------------------------TALK TODOS-----------------------------//
 // TODO: Create documentation
@@ -98,15 +97,6 @@ var maptool_network_gen = function (){
 
     //generates GeoJSON files to pass to the python section of our code, gets called on button press
     function GetPandapowerAndWriteGeoJSONNet() {  
-        var layers = L.PM.Utils.findLayers(map);
-        if(layers.length != 0) {
-            var group = L.featureGroup();
-            layers.forEach((layer)=>{
-                group.addLayer(layer);
-            });
-            shapes = group.toGeoJSON();
-        }
-
         //console.log('starting Fetch');  
         let fetchString = 'editableNetwork';
         document.getElementById("nav-item-networks").setAttribute('href', '/networks');
@@ -148,7 +138,7 @@ var maptool_network_gen = function (){
             });
 
             displayNetNew(ppdata);
-
+            changeTrafoBusNames(NetworkObject.busList, NetworkObject.trafoList)
 
             tabcontent = document.getElementsByClassName("feature-editor__buttons-tab__tablinks");
             for (i = 0; i < tabcontent.length; i++) {
@@ -179,6 +169,21 @@ var maptool_network_gen = function (){
             maptool_net_display.populateEditableNetworkEditor('trafo3w_std_types', trafo3w_std_properties, null, null, null);
         });
     }
+
+    function changeTrafoBusNames(busList, trafoList) {
+        trafoList.forEach(trafo => {
+            busList.forEach(bus => {
+                if (bus.feature.properties.index == trafo.feature.properties.lv_bus) {
+                    bus.feature.properties.name = "main_busbar";
+                }
+                if (bus.feature.properties.index == trafo.feature.properties.hv_bus) {
+                    bus.feature.properties.name = "Trafostation_OS";
+
+                }
+            })
+        })
+    }
+
 
     function extractStdTypesNew(ppdata) {
         NetworkObject.line_stdList= ppdata['line'];

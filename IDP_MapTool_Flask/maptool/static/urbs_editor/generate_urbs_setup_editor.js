@@ -291,9 +291,9 @@ var maptool_urbs_setup = function() {
         
         let key = document.getElementById('pro_propSelect').value;
     
-        let inOrOutFlag = (sel.value.slice(-3) === ' in') ? true : false;
+        let inOrOutFlag = (sel.value.slice(-3) === ' In') ? true : false;
 
-        let target_properties = maptool_urbs_process.ProcessObject.pro_com_propList[key][(inOrOutFlag) ? "in" : "out"][(inOrOutFlag) ? sel.value.slice(0, -3) : sel.value.slice(0, -4)];
+        let target_properties = maptool_urbs_process.ProcessObject.pro_com_propList[key][(inOrOutFlag) ? "In" : "Out"][(inOrOutFlag) ? sel.value.slice(0, -3) : sel.value.slice(0, -4)];
         let editor_form = document.getElementById(secondaryFeatureName + 'Form');
         let editor_elems = editor_form.children[0].children;
 

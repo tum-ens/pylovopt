@@ -2,13 +2,54 @@
 //TODO: Pro_com_prop in/out difference
 //TODO: Pro_com_prop deletion possible
 
+/**
+ * pro_propList: dict containing all processes and their properties
+ *               has structure  {process_name_1: 
+ *                                  {
+ *                                  property_1: value,
+ *                                  property_2: value,
+ *                                  ...
+ *                                  },
+ *                               process_name_2: 
+ *                                  {
+ *                                  ...
+ *                                  }
+ *                              }
+ * pro_com_propList: dict containing all process commodities and their properties
+ *                   has structure {process_name_1: 
+ *                                       {
+ *                                       in: 
+ *                                          {
+ *                                           commodity_name_1: 
+ *                                               {
+ *                                               property_1 : value, 
+ *                                               ...
+ *                                               }
+ *                                           },
+ *                                       out: 
+ *                                           {
+ *                                           commodity_name_2: 
+ *                                               {
+ *                                               property_2 : value, 
+ *                                               ...
+ *                                               }
+ *                                           }
+ *                                       },
+ *                                   process_name_2 : 
+ *                                       {
+ *                                       ...
+ *                                       }
+ *                                   }
+ */
+
+
 
 var maptool_urbs_process = function() {
     let ProcessObject = {
         "pro_propList": {},
         "pro_com_propList": {},
-        "pro_propTemplate": {},
-        "pro_com_propTemplate": {}
+        "pro_propTemplate": {},             //template dict for entries of pro_propList
+        "pro_com_propTemplate": {}          //template dict for entries of pro_com_propList
     }
 
     let container = document.getElementById('process_confHOTContainer');
@@ -25,7 +66,7 @@ var maptool_urbs_process = function() {
 
 
     /**
-     * retrieves pre-existing process property data from the server
+     * retrieves pre-existing process property data from the pandapower2urbs templates in the backend
      */
     function fetchProcessProfiles() {
         fetch('urbs/process_profiles')
@@ -34,7 +75,6 @@ var maptool_urbs_process = function() {
         }).then(function (process_data) {
             let processes = JSON.parse(process_data["pro_prop"]);
             let process_commodities = JSON.parse(process_data["pro_com_prop"]);
-
             createProcessJSONTemplates(processes, process_commodities);
 
             let i = 0;
@@ -46,19 +86,29 @@ var maptool_urbs_process = function() {
                     }
                 }
                 ProcessObject.pro_propList[processes['name'][idx]] = processPropertyJSON;
-                ProcessObject.pro_com_propList[processes['name'][idx]] = {'in': {}, 'out': {}};
+                ProcessObject.pro_com_propList[processes['name'][idx]] = {'In': {}, 'Out': {}};
                 i++;
-            }       
+            }   
+            console.log(process_commodities);
+
+            for (idx in process_commodities['Commodity']) {
+                let pro_comPropertyJSON = JSON.parse(JSON.stringify(ProcessObject.pro_com_propTemplate));
+                pro_comPropertyJSON['ratio'] = process_commodities['ratio'][idx];
+                pro_comPropertyJSON['ratio-min'] = process_commodities['ratio-min'][idx];
+                let process = process_commodities['Process'][idx];
+                let direction = process_commodities["Direction"][idx];
+                ProcessObject.pro_com_propList[process][direction][process_commodities['Commodity'][idx]] = pro_comPropertyJSON;
+            }
+            console.log(ProcessObject.pro_com_propList);
             populateProcessEditorList('pro_prop', Object.keys(ProcessObject.pro_propList));
             createPro_Conf_Editor();
         });
     }
 
     /**
-     * 
+     * creates dict entry templates to use if we want to add new processes or new process commodities
      * @param {dict} processes              dict with process feature:value key:value pairs
      * @param {dict} process_commodities    dict with pro_com feature:value key:value pairs
-     * creates dict entry templates to use if we want to add new processes or new process commodities
      */
     function createProcessJSONTemplates(processes, process_commodities) {
         let processPropertyJSONTemplate = {};
@@ -81,6 +131,11 @@ var maptool_urbs_process = function() {
         ProcessObject.pro_com_propTemplate = pro_com_propJSONTemplate;
     }
 
+    /**
+     * we create options with text based on the keys of a dict and attach them to a html select
+     * @param {string} htmlListName id of the html select element we want to add options to
+     * @param {dict} listEntries    dict containing data for all options we want to add
+     */
     function populateProcessEditorList(htmlListName, listEntries) {
         let processList = document.getElementById(htmlListName + "Select");
         for (entry in listEntries) {
@@ -89,12 +144,20 @@ var maptool_urbs_process = function() {
             processList.add(option);
         }
     }
-
+    /**
+     * called at runtime to make sure only the correct elements are displayed in the pro_com_prop list. All options whose names are keys in target_properties
+     * are made visible, all others are hidden
+     * The pro_com_propSelect element technically contains options for all commodities added to all processes, but we hide all options not added to the
+     * currently selected process
+     * @param {dict} target_properties 
+     */
     function fillSecondaryEditorList(target_properties) {
         let secondaryFeatureSelect = document.getElementById('pro_com_propSelect');
         for (let i = 0; i < secondaryFeatureSelect.options.length; i++) {
-            if (Object.keys(target_properties["in"]).includes((secondaryFeatureSelect.options[i].value).slice(0, -3)) || 
-                Object.keys(target_properties["out"]).includes((secondaryFeatureSelect.options[i].value).slice(0, -4)) ) {
+            //In the GUI commodities have " in" or " out" added at the end, so we need to remove these parts of the string before checking if the commodity
+            //name is included as a key
+            if (Object.keys(target_properties["In"]).includes((secondaryFeatureSelect.options[i].value).slice(0, -3)) || 
+                Object.keys(target_properties["Out"]).includes((secondaryFeatureSelect.options[i].value).slice(0, -4)) ) {
                 secondaryFeatureSelect.options[i].hidden = false;
             }
             else {
@@ -103,11 +166,18 @@ var maptool_urbs_process = function() {
         }
     }
 
+    /**
+     * @param {bool} isCommodity determines whether the process creation dialogue or the pro_com_prop creation dialogue is opened
+     */
     function openNewProcessForm(isCommodity) {
         let form = (isCommodity) ? document.getElementById("urbsProcessCommodityPopupForm") :  document.getElementById("urbsProcessPopupForm");
         form.style.display = "block";
     }
 
+    /**
+     * onclick button for the forms' cancel button, closes dialogue window and resets all input fields
+     * @param {bool} isCommodity 
+     */
     function closeNewProcessForm(isCommodity) {
         let form = (isCommodity) ? document.getElementById("urbsProcessCommodityPopupForm") :  document.getElementById("urbsProcessPopupForm");
         form.style.display = "none";
@@ -240,7 +310,7 @@ var maptool_urbs_process = function() {
         pro_propCommOption.value = com_name;
         document.getElementById('pro_propCommSelect').add(pro_propCommOption);
         if (!Object.keys(ProcessObject.pro_com_propList).includes(pro_name)) {
-            ProcessObject.pro_com_propList[pro_name] = {"in": {}, "out": {}};
+            ProcessObject.pro_com_propList[pro_name] = {"In": {}, "Out": {}};
         }
         ProcessObject.pro_com_propList[pro_name][inOrOut][com_name] = JSON.parse(JSON.stringify(ProcessObject.pro_com_propTemplate));
     }
@@ -251,9 +321,9 @@ var maptool_urbs_process = function() {
         
         if(isPro_com_prop) {
             let pro_com_propKey = document.getElementById("pro_com_propSelect").value;
-            let inOrOutFlag = (pro_com_propKey.slice(-3) === ' in') ? true : false;
+            let inOrOutFlag = (pro_com_propKey.slice(-3) === ' In') ? true : false;
 
-            let selectedElement = ProcessObject.pro_com_propList[keyInFeatureList][(inOrOutFlag) ? "in" : "out"][(inOrOutFlag) ? pro_com_propKey.slice(0, -3) : pro_com_propKey.slice(0, -4)];
+            let selectedElement = ProcessObject.pro_com_propList[keyInFeatureList][(inOrOutFlag) ? "In" : "Out"][(inOrOutFlag) ? pro_com_propKey.slice(0, -3) : pro_com_propKey.slice(0, -4)];
             selectedElement[target.name] = target.value;
         }
         else {
@@ -266,12 +336,29 @@ var maptool_urbs_process = function() {
         var data = [];
         var headers = ['urbs_name'];
         var placeholders = []
+        var trafo_placeholders = []
+        var busbar_placeholders = []
 
         for (processName in ProcessObject.pro_propList) {
             headers.push(processName);
-            placeholders.push('');
+            if(["import", "import_hp", "feed_in", "Slack"].includes(processName)) {
+                trafo_placeholders.push('1000');
+                busbar_placeholders.push('');
+                placeholders.push('');
+            }
+            else if(processName == 'Q_feeder_central') {
+                trafo_placeholders.push('');
+                busbar_placeholders.push('1000');
+                placeholders.push('');
+            }
+            else {
+                trafo_placeholders.push('');
+                busbar_placeholders.push('');
+                placeholders.push('0');
+            }
         }
-
+        data.push(["Trafostation_OS"].concat(trafo_placeholders));
+        data.push(["main_busbar"].concat(busbar_placeholders));
         for (bus in maptool_urbs_buildings.BuildingsObject.busWithLoadList) {
             data.push([maptool_urbs_buildings.BuildingsObject.busWithLoadList[bus].feature.properties.name].concat(placeholders));
         }

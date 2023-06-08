@@ -189,7 +189,6 @@ def formatBuildingsCSV():
             else:
                 buildings_osm_id_list.append("")
 
-        print(buildings_osm_id_list)
         buildings_data_aggregator = []
         bid = 1
         for osm_id in buildings_osm_id_list:
@@ -275,7 +274,7 @@ def formatProcessCSV():
         #combine with sto_conf into single method
         process_data = request.get_json()
         pro_conf_df = pd.read_json(process_data['pro_conf'], orient='split')
-        pro_conf_df = pro_conf_df.replace("", "0")
+        #pro_conf_df = pro_conf_df.replace("", "0")
         pro_conf_df = pro_conf_df[:-1]
         pro_conf_df.to_csv('pandapower2urbs\\dataset\\process\\pro_conf.csv', index=False)
 
