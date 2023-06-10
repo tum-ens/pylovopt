@@ -49,7 +49,8 @@ var maptool_urbs_process = function() {
         "pro_propList": {},
         "pro_com_propList": {},
         "pro_propTemplate": {},             //template dict for entries of pro_propList
-        "pro_com_propTemplate": {}          //template dict for entries of pro_com_propList
+        "pro_com_propTemplate": {},         //template dict for entries of pro_com_propList
+        "pro_conf_default_vals": {}
     }
 
     let container = document.getElementById('process_confHOTContainer');
@@ -75,6 +76,8 @@ var maptool_urbs_process = function() {
         }).then(function (process_data) {
             let processes = JSON.parse(process_data["pro_prop"]);
             let process_commodities = JSON.parse(process_data["pro_com_prop"]);
+            ProcessObject.pro_conf_default_vals = maptool_urbs_setup.getUrbsPropertiesJSON()["process"]["pro_conf"];
+            console.log(maptool_urbs_setup.getUrbsPropertiesJSON())
             createProcessJSONTemplates(processes, process_commodities);
 
             let i = 0;
@@ -89,7 +92,6 @@ var maptool_urbs_process = function() {
                 ProcessObject.pro_com_propList[processes['name'][idx]] = {'In': {}, 'Out': {}};
                 i++;
             }   
-            console.log(process_commodities);
 
             for (idx in process_commodities['Commodity']) {
                 let pro_comPropertyJSON = JSON.parse(JSON.stringify(ProcessObject.pro_com_propTemplate));
@@ -99,7 +101,6 @@ var maptool_urbs_process = function() {
                 let direction = process_commodities["Direction"][idx];
                 ProcessObject.pro_com_propList[process][direction][process_commodities['Commodity'][idx]] = pro_comPropertyJSON;
             }
-            console.log(ProcessObject.pro_com_propList);
             populateProcessEditorList('pro_prop', Object.keys(ProcessObject.pro_propList));
             createPro_Conf_Editor();
         });
@@ -341,21 +342,18 @@ var maptool_urbs_process = function() {
 
         for (processName in ProcessObject.pro_propList) {
             headers.push(processName);
-            if(["import", "import_hp", "feed_in", "Slack"].includes(processName)) {
-                trafo_placeholders.push('1000');
-                busbar_placeholders.push('');
-                placeholders.push('');
-            }
-            else if(processName == 'Q_feeder_central') {
-                trafo_placeholders.push('');
-                busbar_placeholders.push('1000');
-                placeholders.push('');
+            if(ProcessObject.pro_conf_default_vals[processName] != undefined) {
+                trafo_placeholders.push(ProcessObject.pro_conf_default_vals[processName].default_val_trafo);
+                busbar_placeholders.push(ProcessObject.pro_conf_default_vals[processName].default_val_main_bus);
+                placeholders.push(ProcessObject.pro_conf_default_vals[processName].default_val_other);
             }
             else {
                 trafo_placeholders.push('');
                 busbar_placeholders.push('');
-                placeholders.push('0');
+                placeholders.push('');
             }
+
+
         }
         data.push(["Trafostation_OS"].concat(trafo_placeholders));
         data.push(["main_busbar"].concat(busbar_placeholders));

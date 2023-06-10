@@ -29,8 +29,6 @@ var maptool_urbs_trans = function() {
                     TransmissionObject.trafo_dataList[trafo_data.id[i]] = data_dict;
                 }
             }
-            
-            console.log(TransmissionObject.trafo_dataList)
         });
     }
 
@@ -71,7 +69,6 @@ var maptool_urbs_trans = function() {
     function fillTrafoDataEditorIdSelect() {
         let input = document.getElementById("transmission_trafo_dataFormDiv").querySelector('#id');
         let propertiesToAdd = TransmissionObject.trafo_dataList
-        console.log(propertiesToAdd)
 
         for (option in propertiesToAdd) {
             let listOption = document.createElement("option");

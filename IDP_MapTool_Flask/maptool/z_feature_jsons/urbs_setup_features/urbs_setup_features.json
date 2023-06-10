@@ -202,12 +202,12 @@
           "TransDist": {
                 "type": "int",
                 "tooltip": "",
-                "default_val": ""
+                "default_val": "0"
           },
           "tsam": {
                 "type": "boolean",
                 "tooltip": "",
-                "default_val": ""
+                "default_val": "true"
           },
           "tsam_season": {
                 "type": "boolean",
@@ -232,12 +232,12 @@
           "uncoordinated": {
                 "type": "boolean",
                 "tooltip": "",
-                "default_val": ""
+                "default_val": "false"
           },
           "flexible": {
                 "type": "boolean",
                 "tooltip": "",
-                "default_val": ""
+                "default_val": "true"
           },
           "lp": {
                 "type": "boolean",
@@ -375,6 +375,83 @@
                       "tooltip": "",
                       "default_val": ""
                 }
+          },
+          "pro_conf": {
+                  "import": {
+                        "default_val_trafo": 1000,
+                        "default_val_main_bus": "",
+                        "default_val_other":"" 
+                  },
+                  "import_hp": {
+                        "default_val_trafo": 1000,
+                        "default_val_main_bus": "",
+                        "default_val_other":"" 
+                  },
+                  "feed_in": {
+                        "default_val_trafo": 1000,
+                        "default_val_main_bus": "",
+                        "default_val_other":"" 
+                  },
+                  "Slack": {
+                        "default_val_trafo": 1000,
+                        "default_val_main_bus": "",
+                        "default_val_other":"" 
+                  },
+                  "Q_feeder_central": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": 1000,
+                        "default_val_other":"" 
+                  },
+                  "Rooftop PV": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"0" 
+                  },
+                  "Gas boiler": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"" 
+                  },
+                  "Heat_dummy_space": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"150" 
+                  },
+                  "Heat_dummy_water": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"150" 
+                  },
+                  "heatpump_air": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"0" 
+                  },
+                  "heatpump_air_heizstrom": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"0" 
+                  },
+                  "elec_hp_to_usable": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"150" 
+                  },
+                  "curtailment": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"150" 
+                  },
+                  "Slack_heat": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"150" 
+                  },
+                  "charging_station": {
+                        "default_val_trafo": "",
+                        "default_val_main_bus": "",
+                        "default_val_other":"11" 
+                  }
           }
     },
     "storage": {
@@ -571,12 +648,12 @@
                 "v_min": {
                       "type": "float",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "0.95"
                 },
                 "v_max": {
                       "type": "float",
                       "tooltip": "",
-                      "default_val": ""
+                      "default_val": "1.03"
                 }
           }
     }

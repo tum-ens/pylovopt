@@ -7,13 +7,11 @@ var maptool_urbs_setup = function() {
 
     //function that fetches the urbsPropertyJSON file stored in the backend. The file defines all inputs for all features as well as tooltips, types and default values
     function GetUrbsSetupProperties () {
-        fetch('urbs/urbs_setup_properties')
+        return fetch('urbs/urbs_setup_properties')
             .then(function (response) {
                 return response.json();
             }).then(function (urbs_setup_properties) { 
                 UrbsPropertiesJSON = urbs_setup_properties;
-                console.log(UrbsPropertiesJSON);
-
             });
     }
     
@@ -199,7 +197,8 @@ var maptool_urbs_setup = function() {
                 input.type="checkbox";
             }
             else if(propertiesToAdd[property]['type'] == 'float' || propertiesToAdd[property]['type'] == 'int') {
-                input.type="number";
+                input.type="text";
+                input.pattern = "^inf$|\-?\d+\.?\d+|\-?\d+";
             }
             //at the moment list options are passed only in UrbsPropertiesJSON
             //TODO: for some elements (e.g. trafos) these might also be extracted from the previous network-edit step
@@ -216,9 +215,23 @@ var maptool_urbs_setup = function() {
             }
             //everything that has no corresponding special input type gets handled as text input
             else {
-                input.type="text";
+                input.type="text"; 
             }
-            
+            if(propertiesToAdd[property]["default_val"] != "") {
+                if(propertiesToAdd[property]['type'] == 'boolean') {
+                    if (propertiesToAdd[property]["default_val"] == "true") {
+                        input.checked = true;
+                    } 
+                    else {
+                        input.removeAttribute('checked');
+                        console.log(property)
+                    } 
+
+                }
+                else {
+                    input.value = propertiesToAdd[property]["default_val"];
+                }
+            }
             //each input is uniquely addressable by setting the UrbsPropertiesJSON key as id
             input.id = property;
             input.name = property;
@@ -315,7 +328,7 @@ var maptool_urbs_setup = function() {
     /*
     e (Event):              object for the onclick event of the clicked tablink button, necassary to change the button to active
     listName (String):      key to access the relevant list tab html element by id
-    hasEditor (boolean):    some features (like global) do not have an editor which means that the section of the code that opens previously open editors does
+    hasEditor (boolean):    some features (like global) do not have a separate editor which means that the section of the code that opens previously open editors doesn't
                             apply to them. This boolean acts as a flag to ensure that portion is not called
     Function gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
     */
@@ -507,8 +520,9 @@ var maptool_urbs_setup = function() {
     //we retrieve the UrbsPropertiesJSON and create the editor and network visualization on page load of the urbs editor window
     window.addEventListener("load", (event) => {
         if(window.location.pathname == '/urbs') {
-            GetUrbsSetupProperties();
-            SetupUrbsEditor();
+            GetUrbsSetupProperties().then(res =>  {
+                SetupUrbsEditor();
+            });
         }
       });
 

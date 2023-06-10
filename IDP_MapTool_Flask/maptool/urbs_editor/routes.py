@@ -3,11 +3,17 @@ from flask import Flask, render_template, request, session
 from syngrid.GridGenerator import GridGenerator
 import pandapower as pp
 import pandas as pd
+import numpy as np
 import os
 from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
 import json
 from pandapower2urbs import construct_model_components as pp2u
 
+
+#GUROBI LINE COMMANDS:
+#prop=read('filename')
+#prob.computeIIS()
+#prop.write('infeasible.ilp')
 
 
 #As a frist step we always return the html for the current window
@@ -105,6 +111,7 @@ def formatStorageSetup():
 @bp.route('/urbs/commodity_profiles', methods=['GET', 'POST'])
 def formatCommoditySetup():
     com_prop = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/commodity/com_prop.csv'), sep=',')
+    com_prop.replace([np.inf, -np.inf], "inf", inplace=True)
     commodity_json = {
         "com_prop" : com_prop.to_json(),
         }
@@ -114,6 +121,8 @@ def formatCommoditySetup():
 @bp.route('/urbs/supim_profiles', methods=['GET', 'POST'])
 def supimProfiles():
     supim_solar = pd.read_csv(os.path.join(os.getcwd(), 'pandapower2urbs_dataset_template/dataset/supim/profiles/solar.csv'), sep=',')
+    supim_solar = supim_solar.fillna(0)
+    supim_solar.to_csv('pandapower2urbs\\dataset\\supim\\profiles\\solar.csv', index=False)
     supim_json = {"solar" : supim_solar.to_json(),
                 }
 
@@ -363,6 +372,6 @@ def switch_conda_environment(env_name):
 def runPdp2Urbs():
     pp2u.convertPandapower2Urbs()
     print(f"Switched to conda environment: urbs")
-    #switch_conda_environment('urbs')
+    #switch_conda_environment('urbs310')
     return 'Success', 200
 

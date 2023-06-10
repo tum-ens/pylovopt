@@ -15,7 +15,6 @@ var maptool_urbs_commodity = function () {
         }).then(function (data) {
             let commodity = JSON.parse(data["com_prop"])
             let propertyJSONTemplate = {};
-            
             for (idx in commodity) {
                 if(idx != 'name') {
                     propertyJSONTemplate[idx] = '';

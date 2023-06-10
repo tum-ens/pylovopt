@@ -12,9 +12,12 @@ var maptool_return_urbs =  function() {
         const timevareff = returnUrbsSetup_Timevareff();
         
         Promise.all([buildings, demand, transmission, global, commodity,process, storage, supim, timevareff]).then((res) => {
-            runPdp2Urbs();
-            SetupUrbsResultEditor();
-            document.getElementById('nav-item-urbs-results').click();
+            const pdp2urbs = runPdp2Urbs();
+            Promise.all([pdp2urbs]).then(res => {
+                document.location.href = "/urbs_results";
+            })
+            // SetupUrbsResultEditor();
+            // document.getElementById('nav-item-urbs-results').click();
         });
     }
     //DONE BACKEND_DONE
@@ -120,6 +123,7 @@ var maptool_return_urbs =  function() {
     function runPdp2Urbs() {
         console.log("Starting pdp2urbs");
         const promise = fetch("http://127.0.0.1:5000/urbs/pdp2Urbs");
+        return promise;
     }
 
     async function postData(url, jsonData) {
@@ -133,9 +137,9 @@ var maptool_return_urbs =  function() {
         return promise;
     }
 
-    function SetupUrbsResultEditor() {
-        document.getElementById("nav-item-demand").href="#scroll-to-top";
-    }
+    // function SetupUrbsResultEditor() {
+    //     document.getElementById("nav-item-demand").href="#scroll-to-top";
+    // }
 
     return {
         returnUrbsSetup: returnUrbsSetup

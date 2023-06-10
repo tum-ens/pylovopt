@@ -73,8 +73,8 @@ var maptool_urbs_storage = function () {
         for (storage in StorageObject.storagePropertiesList) {
             headers_c.push(storage + '.c');
             headers_p.push(storage + '.p');
-            placeholders.push('');
-            placeholders.push('');
+            placeholders.push('0');
+            placeholders.push('0');
         }
 
         for (bus in maptool_urbs_buildings.BuildingsObject.busWithLoadList) {
