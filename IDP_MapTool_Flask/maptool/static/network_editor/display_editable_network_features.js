@@ -459,6 +459,7 @@ var maptool_net_display = function() {
         populateEditableNetworkEditorSecondaryFeature: populateEditableNetworkEditorSecondaryFeature,
         openEditableNetworkList: openEditableNetworkList,
         fillSelectedEditableNetworkFeatureEditor: fillSelectedEditableNetworkFeatureEditor,
+        resetStyle: resetStyle,
         clickOnMarker: clickOnMarker,
         openSecondaryEditor: openSecondaryEditor,
         writeBackEditedNetworkFeature: writeBackEditedNetworkFeature,

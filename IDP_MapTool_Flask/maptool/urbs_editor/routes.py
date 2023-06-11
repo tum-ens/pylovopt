@@ -370,7 +370,7 @@ def switch_conda_environment(env_name):
 
 @bp.route('/urbs/pdp2Urbs', methods=['GET', 'POST'])
 def runPdp2Urbs():
-    pp2u.convertPandapower2Urbs()
+    #pp2u.convertPandapower2Urbs()
     print(f"Switched to conda environment: urbs")
     #switch_conda_environment('urbs310')
     return 'Success', 200

@@ -245,6 +245,7 @@ var maptool_network_gen = function (){
     });
 
     return {
-        NetworkObject:NetworkObject
+        NetworkObject:NetworkObject,
+        displayNetNew: displayNetNew
     }
 }();

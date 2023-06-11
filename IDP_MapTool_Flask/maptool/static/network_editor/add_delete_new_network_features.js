@@ -12,7 +12,7 @@ var maptool_add_delete = function() {
         if(feature == 'bus' || feature =='ext_grid') {
             type = 'Point'
             map.pm.enableDraw('CircleMarker', {
-                snappable: true, 
+                snappable: false, 
                 snapDistance: 20,
                 requireSnapToFinish : (feature == 'ext_grid'), //busses can be placed anywhere, ext_grids need to be placed on a bus
                 continueDrawing: false,
@@ -136,11 +136,11 @@ var maptool_add_delete = function() {
         workingLayer.on('pm:snap', (e) => {
             //we need to get the name of the feature we are snapping to so we can fill in the to_bus, from_bus, hv, lv etc features that require bus names later
             if (e.shape == 'Line' && e.layerInteractedWith.feature != undefined) {
-                snappedFeature = e.layerInteractedWith.feature.properties.name;
+                snappedFeature = e.layerInteractedWith.feature.properties.index;
                 snapped = true;
             }
             else {
-                snappedFeature = e.layerInteractedWith._parentCopy.feature.properties.name
+                snappedFeature = e.layerInteractedWith._parentCopy.feature.properties.index
             }
         });
         
@@ -191,12 +191,18 @@ var maptool_add_delete = function() {
         let featureList = maptool_network_gen.NetworkObject[featureName + 'List'];
         let featureProperties = {}
         for (property in featureList[featureList.length - 1].feature.properties) {
-            featureProperties[property] = null;
+            if (property == "load" || property == "sgen" || property == "switch") {
+                featureProperties[property] = {};
+            }
+            else {
+                featureProperties[property] = null;
+            }
         }  
     
         if (featureName == 'line') {
             featureProperties['from_bus'] = snappedFeatures[0];
             featureProperties['to_bus'] = snappedFeatures[1];
+            featureProperties['std_type'] = "NYY 4x16 SE";
     
             let coords = e.marker.getLatLngs();
             let length = 0;
@@ -209,7 +215,8 @@ var maptool_add_delete = function() {
         if (featureName == 'trafo') {
             featureProperties['hv_bus'] = snappedFeatures[0];
             featureProperties['lv_bus'] = snappedFeatures[1];
-    
+            featureProperties['std_type'] = "0.25 MVA 20/0.4 kV";
+
         }
         if(featureName == 'ext_grid') {
             featureProperties['bus'] = snappedFeature;
@@ -230,6 +237,8 @@ var maptool_add_delete = function() {
         }
     
         featureProperties['index'] = parseInt(featureList[featureList.length - 1].feature.properties['index']) + 1;
+        featureProperties["name"] = "New " + featureName + " " + featureProperties['index'];
+
         let featureGeoJSON = {"type" : "FeatureCollection", "features": []};    
         let featureToAdd = {"type": "Feature", 
                             "geometry": {"coordinates": featureCoords, "type": featureType}, 
