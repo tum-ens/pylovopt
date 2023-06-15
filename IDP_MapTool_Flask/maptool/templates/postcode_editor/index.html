@@ -41,7 +41,7 @@
     <input type="number" id="PLZ" value="80801">
     <button class="button action-buttons__button" id="submit-plz-button" type="submit" onclick="maptool_display_postcode.selectVersionOfPostalCodeNetwork()">Submit</button>
   </div>
-  <button class="button action-buttons__button" id="selectPLZAreaButton" type="button" onclick="maptool_display_postcode.getPostalCodeArea(this, 'plz-area')">Select Area</button>
+  <button class="button action-buttons__button" id="selectPLZAreaButton" type="button" onclick="maptool_display_postcode.getPostalCodeArea(this, 'plz-area')" disabled>Select Area</button>
   <a href="/networks" >
     <button class="button action-buttons__button" id="selectNetworkButton" type="button" onclick="maptool_display_postcode.sendBackSelectedNetworkKcidBcid()" disabled>Select Network</button>
   </a>

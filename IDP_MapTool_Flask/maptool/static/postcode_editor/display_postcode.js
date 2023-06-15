@@ -40,6 +40,7 @@ var maptool_display_postcode = function (){
             }
             });
         btn = document.getElementById("selectPLZAreaButton");
+        btn.disabled = false;
         btn.innerText="Select Area";
         btn.setAttribute('onclick',"maptool_display_postcode.getPostalCodeArea(this, 'plz-area')")
         });

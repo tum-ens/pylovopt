@@ -10,44 +10,33 @@
 {% block content %}
 <div class="feature-editor">
   <div class="feature-editor__buttons-tab">
-    <button class="feature-editor__buttons-tab__tablinks" id="busListButton" onclick="maptool_net_display.openEditableNetworkList(event, 'bus')"><span>Buses</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="lineListButton" onclick="maptool_net_display.openEditableNetworkList(event, 'line')"><span>Lines</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="trafoListButton" onclick="maptool_net_display.openEditableNetworkList(event, 'trafo')"><span>Trafos</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="trafo3wListButton" onclick="maptool_net_display.openEditableNetworkList(event, 'trafo3w')"><span>Trafos 3w</span></button>
-    <button class="feature-editor__buttons-tab__tablinks" id="ext_gridListButton" onclick="maptool_net_display.openEditableNetworkList(event, 'ext_grid')"><span>Ext. Grid</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="busListButton" onclick="maptool_urbs_res_setup.openEditableNetworkList(event, 'bus')"><span>Buses</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="lineListButton" onclick="maptool_urbs_res_setup.openEditableNetworkList(event, 'line')"><span>Lines</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="trafoListButton" onclick="maptool_urbs_res_setup.openEditableNetworkList(event, 'trafo')"><span>Trafos</span></button>
+    <button class="feature-editor__buttons-tab__tablinks" id="ext_gridListButton" onclick="maptool_urbs_res_setup.openEditableNetworkList(event, 'ext_grid')"><span>Ext. Grid</span></button>
   </div>
   <div class="feature-editor__featurelist-tab" id="bus">
-    <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="" multiple></select>
+    <select class ="feature-editor__featurelist-tab__feature-select" id="busSelect" onchange="maptool_urbs_res_setup.clickOnMarker(null, 'bus')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="line">
-    <select class ="feature-editor__featurelist-tab__feature-select"  id="lineSelect" onchange="" multiple></select>
+    <select class ="feature-editor__featurelist-tab__feature-select"  id="lineSelect" onchange="maptool_urbs_res_setup.clickOnMarker(null, 'line')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="trafo">
-    <select  class ="feature-editor__featurelist-tab__feature-select" id="trafoSelect" onchange="" multiple></select>
-  </div>
-  <div class="feature-editor__featurelist-tab" id="trafo3w">
-    <select class ="feature-editor__featurelist-tab__feature-select" id="trafo3wSelect" onchange="" multiple></select>
+    <select  class ="feature-editor__featurelist-tab__feature-select" id="trafoSelect" onchange="maptool_urbs_res_setup.clickOnMarker(null, 'trafo')" multiple></select>
   </div>
   <div class="feature-editor__featurelist-tab" id="ext_grid">
-    <select class ="feature-editor__featurelist-tab__feature-select" id="ext_gridSelect" onchange="" multiple></select>
+    <select class ="feature-editor__featurelist-tab__feature-select" id="ext_gridSelect" onchange="maptool_urbs_res_setup.clickOnMarker(null, 'ext_grid')" multiple></select>
+  </div>
+  <div class="feature-editor__selected-feature-results" id="busEditor">
+  </div>
+  <div class="feature-editor__selected-feature-results" id="lineEditor">
+  </div>
+  <div class="feature-editor__selected-feature-results" id="trafoEditor">
+  </div>
+  <div class="feature-editor__selected-feature-results" id="ext_gridEditor">
   </div>
 </div>
 
-<div class="feature-editor__selected-feature-editor" id="busEditor">
-  <form id="busForm"></form>
-</div>
-<div class="feature-editor__selected-feature-editor" id="lineEditor">
-<form id="lineForm"></form>
-</div>
-<div class="feature-editor__selected-feature-editor" id="trafoEditor">
-<form id="trafoForm"></form>
-</div>
-<div class="feature-editor__selected-feature-editor" id="trafo3wEditor">
-<form id="trafo3wForm"></form>
-</div>
-<div class="feature-editor__selected-feature-editor" id="ext_gridEditor">
-<form id="ext_gridForm"></form>
-</div>
 
 
 <script defer src="{{url_for('static', filename='/network_editor/generate_editable_network.js')}}"></script>
