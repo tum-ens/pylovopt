@@ -190,7 +190,11 @@ var maptool_network_gen = function (){
         NetworkObject.trafo_stdList = ppdata['trafo'];
         NetworkObject.trafo3w_stdList = ppdata['trafo3w'];
     }
-
+    
+    /**
+     * aggregate function calling the actual functions that place the feature sgeojsons on the leaflet map
+     * @param {geojson dict} ppdata 
+     */
     function displayNetNew(ppdata) {
         addGeoJSONtoMap(true, ppdata['line'], 'line');
         //console.log("added all lines");

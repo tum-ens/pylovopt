@@ -59,6 +59,7 @@ var maptool_net_display = function() {
         for (idx in list) {
             var option = document.createElement("option");
             option.text = list[idx].feature.properties.index;
+            option.value = idx
             x.add(option);
         }
     }

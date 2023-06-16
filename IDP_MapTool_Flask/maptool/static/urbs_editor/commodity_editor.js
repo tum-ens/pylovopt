@@ -8,6 +8,9 @@ var maptool_urbs_commodity = function () {
         "commodityPropertiesTemplate": {}
     }
 
+    /**
+     * retrieves commodity feature templates from the backend and generates a dict for each commodity, holding default values for all inputs
+     */
     function fetchProfiles() {
         fetch('urbs/commodity_profiles')
         .then(function (response) {
@@ -15,12 +18,14 @@ var maptool_urbs_commodity = function () {
         }).then(function (data) {
             let commodity = JSON.parse(data["com_prop"])
             let propertyJSONTemplate = {};
+            //we generate a template for our commodity dicts
+            //names are left out because we use them as keys by which to access the commodity data
             for (idx in commodity) {
                 if(idx != 'name') {
                     propertyJSONTemplate[idx] = '';
                 }
             }
-
+            //we save the template for use when we want to add new commodities
             CommodityObject.commodityPropertiesTemplate = propertyJSONTemplate;
 
             let i = 0;
@@ -44,17 +49,28 @@ var maptool_urbs_commodity = function () {
 
     }
 
-
+    /**
+     * opens the GUI form for creating a new commodity
+     */
     function openNewCommodityForm() {
         document.getElementById('urbsNewCommodityPopupForm').style.display = "block";
     }
 
+    /**
+     * closes the GUI form for creating a new commodity and resets its input values
+     */
     function closeNewCommodityForm() {
         let form = document.getElementById("urbsNewCommodityPopupForm");
         form.style.display = "none";
         document.getElementById("newCommTextInput").value = '';
     }
 
+
+    /**
+     * makes sure we cannot create a commodity with now name and
+     * enables or disables the confirm button in the new commodity form
+     * @param {string} comm_name text contained in the input field for a new commodity name
+     */
     function commodityFormCheckValidInput(comm_name) {
         if(comm_name != '') {
             document.getElementById("newCommCreateButton").disabled = false;
@@ -64,7 +80,11 @@ var maptool_urbs_commodity = function () {
         }
 
     }
- 
+    /**
+     * Once a new commodity has been created, this function adds it to the GUI forms for creating new commodities and adding commodities to processes 
+     * @param {string} name of the new commodity
+     */
+    //TODO: There are a few lists that still need to be included here
     function addCommToProcessCreationFormList(name) {
         let commSelect = document.getElementById("pro_propCommSelect");
         let commAddSelect = document.getElementById("pro_propAddCommSelect");
@@ -80,6 +100,10 @@ var maptool_urbs_commodity = function () {
         commAddSelect.appendChild(newAddOption);
     }
 
+    /**
+     * adds the newly created commodity to the commodity editor list, the pro_conf table and the CommodityObject
+     * @param {string} com_name 
+     */
     function createNewCommodity(com_name) {
                 //we grab the commodity list and add a new option. All values are blank at the start. We also add a blank entry to the Commodity Object List
                 let commodityList = document.getElementById("commoditySelect");
@@ -93,7 +117,7 @@ var maptool_urbs_commodity = function () {
                 maptool_urbs_process.hot.alter('insert_col', maptool_urbs_process.hot.countCols(), 1)
                 maptool_urbs_process.hot.headers[maptool_urbs_process.hot.headers.length - 1] = com_name;
         
-
+                //TODO: Replace with addCommToProcessCreationFormList function
                 let pro_propCommOption = document.createElement("option");
                 pro_propCommOption.text = com_name;
                 pro_propCommOption.value = com_name;
@@ -106,7 +130,11 @@ var maptool_urbs_commodity = function () {
 
                 closeNewCommodityForm();
     }
-
+    /**
+     * onchange function for all commodity editor input fields 
+     * writes changed value back to the relevant entry in the CommodityObject
+     * @param {event target object} target 
+     */
     function writeBackCommodityFeatures(target) {
         console.log(target);
         let idxInFeatureList = document.getElementById("commoditySelect").value;

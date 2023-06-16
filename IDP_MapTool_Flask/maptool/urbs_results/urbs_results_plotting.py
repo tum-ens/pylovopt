@@ -2,6 +2,7 @@ import plotly
 import pandas as pd
 import plotly.express as px
 
+
 def aggregateHTMLFiles(filenames):
     #TODO: combine a given number of divs into single html file to be passed to the frontend
     return 0

@@ -292,13 +292,15 @@ var maptool_urbs_setup = function() {
         editor_form.appendChild(featureCreateButton);
     }
 
-    /*
-    sel (Html select element):      gets passed as "this" reference when the onchange method for the select element is called, needed to
-                                    retrieve the currently selected secondary feature
-    secondaryFeatureName (String):  key for relevant html elements 
-    Function makes secondary feature window visible and fills all input fields with the saved values, if any exist
-    TODO: currently hardcoded for process. Either generalize or put into process_editor.js
+
+   /**
+    * Function makes secondary feature window visible and fills all input fields with the saved values, if any exist
+    * At the moment the process editor is the only one with a secondary editor, namely the pro_com_prop editor
+    * @param {html select element} sel      gets passed as "this" reference when the onchange method for the select element is called, needed to 
+    *                                       retrieve the currently selected secondary feature
+    * @param {string} secondaryFeatureName  key for relevant html elements 
     */
+    //TODO: currently hardcoded for process. Either generalize or put into process_editor.js
     function openSecondaryEditor(sel, secondaryFeatureName) {
         document.getElementById(secondaryFeatureName + 'Editor').style.display='block';
         
@@ -325,12 +327,12 @@ var maptool_urbs_setup = function() {
         }
     }
     
-    /*
-    e (Event):              object for the onclick event of the clicked tablink button, necassary to change the button to active
-    listName (String):      key to access the relevant list tab html element by id
-    hasEditor (boolean):    some features (like global) do not have a separate editor which means that the section of the code that opens previously open editors doesn't
-                            apply to them. This boolean acts as a flag to ensure that portion is not called
-    Function gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
+   /**
+    * Function gets called when one of the tablink buttons in the GUI gets pressed and opens the relevant feature list, while hiding all other GUI elements
+    * @param {event} e              object for the onclick event of the clicked tablink button, necassary to change the button to active
+    * @param {string} listName      key to access the relevant list tab html element by id
+    * @param {boolean} hasEditor    some features (like global) do not have a separate editor which means that the section of the code that opens previously open editors 
+    *                               doesn't apply to them. This boolean acts as a flag to ensure that portion is not called
     */
     function openUrbsEditorList(e, listName, hasEditor) {
         //hides all lists
@@ -385,10 +387,10 @@ var maptool_urbs_setup = function() {
         }
     }
     
-    /*
-    target (Event target object): the leaflet object whose onclick method has been triggered via click on the map or selection via the list
-    function that switches bus styles back to default once they are deselected when the user clicks on another node on the map or another element in the list
-    */
+    /**
+     * function that switches bus styles back to default once they are deselected when the user clicks on another node on the map or another element in the list
+     * @param {event target object} target the leaflet object whose onclick method has been triggered via click on the map or selection via the list 
+     */
     function resetLoadBusStyle(target) {
         let zoomLevel = 14;
         map.setView(target.getLatLng(), Math.max(map.getZoom(), zoomLevel));

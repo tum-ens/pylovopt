@@ -11,6 +11,7 @@ var maptool_return_urbs =  function() {
         const supim = returnUrbsSetup_SupIm();
         const timevareff = returnUrbsSetup_Timevareff();
         
+        //makes sure we have returned all data before telling the backend to run the pdp2urbs function and switching to the urbs_results window
         Promise.all([buildings, demand, transmission, global, commodity,process, storage, supim, timevareff]).then((res) => {
             const pdp2urbs = runPdp2Urbs();
             Promise.all([pdp2urbs]).then(res => {
@@ -55,7 +56,6 @@ var maptool_return_urbs =  function() {
     function returnUrbsSetup_Global() {
         let global_json = {};
 
-        //TODO: Build checkbox list from UrbsPropertyJSON global entries with type boolean
         let global_checkboxes = ['assumelowq', 'excel', 'flexible', 'grid_curtailment', 'lp', 'retrofit', 'tsam', 'tsam_season', 'uncoordinated']
 
         const globalFormData = new FormData(document.getElementById('globalForm'));
@@ -120,12 +120,22 @@ var maptool_return_urbs =  function() {
         return postData("http://127.0.0.1:5000/urbs/timevareff_csv_setup", timevareff_json);
     }
 
+    /**
+     * function telling the backend to run the pandapower2urbs script once all relevant data has been returned
+     * @returns Promise signifying that the data was correctly received and processed in the backend
+     */
     function runPdp2Urbs() {
         console.log("Starting pdp2urbs");
         const promise = fetch("http://127.0.0.1:5000/urbs/pdp2Urbs");
         return promise;
     }
 
+    /**
+     * 
+     * @param {string} url      address we send data to on the backend side
+     * @param {json} jsonData   data we want to return to the backend
+     * @returns Promise signifying that the data was correctly received and processed in the backend
+     */
     async function postData(url, jsonData) {
         const promise = await fetch(url, {
             method: 'POST',
@@ -136,10 +146,6 @@ var maptool_return_urbs =  function() {
 
         return promise;
     }
-
-    // function SetupUrbsResultEditor() {
-    //     document.getElementById("nav-item-demand").href="#scroll-to-top";
-    // }
 
     return {
         returnUrbsSetup: returnUrbsSetup
