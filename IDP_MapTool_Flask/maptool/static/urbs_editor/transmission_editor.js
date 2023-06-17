@@ -5,6 +5,13 @@ var maptool_urbs_trans = function() {
         trafo_dataList: {}
     }
 
+    /**
+     * called from generate_urbs_setup_editor.js during setup of the urbs setup editor window
+     * we fetch default values from the backend 
+     * the fetched data contains default values for trafo_data as well as 
+     * the sn_mva value of the network trafo to generate the kont option for trafo data
+     * @returns Promise signalling that the fetch operation concluded
+     */
     function fetchTransmissionProfiles() {
         return fetch('urbs/transmission_profiles')
         .then(function(response) {
@@ -12,7 +19,8 @@ var maptool_urbs_trans = function() {
         }).then(function(trafo_json) {
             let trafo_data = JSON.parse(trafo_json['trafo_data']);
             let trafo_data_profiles = Object.keys(trafo_data.id);
-
+            
+            //we save each profile in the corresponding dataList as dicts with the profile id as key
             for (let i = 0; i < trafo_data_profiles.length; i++) {
                 let data_dict = {};
                 for (key in trafo_data) {
@@ -34,10 +42,10 @@ var maptool_urbs_trans = function() {
 
     //TODO: Allow adding additional cables
     /**
+     * THIS IS REDUNDANT, SHOULD BE INCLUDED IN FETCHTRANSMISSIONPROFILES
+     * prefills the TransmissionObject
      * @param {JSON Object} TransmissionPropertiesJSON 
      * @param {string}      listName
-     * 
-     * prefills the TransmissionObject
      */
     function prepareCableDataList(TransmissionPropertiesJSON, listName) {
         TransmissionPropertiesJSON[listName].id.list_options.forEach(featureName => {
@@ -52,8 +60,9 @@ var maptool_urbs_trans = function() {
     }
 
     /**
-     * @param {JSON Object} UrbsPropertiesJSON
-     * Creates list elements for the different transmission templates
+     * called from generate_urbs_setup_editor.js during setup of the urbs setup editor window
+     * Creates select options for cable_data, trafo_data and voltage_limits
+     * @param {JSON Object} UrbsPropertiesJSON json containing all features and their properties for all input categories of the urbs setup
      */
     function populateTransmissionEditorList(UrbsPropertiesJSON) {
         let transmissionEditorList = document.getElementById("transmissionSelect");
@@ -66,6 +75,9 @@ var maptool_urbs_trans = function() {
         }
     }
 
+    /**
+     * after the editor form for trafo_data has been selected, we add the kont and ronts as options to the id selection
+     */
     function fillTrafoDataEditorIdSelect() {
         let input = document.getElementById("transmission_trafo_dataFormDiv").querySelector('#id');
         let propertiesToAdd = TransmissionObject.trafo_dataList
@@ -97,9 +109,8 @@ var maptool_urbs_trans = function() {
     }
 
     /**
-     * @param {string} id key for TransmissionObject list element that contains values for a given id
-     * 
      * If the Select element in the transmission editor changes, all other fields are updated with the values corresponding to the newly selected element
+     * @param {string} id key for TransmissionObject list element that contains values for a given id
      */
     function fillInputFieldsOfSelectedID(id, feature) {
         let featureEditor = document.getElementById('transmission_' + feature + 'FormDiv');
@@ -110,15 +121,29 @@ var maptool_urbs_trans = function() {
         }
     }
 
+    /**
+     * onclick function for the #newTrafo_dataButton
+     * opens the form for creating a new ront
+     */
     function openNewTrafoDataForm() {
         document.getElementById('urbsNewTrafoDataPopupForm').style.display = "block";
     }
 
+    /**
+     * onclick function for the cancel and accept button of the #urbsNewTrafoDataPopupForm
+     * closes the form for creating a new ront and resets its input field
+     */
     function closeNewTrafoDataForm() {
         document.getElementById('urbsNewTrafoDataPopupForm').style.display = "none";
         document.getElementById('newTrafoDataTextInput').value = "";
     }
 
+    /**
+     * onchange method for the #newTrafoDataTextInput
+     * checks that the sn_mva value the user puts in is valid and that a value has been given at all before 
+     * enabling the accept button of the creation form
+     * @param {string} text value in the input field
+     */
     function trafoDataFormCheckValidInput(text) {
         if(!isNaN(text) && !isNaN(parseFloat(text))) {
             document.getElementById("newTrafoDataCreateButton").disabled = false;
@@ -129,6 +154,11 @@ var maptool_urbs_trans = function() {
         }
     }
 
+    /**
+     * onclick function for the #newTrafoDataCreateButton of the new trafo data form
+     * creates a new ront and adds it to the TransmissionObject, trafo_data editor id select
+     * @param {string} sn_mva 
+     */
     function createNewTrafoData(sn_mva) {
         let list = document.getElementById("transmission_trafo_dataFormDiv").querySelector('#id');
         let option = document.createElement('option');

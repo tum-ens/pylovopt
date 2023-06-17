@@ -12,7 +12,10 @@ var maptool_return_net = function() {
         console.log("returned Network");
     }
     
-    
+    /**
+     * goes through every list in the network object and extracts features and their properties from the saved map objects
+     * @returns dict containing all data of the network to be processed in the backend
+     */
     function extractNetworFeatures() {
         let featureLists = ["busList", "lineList", "trafoList", "trafo3wList", "ext_gridList"];
         let stdFeatureLists = ["line_stdList", "trafo_stdList", "trafo3w_stdList"]

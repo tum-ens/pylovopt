@@ -153,20 +153,20 @@ var maptool_network_gen = function (){
             maptool_net_display.populateLists('trafo');
             maptool_net_display.populateLists('ext_grid');
 
-            maptool_net_display.populateEditableNetworkEditor('bus', bus_properties, null, null, null);
+            maptool_net_display.populateEditableNetworkEditor('bus', bus_properties, null, null);
             maptool_net_display.populateEditableNetworkEditorSecondaryFeature('bus','load');
             maptool_net_display.populateEditableNetworkEditorSecondaryFeature('bus','sgen');
             maptool_net_display.populateEditableNetworkEditorSecondaryFeature('bus','switch');
-            maptool_net_display.populateEditableNetworkEditor('load', load_features, null, null, null);
-            maptool_net_display.populateEditableNetworkEditor('sgen', sgen_features, null, null, null);
-            maptool_net_display.populateEditableNetworkEditor('switch', switch_features, null, null, null);
+            maptool_net_display.populateEditableNetworkEditor('load', load_features, null, null);
+            maptool_net_display.populateEditableNetworkEditor('sgen', sgen_features, null, null);
+            maptool_net_display.populateEditableNetworkEditor('switch', switch_features, null, null);
 
-            maptool_net_display.populateEditableNetworkEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties, null);
-            maptool_net_display.populateEditableNetworkEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties, null);
-            maptool_net_display.populateEditableNetworkEditor('ext_grid', ext_grid_properties, null, null, null);
-            maptool_net_display.populateEditableNetworkEditor('line_std_types', line_std_properties, null, null, null);
-            maptool_net_display.populateEditableNetworkEditor('trafo_std_types', trafo_std_properties, null, null, null);
-            maptool_net_display.populateEditableNetworkEditor('trafo3w_std_types', trafo3w_std_properties, null, null, null);
+            maptool_net_display.populateEditableNetworkEditor('line', line_properties, NetworkObject.line_stdList, line_std_properties);
+            maptool_net_display.populateEditableNetworkEditor('trafo', trafo_properties, NetworkObject.trafo_stdList, trafo_std_properties);
+            maptool_net_display.populateEditableNetworkEditor('ext_grid', ext_grid_properties, null, null);
+            maptool_net_display.populateEditableNetworkEditor('line_std_types', line_std_properties, null, null);
+            maptool_net_display.populateEditableNetworkEditor('trafo_std_types', trafo_std_properties, null, null);
+            maptool_net_display.populateEditableNetworkEditor('trafo3w_std_types', trafo3w_std_properties, null, null);
         });
     }
 

@@ -515,11 +515,12 @@ input[type=text]:focus + label, input[type=number]:focus + label {
   background: #ffffff;
   color: #000000;
   height: 100%;
-  width: 50%;
+  width: 65%;
   opacity: 1;
   display: none;
   pointer-events: all;
   z-index: 1;
+  overflow-y: auto;
 }
 
 /* || Generic Buttons --------------------------*/

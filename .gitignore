@@ -52,3 +52,7 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+IDP_MapTool_Flask/pandapower2urbs/dataset/
+IDP_MapTool_Flask/maptool/urbs_results/plots/
+

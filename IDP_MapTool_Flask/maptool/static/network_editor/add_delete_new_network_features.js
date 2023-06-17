@@ -3,6 +3,7 @@ var maptool_add_delete = function() {
     let featuresToDeleteList = [];
 
     /**
+     * onclick function for the add feature buttons in the GUI
      * switches leaflet map mode to draw and makes sure we place down the correct marker type
      * @param {string} feature name of the network feature type we want to create
      */
@@ -34,7 +35,7 @@ var maptool_add_delete = function() {
     }
     
     /**
-     * closes deletion popup window and resets all highlighted features in the map view
+     * closes feature deletion popup window and resets style of all highlighted features in the map view
      */
     function closeForm() {
         for (feature in featuresToDeleteList) {
@@ -45,9 +46,9 @@ var maptool_add_delete = function() {
       }
     
     //TODO: This is awful. Change this
-    //TODO: Change featuresToDeleteList to dict. Why did I even make this a list in the first place? Not enough coffee?
+    //TODO: Change featuresToDeleteList to dict. Why did I even make this a list in the first place? 
     /**
-     * if you try to delete a bus, tries to find all connected features (lines, ext_grids, trafos) and marks them as about to be deleted as well 
+     * if you try to delete a bus, the function tries to find all connected features (lines, ext_grids, trafos) and marks them as about to be deleted as well 
      * @param {string} featureName name of the feature type to delete
      * @param {string array} featureLists contains feature names of all features that may be connected to the deletable feature
      */
@@ -163,6 +164,10 @@ var maptool_add_delete = function() {
         });
       });
     
+    /**
+     *  event listeners ensuring that new features on the map are added to the correct NetworkObject list,
+     *  given the correct styling and initialized with the correct values (e.g. name, index, connected busses)
+     */
     map.on('pm:create', (e) => {
         let featureName = '';
         let featureType = '';

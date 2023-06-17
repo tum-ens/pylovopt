@@ -17,8 +17,6 @@ var maptool_return_urbs =  function() {
             Promise.all([pdp2urbs]).then(res => {
                 document.location.href = "/urbs_results";
             })
-            // SetupUrbsResultEditor();
-            // document.getElementById('nav-item-urbs-results').click();
         });
     }
     //DONE BACKEND_DONE

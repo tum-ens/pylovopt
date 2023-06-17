@@ -19,7 +19,10 @@ var maptool_urbs_storage = function () {
         licenseKey: 'non-commercial-and-evaluation'
         });
 
-
+    /**
+     * called from generate_urbs_setup_editor.js during setup of the urbs setup editor window
+     * @returns Promise signalling that the fetch operation concluded
+     */
     function fetchProfiles() {
         return fetch('urbs/storage_profiles')
         .then(function (response) {

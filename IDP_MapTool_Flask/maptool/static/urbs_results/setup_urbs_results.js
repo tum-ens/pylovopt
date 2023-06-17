@@ -148,7 +148,12 @@ var maptool_urbs_res_setup = function (){
         }
     }
 
-    //writes values of the currently selected feature into the input fields of the editor window
+    /**
+     * onchange method for the feature lists in the GUI window
+     * picks the corresponding map object for the selected list element to execute the clickonmarker function on
+     * @param {html select object} sel reference to the select element that just changed
+     * @param {string} listName key for NetworkObject list
+     */
     function fillSelectedEditableNetworkFeatureEditor(sel, listName) {
         let idx = parseInt(sel.options[sel.selectedIndex].value);    
         let selectedObject = maptool_network_gen.NetworkObject[listName + 'List'][idx];
@@ -156,6 +161,11 @@ var maptool_urbs_res_setup = function (){
         clickOnMarker(selectedObject, listName, 0);
     }
 
+    /**
+     * resets the style of the previously selected feature
+     * @param {html element} target 
+     * @param {string} feature 
+     */
     function resetStyle(target, feature) {
         let zoomLevel = 14;
         if(feature == 'bus' || feature == 'ext_grid') {
@@ -175,19 +185,6 @@ var maptool_urbs_res_setup = function (){
         }
         target.setStyle(maptool_network_gen.NetworkObject[feature + 'Styles'][0]);
         clicked = [target, feature];
-
-        let featureList = maptool_network_gen.NetworkObject[feature + 'List'];
-        let selectedList = document.getElementById(feature + "Select");
-        let featureIndex = featureList.findIndex((entry) => entry === target);
-        
-        let newIndex = selectedList.selectedIndex;
-        for(let i = 0; i < selectedList.options.length; i++) {
-            if(selectedList.options[i].value == parseInt(featureIndex)) {
-                newIndex = i;
-                break;
-            }
-        }
-        selectedList.selectedIndex = newIndex;
     }
 
     /**
@@ -202,6 +199,22 @@ var maptool_urbs_res_setup = function (){
             resetStyle(target, feature);
         }
 
+        let featureList = maptool_network_gen.NetworkObject[feature + 'List'];
+        let selectedList = document.getElementById(feature + "Select");
+        let featureIndex = featureList.findIndex((entry) => entry === target);
+        
+        //since for example the GUI bus list does not hold all busses, there is no 1to1 connection between the GUI select and the NetworkObjet list
+        //therefore we need to manually find the correct option in the GUI select via the options value field, which corresponds to the index of the map object 
+        //in the NetworkObject list
+        let newIndex = selectedList.selectedIndex;
+        for(let i = 0; i < selectedList.options.length; i++) {
+            if(selectedList.options[i].value == parseInt(featureIndex)) {
+                newIndex = i;
+                break;
+            }
+        }
+        selectedList.selectedIndex = newIndex;
+        
         //we display the feature list by triggering an onclick event for its tablink button
         let selectedButton = document.getElementById(feature + "ListButton");
         selectedButton.click();
@@ -242,11 +255,39 @@ var maptool_urbs_res_setup = function (){
     }).then(function (response) {
         return response.json();
     }).then(function (plot_data) {
+        console.log(plot_data);
         for(entry in plot_data) {
-            console.log(entry);
+            console.log(entry)
+            plotDiv = document.getElementById(entry);
+            x = plot_data[entry].replace(/\\"/g, '"');
+            plotDiv.innerHTML = "";
+            setInnerHTML(plotDiv, x)
         }
     }).catch((err) => console.error(err));
     }
+
+    /**
+     * from  https://stackoverflow.com/questions/2592092/executing-script-elements-inserted-with-innerhtml
+     * @param {*} elm 
+     * @param {*} html 
+     */
+    function setInnerHTML(elm, html) {
+        elm.innerHTML = html;
+        
+        Array.from(elm.querySelectorAll("script"))
+          .forEach( oldScriptEl => {
+            const newScriptEl = document.createElement("script");
+            
+            Array.from(oldScriptEl.attributes).forEach( attr => {
+              newScriptEl.setAttribute(attr.name, attr.value) 
+            });
+            
+            const scriptText = document.createTextNode(oldScriptEl.innerHTML);
+            newScriptEl.appendChild(scriptText);
+            
+            oldScriptEl.parentNode.replaceChild(newScriptEl, oldScriptEl);
+        });
+      }
 
     /**
      * makes sure the network is properly displayed on window load

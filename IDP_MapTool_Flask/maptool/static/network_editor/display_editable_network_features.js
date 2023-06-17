@@ -7,6 +7,9 @@ var maptool_net_display = function() {
     //variable that saves last selected path and resets its style when it's deselected
     let clicked;
 
+    /**
+     * function creates options for each std_type select element in the GUI
+     */
     function fillStdTypeList() {
         let lists = [maptool_network_gen.NetworkObject.line_stdList, maptool_network_gen.NetworkObject.trafo_stdList, maptool_network_gen.NetworkObject.trafo3w_stdList];
 
@@ -21,16 +24,23 @@ var maptool_net_display = function() {
         }
     }
 
+    /**
+     * displays the right std_types editor window and fills the input fields with the rigth values
+     * @param {html select element} sel 
+     * @param {string} listName 
+     */
     function fillStdTypeEditor(sel, listName) {
         let idx = sel.options[sel.selectedIndex].value;
         
         let selectedObject = null; 
+        //the std_type editor forms are all located within the same div and only one should be visible at a time
         document.getElementById('line_std_typesForm').style.display = (sel.id == 'line_std_typesSelect') ? 'inline-block' : 'none';
         document.getElementById('trafo_std_typesForm').style.display = (sel.id == 'trafo_std_typesSelect') ? 'inline-block' : 'none';
         document.getElementById('trafo3w_std_typesForm').style.display = (sel.id == 'trafo3w_std_typesSelect') ? 'inline-block' : 'none';
 
         selectedObject = maptool_network_gen.NetworkObject[listName + 'List'][idx];
-    
+        
+        //close all other open editors
         let editorcontent = document.getElementsByClassName('feature-editor__selected-feature-editor');
         for (i = 0; i < editorcontent.length; i++) {
             editorcontent[i].style.display = "none";
@@ -47,9 +57,11 @@ var maptool_net_display = function() {
         }
     }
 
-    //only called once on network generation
-    //fills html element for a given list of network features at intial editable network generation
-    //the index property of a feature and the option index do not have to match
+    /**
+     * fills html element with options for a given list of network features at intial editable network generation
+     * the index property of a feature and the option index do not have to match
+     * @param {string} listName key for accessing and setting html element ids 
+     */
     function populateLists(listName) {
         var x = document.getElementById(listName + "Select");
         let list = maptool_network_gen.NetworkObject[listName + 'List'];
@@ -68,10 +80,15 @@ var maptool_net_display = function() {
         referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     }
 
-    //only called once on network generation
-    //The feature editor window template for all feature types gets filled at runtime
-    //input fields and labels depend entirely on the properties defined in the displayNetwork function
-    function populateEditableNetworkEditor(listName, selectedProperties, std_typeList, std_type_properties, secondaryFeatureName) {
+    /**
+     * The feature editor window template for all feature types gets filled at runtime
+     * input fields and labels depend entirely on the properties defined in the displayNetwork function
+     * @param {string}      listName            key for accessing and setting html element ids 
+     * @param {dict}        selectedProperties  dict containing all properties of the feature for which we create the editor window
+     * @param {dict}        std_typeList        dict containing all std_types, only needed for keys here
+     * @param {dict}        std_type_properties dict containing all properties of the std_type associated with the feature
+     */
+    function populateEditableNetworkEditor(listName, selectedProperties, std_typeList, std_type_properties) {
         let editor_form = document.getElementById(listName + 'Form');
         let formDiv = document.createElement('DIV');
         let formDivId = listName + 'FormDiv';
@@ -82,6 +99,8 @@ var maptool_net_display = function() {
             label.htmlFor = idx;
             label.innerHTML = idx;
             
+            //std types are selected from a select menu in the GUI
+            //Inputs of the std_type feature are still visible in the editor, but not editable
             if(idx == 'std_type') {
                 let form = document.createElement("select");
                 form.id = 'std_type'
@@ -127,6 +146,11 @@ var maptool_net_display = function() {
         formDiv.id = formDivId;
     }
 
+    /**
+     * 
+     * @param {*} primaryFeatureName 
+     * @param {*} secondaryFeatureName 
+     */
     function populateEditableNetworkEditorSecondaryFeature(primaryFeatureName, secondaryFeatureName) {
         let editor_form = document.getElementById(primaryFeatureName + 'Form');
 
@@ -401,7 +425,7 @@ var maptool_net_display = function() {
             if (target.nodeName == 'SELECT') {
                 //console.log(target.options[target.selectedIndex].text, featureName)
                 maptool_network_gen.NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.options[target.selectedIndex].text
-                updateStdTypeFeaturesInEditor(target)
+                updateStdTypeFeaturesInEditor(target.options[target.selectedIndex].text, feature)
             }
             else if(secondary_feature == '') {
                 maptool_network_gen.NetworkObject[feature + "List"][idxInFeatureList].feature.properties[featureName] = target.value;
@@ -419,8 +443,21 @@ var maptool_net_display = function() {
         }
     }
 
-    function updateStdTypeFeaturesInEditor(target) {
+    function fillInputFieldsOfSelectedID(id, feature) {
+        let featureEditor = document.getElementById('transmission_' + feature + 'FormDiv');
+        let featureValues = maptool_network_gen.NetworkObject[feature + 'List'][id];
 
+        for (value in featureValues) {
+            featureEditor.querySelector('#' + value).value = featureValues[value];
+        }
+    }
+
+    function updateStdTypeFeaturesInEditor(id, feature) {
+        let featureEditor = document.getElementById(feature + 'FormDiv');
+        let featureValues = maptool_network_gen.NetworkObject[feature + '_stdList'][id];
+        for (value in featureValues) {
+            featureEditor.querySelector('#' + value).value = featureValues[value];
+        }
     }
 
     var acc = document.getElementsByClassName("accordion");

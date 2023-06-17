@@ -8,6 +8,7 @@ from maptool.urbs_editor import bp
 from flask import Flask, render_template, request, session
 from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
 from maptool.urbs_results.urbs_results_plotting import *
+from maptool.config import *
 
 #return main site html
 @bp.route('/urbs_results', methods=['GET', 'POST'])
@@ -42,16 +43,23 @@ def urbs_results_generate_plot():
         feature_name_dict = request.get_json()['name']
         print(feature_name_dict)
         hdf_path = '../urbs_optimizer/result/Trans-Dist-20230613T1603/flex_all_tsam_coordinated_flexible_step1.h5'
+        plot_filenames = []
         if data_path == 'bus':
             feature_name = feature_name_dict['bus']
-            print(data_path, feature_name)
-            #cap_pro_generate_plot(hdf_path=hdf_path, site_name=feature_name)
-            #e_pro_in_generate_plot(hdf_path=hdf_path, site_name=feature_name)
-            #e_pro_out_generate_plot(hdf_path=hdf_path, site_name=feature_name)
+            #print(data_path, feature_name)
+            plot_filenames.append(cap_pro_generate_plot(hdf_path=hdf_path, site_name=feature_name))
+            plot_filenames.append(e_pro_in_generate_plot(hdf_path=hdf_path, site_name=feature_name))
+            plot_filenames.append(e_pro_out_generate_plot(hdf_path=hdf_path, site_name=feature_name))
         if data_path == 'line':
             feature_name_from = feature_name_dict['from_bus']
             feature_name_to = feature_name_dict['to_bus']
-            print(data_path, feature_name_from, feature_name_to)
+            #print(data_path, feature_name_from, feature_name_to)
+            plot_filenames.append(cap_tra_generate_plot(hdf_path=hdf_path, site_name=feature_name_from))
+            plot_filenames.append(cap_tra_generate_plot(hdf_path=hdf_path, site_name=feature_name_to))
         return_json = {}
+        for filename in plot_filenames:
+            with open(URBS_RESULT_PLOT_SAVE_PATH + filename + '.html') as fp:
+                soup = BeautifulSoup(fp, 'html.parser')
+                return_json[filename] = str(soup)
 
         return return_json

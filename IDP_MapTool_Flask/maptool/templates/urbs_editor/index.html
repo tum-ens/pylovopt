@@ -238,8 +238,6 @@
   <button class="button action-buttons__button" type="button" id="returnUrbsSetupButton" onclick="maptool_return_urbs.returnUrbsSetup()">Finish Urbs Setup</button>
 </div>
 
-{% include "urbs_editor/include/urbs_results.html" %}
-
 <script defer src="{{url_for('static', filename='/network_editor/generate_editable_network.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/return_urbs_setup.js')}}"></script>
 <script defer src="{{url_for('static', filename='/urbs_editor/generate_urbs_setup_editor.js')}}"></script>
