@@ -8,6 +8,7 @@ import os
 from maptool.network_editor.generateEditableNetwork import createGeoJSONofNetwork
 import json
 from pandapower2urbs import construct_model_components as pp2u
+from maptool.config import *
 
 
 #GUROBI LINE COMMANDS:
@@ -363,15 +364,15 @@ def formatTimevareffCSV():
 
 import subprocess
 
-def switch_conda_environment(env_name):
-    urbs_process = subprocess.run(f'cd ../urbs_optimizer && conda run -n {env_name} python.exe run_automatedoutput.py', shell=True, capture_output=True, check=True)
+def switch_conda_environment(env_path, env_name):
+    urbs_process = subprocess.run(f'cd {env_path} && conda run -n {env_name} python.exe run_automatedoutput.py', shell=True, capture_output=True, check=True)
     print(urbs_process.stdout)
     print(f"Switched to conda environment: {env_name}")
 
 @bp.route('/urbs/pdp2Urbs', methods=['GET', 'POST'])
 def runPdp2Urbs():
-    #pp2u.convertPandapower2Urbs()
+    pp2u.convertPandapower2Urbs()
     print(f"Switched to conda environment: urbs")
-    #switch_conda_environment('urbs310')
+    switch_conda_environment(URBS_RUN_FILE_PATH, URBS_CONDA_ENV_NAME)
     return 'Success', 200
 

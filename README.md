@@ -54,17 +54,27 @@ flask --app maptool --debug run
 ```
 Then navigate to http://127.0.0.1:5000 in a browser of your choice (though preferably Chrome, because that is the only browser the CSS layout is guaranteed to work with at the moment)
 
+### Creating your own plots for the urbs result step
+tbc
+
+
 ## Usage
 
 Once you have opened the tool in a browser of your choice you will be presented with a map view centered somewhere in Bavaria.
 
 ### Selecting an area for your networks
-1. You can enter a german PLZ into the input in the top right corner to show all already existing nets for that PLZ. A popup window will let you select one of the available networks for that area, or you can choose to create a new version of the network. NOTE: At this moment, choosing a new version does nothing.
+1. You can enter a german PLZ into the input in the top right corner to show all already existing nets for that PLZ. A popup window will let you select one of the available networks for that area, or you can choose to create a new version of the network.
 Once you have submitted a valid PLZ, the tool will display the generated networks on the map. You can choose one of them by clicking on it or selecting it via the list on the right and clicking "Select Network"
-2. You can select an area by drawing a shape on the map via the tools on the left side of the page and then clicking the "Select Area" button. At the moment this will only display all the buildings the database can find within the selected area. Clicking on individual buildings opens a popup that allows you to delete a specific building
+2. You can select an area by drawing a shape on the map via the tools on the left side of the page and then clicking the "Select Area" button. At the moment this will only display all the buildings the database can find within the selected area. Clicking on individual buildings opens a popup that allows you to delete a specific building. Once you are satisfied, you can click "Generate Network" to generate pylovo nets based on the buildings you selected. Once the networks have been generated, you can access them as seen in step #1 
+NOTE: at the moment there is a bug involving the building select, meaning that networks are based on the initial area selection; building deletion is not taken into consideration.
 
 ### Editing a selected network
-Clicking the "Select Network" button will change your view, displaying the selected network in more detail. Now you can choose and edit individual features as well as delete them and add new ones. <br>
+Clicking the "Select Network" button will change your view, displaying the selected network in more detail. Now you can choose and edit individual features as well as delete them. <br>
+You can access features via the lists on the right-hand side of the screen or by clicking on them on the map itself.
+
+### Preparing the network for an urbs run
+Once you are satisfied with your network, you can click the "Finish Editing" button and get taken to the Urbs Editor Setup view. Here you can once again access different features relevant for the urbs run through the GUI.
+Once everything has been set to your liking you can click the "Finish Urbs Setup" button, which will start the execution of urbs
 
 ## Style guide
 

@@ -243,33 +243,39 @@ var maptool_urbs_res_setup = function (){
         document.getElementById(feature + 'Editor').style.display = 'inline-block';
     }
 
-    function getPlotOfFeature(feature, featureName) {
+    /**
+     * sends the feature type and the name of the feature we want to generate a plot for to the backend
+     * @param {string} feature      to distinguish what type of plot we want to generate in the backend
+     * @param {string} targetName   key needed to access data for a specific site in the hdf5 file
+     */
+    function getPlotOfFeature(feature, targetName) {
 
-        data_json = {"type": feature,"name": featureName}
+        data_json = {"type": feature,"name": targetName}
 
         fetch("http://127.0.0.1:5000/urbs_results/plots", {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json'},
             body: JSON.stringify(data_json)
-    }).then(function (response) {
-        return response.json();
-    }).then(function (plot_data) {
-        console.log(plot_data);
-        for(entry in plot_data) {
-            console.log(entry)
-            plotDiv = document.getElementById(entry);
-            x = plot_data[entry].replace(/\\"/g, '"');
-            plotDiv.innerHTML = "";
-            setInnerHTML(plotDiv, x)
-        }
-    }).catch((err) => console.error(err));
+        }).then(function (response) {
+            return response.json();
+        }).then(function (plot_data) {
+            console.log(plot_data);
+            for(entry in plot_data) {
+                console.log(entry)
+                plotDiv = document.getElementById(entry);
+                x = plot_data[entry].replace(/\\"/g, '"');
+                plotDiv.innerHTML = "";
+                setInnerHTML(plotDiv, x)
+            }
+        }).catch((err) => console.error(err));
     }
 
     /**
+     * makes sure inline script is executed once we add a plot to the GUI, which makes the plot visible and interactible
      * from  https://stackoverflow.com/questions/2592092/executing-script-elements-inserted-with-innerhtml
-     * @param {*} elm 
-     * @param {*} html 
+     * @param {html element} elm   html div element we want to add the plot to
+     * @param {*} html             html code we want to add to the div 
      */
     function setInnerHTML(elm, html) {
         elm.innerHTML = html;

@@ -109,11 +109,12 @@ var maptool_urbs_setup = function() {
     }
     
     /**
+     * creates a new geojson layer for leaflet map
+     * distinguishes between line (for lines and trafos) and circle marker (for busses and ext_grids) formats
+     * because line geojsons do not have the pointToLayer option
      * @param {bool}                isLines 
      * @param {GeoJSON Object}      input_geoJSON 
      * @param {string}              featureName 
-     * creates a new geojson layer for leaflet map
-     * distinguishes between line (for lines and trafos) and circle marker (for busses and ext_grids) formats because line geojsons do not have the pointToLayer option
      */
     function addGeoJSONtoUrbsEditorMap(isLines, input_geoJSON, featureName) {
         let newGeoJson;

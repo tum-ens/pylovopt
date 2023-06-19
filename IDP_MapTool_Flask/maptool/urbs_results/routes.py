@@ -42,7 +42,7 @@ def urbs_results_generate_plot():
         data_path = request.get_json()['type']
         feature_name_dict = request.get_json()['name']
         print(feature_name_dict)
-        hdf_path = '../urbs_optimizer/result/Trans-Dist-20230613T1603/flex_all_tsam_coordinated_flexible_step1.h5'
+        hdf_path = URBS_RESULT_HDF_LOCATION_PATH
         plot_filenames = []
         if data_path == 'bus':
             feature_name = feature_name_dict['bus']

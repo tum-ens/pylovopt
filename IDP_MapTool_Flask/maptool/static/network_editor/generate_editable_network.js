@@ -1,13 +1,3 @@
-//-----------------------------CRUCIAL JS TODOS-----------------------------//
-// TODO: define, check for correct inputs for all features
-
-//-----------------------------TALK TODOS-----------------------------//
-// TODO: Create documentation
-
-//-----------------------------OPTIONAL TODOS-----------------------------//
-// TODO: Deselect marker when clicking elsewhere on the map?
-
-
 var maptool_network_gen = function (){
     let line_std_properties = {};
     let trafo_std_properties = {};
@@ -95,17 +85,14 @@ var maptool_network_gen = function (){
             }]     
     }
 
-    //generates GeoJSON files to pass to the python section of our code, gets called on button press
+/**
+ * gets called when the window is first loaded, retrieves preprocessed Geojson data from the backend
+ * and calls necessary functions to display network on the map and fill editor windows
+ */
     function GetPandapowerAndWriteGeoJSONNet() {  
-        //console.log('starting Fetch');  
         let fetchString = 'editableNetwork';
-        document.getElementById("nav-item-networks").setAttribute('href', '/networks');
-
-        if(window.location.pathname == '/networks') {
-            fetchString = '/networks/editableNetwork';
-            document.getElementById("nav-item-networks").setAttribute('href', '#scroll-to-top');
-        }  
-
+        
+        //we fetch the properties json file detailing all inputs, their data types, default values etc for all features
         fetch('/networks/networkProperties')       
         .then(function (response) {
             return response.json();
@@ -145,7 +132,7 @@ var maptool_network_gen = function (){
                 tabcontent[i].style.display = "inline-flex";
             }
             
-            extractStdTypesNew(JSON.parse(ppdata["std_types"]));
+            extractStdTypes(JSON.parse(ppdata["std_types"]));
             maptool_net_display.fillStdTypeList();
 
             maptool_net_display.populateLists('bus');
@@ -170,6 +157,7 @@ var maptool_network_gen = function (){
         });
     }
 
+    //The busses connected to the trafo need to have specific names to work with urbs later
     function changeTrafoBusNames(busList, trafoList) {
         trafoList.forEach(trafo => {
             busList.forEach(bus => {
@@ -184,16 +172,19 @@ var maptool_network_gen = function (){
         })
     }
 
-
-    function extractStdTypesNew(ppdata) {
+    /**
+     * small aggregate function for all std types
+     * @param {dict} ppdata dict retrieved from the backend
+     */
+    function extractStdTypes(ppdata) {
         NetworkObject.line_stdList= ppdata['line'];
         NetworkObject.trafo_stdList = ppdata['trafo'];
         NetworkObject.trafo3w_stdList = ppdata['trafo3w'];
     }
     
     /**
-     * aggregate function calling the actual functions that place the feature sgeojsons on the leaflet map
-     * @param {geojson dict} ppdata 
+     * aggregate function calling the actual functions that place the feature geojsons on the leaflet map
+     * @param {dict} ppdata dict retrieved from the backend
      */
     function displayNetNew(ppdata) {
         addGeoJSONtoMap(true, ppdata['line'], 'line');
@@ -209,6 +200,14 @@ var maptool_network_gen = function (){
         //console.log('added all trafos');
     }
 
+/**
+ * function that adds a FeatureCollection to the leaflet map
+ * we set styles and onclick functions here and save references to each added feature in the NetworkObject
+ * lines (lines, trafos) and circlemarkers (busses, ext_grids) need to be handled differently because lines do not have the pointToLayer function
+ * @param {boolean} isLines 
+ * @param {FeatureCollection geoJSON} input_geoJSON 
+ * @param {string} featureName 
+ */
     function addGeoJSONtoMap(isLines, input_geoJSON, featureName) {
         let newGeoJson
         if (isLines) {
