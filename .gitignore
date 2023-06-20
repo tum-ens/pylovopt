@@ -56,3 +56,20 @@ docs/_build/
 IDP_MapTool_Flask/pandapower2urbs/dataset/
 IDP_MapTool_Flask/maptool/urbs_results/plots/
 
+IDP_MapTool_Flask/pandapower2urbs/dataset/_buildings/building_conf.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/_buildings/building_data.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/_transmission/cable_data.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/_transmission/test.xlsx
+IDP_MapTool_Flask/pandapower2urbs/dataset/_transmission/trafo_data.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/_transmission/voltage_limits.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/commodity/com_prop.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/demand/demand_conf.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/global/global.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/process/pro_com_prop.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/process/pro_conf.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/process/pro_prop.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/storage/sto_conf.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/storage/sto_prop.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/supim/supim_conf.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/supim/profiles/solar.csv
+IDP_MapTool_Flask/pandapower2urbs/dataset/timevareff/timevareff_conf.csv
