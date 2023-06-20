@@ -13,6 +13,10 @@ from maptool.config import *
 #return main site html
 @bp.route('/urbs_results', methods=['GET', 'POST'])
 def urbs_results_setup():
+    urbs_result_dirs = [os.path.join(URBS_RESULT_PATH,d) for d in os.listdir(URBS_RESULT_PATH) if os.path.isdir(os.path.join(URBS_RESULT_PATH,d))]
+    latest_subdir = max(urbs_result_dirs, key=os.path.getmtime)
+    session['result_location'] = str(latest_subdir)
+
     return render_template('urbs_results/index.html')
 
 #loads and returns the network geojson collection of the previous steps
@@ -42,7 +46,9 @@ def urbs_results_generate_plot():
         data_path = request.get_json()['type']
         feature_name_dict = request.get_json()['name']
         print(feature_name_dict)
-        hdf_path = URBS_RESULT_HDF_LOCATION_PATH
+        hdf_path = session.get('result_location') + '/' + URBS_RESULT_FILENAME
+
+        
         plot_filenames = []
         if data_path == 'bus':
             feature_name = feature_name_dict['bus']
@@ -54,8 +60,8 @@ def urbs_results_generate_plot():
             feature_name_from = feature_name_dict['from_bus']
             feature_name_to = feature_name_dict['to_bus']
             #print(data_path, feature_name_from, feature_name_to)
-            plot_filenames.append(cap_tra_generate_plot(hdf_path=hdf_path, site_name=feature_name_from))
-            plot_filenames.append(cap_tra_generate_plot(hdf_path=hdf_path, site_name=feature_name_to))
+            #plot_filenames.append(cap_tra_generate_plot(hdf_path=hdf_path, site_name=feature_name_from))
+            #plot_filenames.append(cap_tra_generate_plot(hdf_path=hdf_path, site_name=feature_name_to))
         return_json = {}
         for filename in plot_filenames:
             with open(URBS_RESULT_PLOT_SAVE_PATH + filename + '.html') as fp:

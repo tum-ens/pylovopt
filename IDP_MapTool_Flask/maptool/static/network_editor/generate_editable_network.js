@@ -89,9 +89,7 @@ var maptool_network_gen = function (){
  * gets called when the window is first loaded, retrieves preprocessed Geojson data from the backend
  * and calls necessary functions to display network on the map and fill editor windows
  */
-    function GetPandapowerAndWriteGeoJSONNet() {  
-        let fetchString = 'editableNetwork';
-        
+    function GetPandapowerAndWriteGeoJSONNet() {    
         //we fetch the properties json file detailing all inputs, their data types, default values etc for all features
         fetch('/networks/networkProperties')       
         .then(function (response) {
@@ -114,7 +112,7 @@ var maptool_network_gen = function (){
             trafo3w_properties = properties['trafo3w']
         });
     
-        fetch(fetchString)
+        fetch('/networks/editableNetwork')
         .then(function (response) {
             return response.json();
         }).then(function (ppdata) {

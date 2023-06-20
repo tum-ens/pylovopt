@@ -365,14 +365,28 @@ def formatTimevareffCSV():
 import subprocess
 
 def switch_conda_environment(env_path, env_name):
-    urbs_process = subprocess.run(f'cd {env_path} && conda run -n {env_name} python.exe run_automatedoutput.py', shell=True, capture_output=True, check=True)
-    print(urbs_process.stdout)
+    cmd = f'cd {env_path} && conda run -n {env_name} python.exe run_automatedoutput.py'
+    urbs_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
+    for stdout_line in iter(urbs_process.stdout.readline, ""):
+        yield stdout_line 
+    urbs_process.stdout.close()
+    return_code = urbs_process.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, cmd)
     print(f"Switched to conda environment: {env_name}")
 
 @bp.route('/urbs/pdp2Urbs', methods=['GET', 'POST'])
 def runPdp2Urbs():
     pp2u.convertPandapower2Urbs()
-    print(f"Switched to conda environment: urbs")
-    switch_conda_environment(URBS_RUN_FILE_PATH, URBS_CONDA_ENV_NAME)
+    cmd = f'cd {URBS_RUN_FILE_PATH} && conda run -n {URBS_CONDA_ENV_NAME} python.exe run_automatedoutput.py'
+    urbs_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True, shell=True)
+    for stdout_line in iter(urbs_process.stdout.readline, ""):
+        yield stdout_line 
+    urbs_process.stdout.close()
+    return_code = urbs_process.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, cmd)
+    print(f"Switched to conda environment: {URBS_CONDA_ENV_NAME}")
+    
     return 'Success', 200
 

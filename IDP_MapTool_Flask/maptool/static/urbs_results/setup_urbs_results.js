@@ -261,9 +261,18 @@ var maptool_urbs_res_setup = function (){
             return response.json();
         }).then(function (plot_data) {
             console.log(plot_data);
+            aggregatorDiv = document.getElementById(feature + 'Editor');
             for(entry in plot_data) {
                 console.log(entry)
+                
                 plotDiv = document.getElementById(entry);
+                if(plotDiv == null) {
+                    plotDiv = document.createElement("div");
+                    plotDiv.id = entry;
+                    plotDiv.style = {'width:' : '100%'};
+                    aggregatorDiv.appendChild(plotDiv)
+                }
+
                 x = plot_data[entry].replace(/\\"/g, '"');
                 plotDiv.innerHTML = "";
                 setInnerHTML(plotDiv, x)
