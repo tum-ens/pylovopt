@@ -1,4 +1,4 @@
-# TUM IDP MAPTOOL [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/your/your-project/blob/master/LICENSE)
+# TUM IDP MAPTOOL
 > Interdisciplinary Project at the Chair of Renewable and Sustainable Energy Systems at TUM (WS22-SS23)
 
 A tool for displaying, editing and analyzing energy networks in real time
